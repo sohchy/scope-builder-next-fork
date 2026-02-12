@@ -41,9 +41,7 @@ export default function ModalTodo({
     <>
       <li
         key={todo.id}
-        className={`text-[#B5BCCB] border-[0.5px] border-[#B5BCCC] rounded-[8px] px-[12px] py-[12px] flex flex-row gap-3.5 items-center ${
-          isCompleted ? "bg-[#E4E5ED66]" : ""
-        }`}
+        className={`text-[#B5BCCB] border-[0.5px] border-white rounded-[8px] px-[12px] py-[12px] flex flex-row gap-3.5 items-center bg-white`}
       >
         <div
           className={`size-4 min-w-[16px] rounded-full text-[#B5BCCC] border border-[#B5BCCC] flex items-center justify-center ${
@@ -67,7 +65,10 @@ export default function ModalTodo({
       </li>
 
       <Mentors isOpen={isMentorsOpen} onClose={() => setIsMentorsOpen(false)} />
-      <AboutProgram isOpen={isAboutProgramOpen} onClose={() => setIsAboutProgramOpen(false)} />
+      <AboutProgram
+        isOpen={isAboutProgramOpen}
+        onClose={() => setIsAboutProgramOpen(false)}
+      />
     </>
   );
 }

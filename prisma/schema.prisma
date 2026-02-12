@@ -36,7 +36,7 @@ enum ParticipantStatus {
 }
 
 model Participant {
-  id                     String            @id @default(uuid())
+  id                     String              @id @default(uuid())
   name                   String
   org_id                 String
   role                   String?
@@ -46,10 +46,11 @@ model Participant {
   blocking_issues        String?
   hypothesis_to_validate String?
   learnings              String?
-  status                 ParticipantStatus @default(need_to_schedule)
+  status                 ParticipantStatus   @default(need_to_schedule)
   scheduled_date         DateTime?
-  created_at             DateTime          @default(now())
+  created_at             DateTime            @default(now())
   ParticipantRoom        ParticipantRoom?
+  interview_responses    InterviewResponse[]
 
   @@map("participants")
 }
@@ -200,4 +201,142 @@ model OrgTask {
 
   @@unique([org_id, task_id])
   @@map("org_tasks")
+}
+
+model ExerciseResponse {
+  id               Int      @id @default(autoincrement())
+  org_id           String
+  excercise_number Int
+  responses        Json
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  @@map("exercise_responses")
+}
+
+model Topic {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  type        String
+  deadline    String
+  order       Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  topic_tasks      TopicTask[]
+  topic_progresses TopicProgress[]
+
+  @@map("topics")
+}
+
+model TopicTask {
+  id       Int    @id @default(autoincrement())
+  topic_id Int
+  type     String
+  subtype  String
+  order    Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  topic            Topic           @relation(fields: [topic_id], references: [id], onDelete: Cascade)
+  topic_progresses TopicProgress[]
+
+  @@map("topic_tasks")
+}
+
+model TopicProgress {
+  id        Int     @id @default(autoincrement())
+  org_id    String
+  topic_id  Int?
+  task_id   Int?
+  completed Boolean @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  topic Topic?     @relation(fields: [topic_id], references: [id], onDelete: Cascade)
+  task  TopicTask? @relation(fields: [task_id], references: [id], onDelete: Cascade)
+
+  @@unique([org_id, task_id])
+  @@unique([org_id, topic_id])
+  @@map("topic_progress")
+}
+
+model Hypothesis {
+  id                 Int     @id @default(autoincrement())
+  org_id             String  @default("")
+  title              String
+  type               String?
+  description        String?
+  priority           Int     @default(0)
+  order              Int     @default(0)
+  conclusion_status  String  @default("Testing")
+  conclusion_content String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  questions Question[]
+
+  @@map("hypotheses")
+}
+
+model Question {
+  id            Int    @id @default(autoincrement())
+  title         String
+  hypothesis_id Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  hypothesis          Hypothesis          @relation(fields: [hypothesis_id], references: [id], onDelete: Cascade)
+  interview_responses InterviewResponse[]
+
+  @@map("questions")
+}
+
+model InterviewResponse {
+  id               Int    @id @default(autoincrement())
+  question_id      Int
+  participant_id   String
+  response_content String
+  attachments      Json[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  question    Question    @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  participant Participant @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+
+  @@unique([question_id, participant_id])
+  @@map("interview_responses")
+}
+
+model KanbanBoardCategory {
+  id        Int      @id @default(autoincrement())
+  room_id   String
+  name      String
+  order     Int      @default(0)
+  shape_ids String[]
+
+  @@map("kanban_board_categories")
+}
+
+model Note {
+  id                 Int     @id @default(autoincrement())
+  org_id             String
+  content            String
+  user_id            String
+  author_name        String
+  author_email       String
+  share_with_startup Boolean @default(false)
+  attachments        Json[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("notes")
 }

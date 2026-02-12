@@ -155,7 +155,7 @@ export const FeatureIdea: React.FC<FeatureIdeaProps> = (props) => {
             </span>
           </div>
           <div className="col-span-6 flex items-center justify-end pl-3 pr-3">
-            <DropdownMenu defaultOpen={false}>
+            {/* <DropdownMenu defaultOpen={false}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
                   <span className="sr-only">Open</span>
@@ -166,7 +166,7 @@ export const FeatureIdea: React.FC<FeatureIdeaProps> = (props) => {
                 align="end"
                 className="absolute -top-11 left-5 p-1.5 w-[216px]"
               ></DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
           </div>
         </div>
       }

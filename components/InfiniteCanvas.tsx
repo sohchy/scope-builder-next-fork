@@ -58,6 +58,37 @@ import { HelperValueProp } from "./CanvasModule/HelperValueProp";
 import { HelperAnalysis } from "./CanvasModule/HelperAnalysis";
 import { OrthogonalArrow } from "./CanvasModule/OrthogonalArrow";
 
+type ToolGroup = "shapes" | "cards" | null;
+
+type CardSubtype =
+  | "assumption_card"
+  | "interview_card"
+  | "solution_card"
+  | "problem_statement_card"
+  | "select_subtype"
+  | "jobs_to_be_done_card"
+  | "pains_card"
+  | "gains_card"
+  | "products_services_card"
+  | "pain_relievers_card"
+  | "gain_creators_card"
+  | "industry_market_segment_card"
+  | "customer_card"
+  | "end_user_card"
+  | "both_customer_end_user_card"
+  | "payer_card"
+  | "influencer_card"
+  | "recommender_card"
+  | "saboteur_card"
+  | "additional_decision_maker_card"
+  | "additional_stakeholder_card"
+  | "feature_idea_card";
+
+type PlacementTool =
+  | { kind: "shape"; type: ShapeType }
+  | { kind: "card"; subtype: CardSubtype }
+  | null;
+
 type RelativeAnchor = {
   x: number; // valor entre 0 y 1, representa el porcentaje del ancho
   y: number; // valor entre 0 y 1, representa el porcentaje del alto
@@ -72,7 +103,7 @@ type Connection = {
 
 export function getAbsoluteAnchorPosition(
   shape: IShape,
-  anchor: { x: number; y: number }
+  anchor: { x: number; y: number },
 ): Position {
   return {
     x: shape.x + shape.width * anchor.x,
@@ -93,6 +124,7 @@ interface InfiniteCanvasProps {
     rectangle: boolean;
     interview: boolean;
   };
+  valuePropCanvasMode?: boolean;
 }
 
 export default function InfiniteCanvas({
@@ -108,8 +140,11 @@ export default function InfiniteCanvas({
     rectangle: true,
     interview: true,
   },
+  valuePropCanvasMode = false,
 }: InfiniteCanvasProps) {
   const pathname = usePathname();
+  const [openToolGroup, setOpenToolGroup] = useState<ToolGroup>(null);
+  const [placementTool, setPlacementTool] = useState<PlacementTool>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string[]>([]);
   const { scale, canvasRef, position, setPosition, setScale, zoomIn, zoomOut } =
     useCanvasTransform();
@@ -149,7 +184,7 @@ export default function InfiniteCanvas({
   // const [connections, setConnections] = useState<Connection[]>([]);
 
   const [connectingMousePos, setConnectingMousePos] = useState<Position | null>(
-    null
+    null,
   );
 
   const guides = useSmartGuidesStore((s) => s.guides);
@@ -203,7 +238,7 @@ export default function InfiniteCanvas({
     connectingMousePos,
     shapes,
     scale,
-    connecting?.fromShapeId ?? null
+    connecting?.fromShapeId ?? null,
   );
 
   useEffect(() => {
@@ -335,11 +370,11 @@ export default function InfiniteCanvas({
             .filter(
               (shape) =>
                 shape.type.includes("example") ||
-                shape.subtype?.includes("example")
+                shape.subtype?.includes("example"),
             )
             .map((s) => s.id);
           setShowDeleteConfirm(
-            selectedShapeIds.filter((id) => !exampleShapeIds.includes(id))
+            selectedShapeIds.filter((id) => !exampleShapeIds.includes(id)),
           );
           return;
         }
@@ -369,6 +404,8 @@ export default function InfiniteCanvas({
         setConnecting(null);
         setConnectingMousePos(null);
         setIsDraggingConnector(false);
+        setPlacementTool(null);
+        setOpenToolGroup(null);
       }
     };
 
@@ -448,10 +485,29 @@ export default function InfiniteCanvas({
   // Shape ID generator
   const nextIdRef = useRef(1000);
 
+  function selectPlacementTool(tool: PlacementTool) {
+    setPlacementTool(tool);
+    // optional: keep menu open while selecting; I like closing it:
+    setOpenToolGroup(null);
+  }
+
+  function clientPointToWorld(
+    clientX: number,
+    clientY: number,
+    canvasEl: HTMLDivElement,
+    position: { x: number; y: number },
+    scale: number,
+  ) {
+    const rect = canvasEl.getBoundingClientRect();
+    const x = (clientX - rect.left - position.x) / scale;
+    const y = (clientY - rect.top - position.y) / scale;
+    return { x, y };
+  }
+
   const handleConnectorMouseDown = (
     e: React.MouseEvent,
     shapeId: string,
-    direction: "top" | "right" | "bottom" | "left"
+    direction: "top" | "right" | "bottom" | "left",
   ) => {
     e.preventDefault();
     if (!editable) return;
@@ -727,6 +783,55 @@ export default function InfiniteCanvas({
     addShape(type, x, y, uuidv4());
   };
 
+  const handleCanvasPointerDownCapture = (
+    e: React.PointerEvent<HTMLDivElement>,
+  ) => {
+    if (!editable) return;
+    if (e.button !== 0) return; // left click only
+    if (!canvasRef.current) return;
+
+    // If we are not in placement mode, do nothing
+    if (!placementTool) return;
+
+    // Don’t place if pan tool is enabled
+    if (panToolEnabled) return;
+
+    // Don’t place while connecting/resizing/dragging/marquee
+    if (connecting || resizing || dragging || marquee) return;
+
+    // ✅ place at click position (world coords)
+    const { x, y } = clientPointToWorld(
+      e.clientX,
+      e.clientY,
+      canvasRef.current,
+      position,
+      scale,
+    );
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const id = uuidv4();
+    // addShape(placementTool.type, x, y, id);
+    if (placementTool.kind === "shape") {
+      addShape(placementTool.type, x, y, id);
+    } else {
+      // kind === "card"
+      addShape("card", x, y, id);
+
+      // Immediately stamp subtype
+      updateShape(id, (s) => ({
+        ...s,
+
+        subtype: placementTool.subtype,
+      }));
+    }
+    setSelectedShapeIds([id]);
+
+    // exit tool after one placement (miro-ish)
+    setPlacementTool(null);
+  };
+
   // tiny base64 preview (fast to sync via Liveblocks)
   async function makeBase64Thumb(file: File, max = 384): Promise<string> {
     const img = document.createElement("img");
@@ -751,11 +856,11 @@ export default function InfiniteCanvas({
   // plug your real uploader here (S3/Supabase/UploadThing/etc.)
   async function uploadToStorage(
     file: File,
-    onProgress: (p: number) => void
+    onProgress: (p: number) => void,
   ): Promise<{ url: string }> {
     // Example pattern using an API route that returns { uploadUrl, fileUrl }
     const resp = await fetch(
-      `/api/upload-url?filename=${encodeURIComponent(file.name)}`
+      `/api/upload-url?filename=${encodeURIComponent(file.name)}`,
     );
     if (!resp.ok) throw new Error("Failed to get upload URL");
     const { uploadUrl, fileUrl } = await resp.json();
@@ -773,7 +878,7 @@ export default function InfiniteCanvas({
       xhr.onerror = () => reject(new Error("Network error"));
       xhr.setRequestHeader(
         "Content-Type",
-        file.type || "application/octet-stream"
+        file.type || "application/octet-stream",
       );
       xhr.send(file);
     });
@@ -793,7 +898,7 @@ export default function InfiniteCanvas({
     e: React.DragEvent | React.MouseEvent,
     canvasEl: HTMLDivElement,
     position: { x: number; y: number },
-    scale: number
+    scale: number,
   ) {
     const rect = canvasEl.getBoundingClientRect();
     const x = (e.clientX - rect.left - position.x) / scale;
@@ -954,6 +1059,48 @@ export default function InfiniteCanvas({
     clearSelection?.();
   };
 
+  // const onBgPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+  //   if (!editable) return;
+  //   if (e.button !== 0) return; // left click only
+  //   if (!canvasRef.current) return;
+
+  //   // If pan tool is enabled, do NOT place shapes on click.
+  //   if (panToolEnabled) return;
+
+  //   // If user is currently connecting or resizing/dragging, ignore placement clicks
+  //   if (connecting || resizing || dragging || marquee) return;
+
+  //   //if (placementTool) return;
+
+  //   // // PLACE MODE
+  //   // if (placementTool) {
+  //   //   e.preventDefault();
+  //   //   e.stopPropagation();
+
+  //   //   const { x, y } = clientPointToWorld(
+  //   //     e.clientX,
+  //   //     e.clientY,
+  //   //     canvasRef.current,
+  //   //     position,
+  //   //     scale
+  //   //   );
+
+  //   //   const id = uuidv4();
+  //   //   addShape(placementTool.type, x, y, id);
+
+  //   //   // (optional) select the newly placed shape
+  //   //   setSelectedShapeIds([id]);
+
+  //   //   // exit placement mode after one placement (Miro-ish)
+  //   //   setPlacementTool(null);
+
+  //   //   return;
+  //   // }
+
+  //   // otherwise behave as before
+  //   clearSelection?.();
+  // };
+
   const handleCanvasPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
@@ -987,21 +1134,23 @@ export default function InfiniteCanvas({
 
   return (
     <div className="w-full h-full overflow-hidden bg-[#EFF0F4] relative flex">
-      <div className="absolute top-4 right-4 z-20 flex flex-row gap-6 bg-black p-2 rounded-md text-white">
-        <div className="flex items-center gap-3 ">
-          <Checkbox
-            id="example"
-            checked={examples}
-            onCheckedChange={() => setExamples(!examples)}
-            className={
-              "data-[state=checked]:bg-white data-[state=checked]:text-black"
-            }
-          />
-          <Label htmlFor="example">Examples</Label>
+      {/* {!valuePropCanvasMode && (
+        <div className="absolute top-4 right-4 z-20 flex flex-row gap-6 bg-black p-2 rounded-md text-white">
+          <div className="flex items-center gap-3 ">
+            <Checkbox
+              id="example"
+              checked={examples}
+              onCheckedChange={() => setExamples(!examples)}
+              className={
+                "data-[state=checked]:bg-white data-[state=checked]:text-black"
+              }
+            />
+            <Label htmlFor="example">Examples</Label>
+          </div>
         </div>
-      </div>
+      )} */}
 
-      {isValuePropCanvas && (
+      {isValuePropCanvas && !valuePropCanvasMode && (
         <div className="absolute top-4 left-4 z-20 flex flex-row gap-6 bg-black p-2 rounded-md text-white">
           <div className="flex items-center gap-3 ">
             <Checkbox
@@ -1041,16 +1190,16 @@ export default function InfiniteCanvas({
         </div>
       )}
 
-      {editable && (
+      {editable && !valuePropCanvasMode && (
         <div className="absolute bottom-4 right-4 z-20">
           <Comments />
         </div>
       )}
 
       <div className="absolute bottom-4 right-35 z-20">
-        {isAnalysisCanvas && <HelperAnalysis />}
-        {isQuestionsCanvas && <HelperQuestions />}
-        {isValuePropCanvas && <HelperValueProp />}
+        {isAnalysisCanvas && !valuePropCanvasMode && <HelperAnalysis />}
+        {isQuestionsCanvas && !valuePropCanvasMode && <HelperQuestions />}
+        {isValuePropCanvas && !valuePropCanvasMode && <HelperValueProp />}
       </div>
 
       <AlertDialog
@@ -1111,17 +1260,24 @@ export default function InfiniteCanvas({
       />
 
       {/* Toolbar */}
+      {/* Toolbar */}
       {editable && (
-        <div className="absolute top-1/2 -translate-y-1/2 left-4 z-20 py-4 px-3 bg-white  rounded-2xl shadow flex flex-col gap-6 items-center">
+        <div className="absolute top-1/2 -translate-y-1/2 left-4 z-20 p-2 bg-white rounded-2xl shadow flex flex-col gap-3 items-center">
+          {/* Pan */}
           <button
-            onClick={() => setPanToolEnabled((v) => !v)}
-            className={`w-10 h-10 flex flex-col items-center justify-center rounded-xl
-    ${
-      panToolEnabled
-        ? "bg-blue-600 text-white"
-        : "bg-transparent text-[#111827]"
-    }
-  `}
+            onClick={() => {
+              setPanToolEnabled((v) => !v);
+              // If enabling pan, exit placement mode
+              setPlacementTool(null);
+              setOpenToolGroup(null);
+            }}
+            className={`w-13 h-13 flex flex-col items-center justify-center rounded-xl
+        ${
+          panToolEnabled
+            ? "bg-blue-600 text-white"
+            : "bg-transparent text-[#111827]"
+        }
+      `}
             title="Pan tool"
           >
             <Hand className="pointer-events-none" size={18} />
@@ -1130,243 +1286,333 @@ export default function InfiniteCanvas({
             </span>
           </button>
 
-          {toolbarOptions.rectangle && (
+          {/* Group buttons */}
+          <div className="relative flex flex-col gap-3 items-center">
+            {/* Shapes group */}
             <button
-              draggable
-              onDragStart={(e) => {
-                console.log("e", e);
-
-                e.dataTransfer.setData("shape-type", "rect");
+              onClick={() => {
+                setOpenToolGroup((g) => (g === "shapes" ? null : "shapes"));
               }}
-              className="w-10 h-10 gap-1 flex flex-col items-center "
-              title="Rectangle"
+              className={`w-13 h-13 flex flex-col items-center justify-center rounded-xl
+          ${
+            openToolGroup === "shapes"
+              ? "bg-blue-600 text-white"
+              : "bg-transparent text-[#111827]"
+          }
+        `}
+              title="Shapes"
             >
-              {/* <SquarePlus className="text-[#111827] pointer-events-none" /> */}
               <NextImage
                 src={"/rectangle.svg"}
-                alt="Rectangle"
-                width={20}
-                height={20}
-                className="pointer-events-none"
+                alt="Shapes"
+                width={18}
+                height={18}
+                className="pointer-events-none invert-0"
               />
-              <span className="text-[10px] font-bold text-[#111827] opacity-60 pointer-events-none">
-                Rectangle
+              <span className="text-[10px] font-bold opacity-60 pointer-events-none">
+                Shapes
               </span>
             </button>
-          )}
 
-          {toolbarOptions.ellipse && (
+            {/* Cards group */}
             <button
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData("shape-type", "ellipse");
+              onClick={() => {
+                setOpenToolGroup((g) => (g === "cards" ? null : "cards"));
               }}
-              className="w-10 h-10 gap-1 flex flex-col items-center "
-              title="Ellipse"
+              className={`w-13 h-13 flex flex-col items-center justify-center rounded-xl
+          ${
+            openToolGroup === "cards"
+              ? "bg-blue-600 text-white"
+              : "bg-transparent text-[#111827]"
+          }
+        `}
+              title="Cards"
             >
-              {/* <SquarePlus className="text-[#111827] pointer-events-none" /> */}
-              <NextImage
-                src={"/ellipse.svg"}
-                alt="Ellipse"
-                width={20}
-                height={20}
-                className="pointer-events-none"
-              />
-              <span className="text-[10px] font-bold text-[#111827] opacity-60 pointer-events-none">
-                Ellipse
-              </span>
-            </button>
-          )}
-
-          {/* <button
-          draggable
-          onDragStart={(e) => {
-            e.dataTransfer.setData("shape-type", "text");
-          }}
-          className="w-10 h-10 flex items-center justify-center bg-yellow-300 rounded text-black font-bold"
-          title="Text"
-        >
-          Tx
-        </button> */}
-
-          {toolbarOptions.text && (
-            <button
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData("shape-type", "text");
-              }}
-              className="w-10 h-10 gap-1 flex flex-col items-center "
-              title="Text"
-            >
-              {/* <SquarePlus className="text-[#111827] pointer-events-none" /> */}
-              <NextImage
-                src={"/text.svg"}
-                alt="Text"
-                width={16}
-                height={16}
-                className="pointer-events-none"
-              />
-              <span className="text-[10px] font-bold text-[#111827] opacity-60 pointer-events-none">
-                Text
-              </span>
-            </button>
-          )}
-
-          {/* <button
-          draggable
-          onDragStart={(e) => {
-            e.dataTransfer.setData("shape-type", "interview");
-          }}
-          className="w-10 h-10 flex items-center justify-center bg-purple-300 rounded text-black font-bold"
-          title="Interview"
-        >
-          In
-        </button> */}
-
-          {toolbarOptions.interview && (
-            <button
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData("shape-type", "interview");
-              }}
-              className="w-10 h-10  flex flex-col items-center "
-              title="Interview"
-            >
-              <SquarePlus className="text-[#111827] pointer-events-none" />
-              <span className="text-[10px] font-bold text-[#111827] opacity-60 pointer-events-none">
-                Interview
-              </span>
-            </button>
-          )}
-
-          {/* <button
-          draggable
-          onDragStart={(e) => {
-            e.dataTransfer.setData("shape-type", "question");
-          }}
-          className="w-10 h-10 flex items-center justify-center bg-red-300 rounded text-black font-bold"
-          title="Question"
-        >
-          Qs
-        </button> */}
-
-          {toolbarOptions.question && (
-            <button
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData("shape-type", "question");
-              }}
-              className="w-10 h-10  flex flex-col items-center "
-              title="Question"
-            >
-              <SquarePlus className="text-[#111827] pointer-events-none" />
-              <span className="text-[10px] font-bold text-[#111827] opacity-60 pointer-events-none">
-                Question
-              </span>
-            </button>
-          )}
-
-          {/* <button
-          draggable
-          onDragStart={(e) => {
-            e.dataTransfer.setData("shape-type", "question_answer");
-          }}
-          className="w-10 h-10 flex items-center justify-center bg-amber-300 rounded text-black font-bold"
-          title="Answer"
-        >
-          An
-        </button> */}
-
-          {toolbarOptions.answer && (
-            <button
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData("shape-type", "question_answer");
-              }}
-              className="w-10 h-10  flex flex-col items-center "
-              title="Answer"
-            >
-              <SquarePlus className="text-[#111827] pointer-events-none" />
-              <span className="text-[10px] font-bold text-[#111827] opacity-60 pointer-events-none">
-                Answer
-              </span>
-            </button>
-          )}
-
-          {/* <button
-          draggable
-          onDragStart={(e) => {
-            e.dataTransfer.setData("shape-type", "table");
-          }}
-          className="w-10 h-10 flex items-center justify-center bg-pink-300 rounded text-black font-bold"
-          title="Table"
-        >
-          Tb
-        </button> */}
-          {toolbarOptions.table && (
-            <button
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData("shape-type", "table");
-              }}
-              className="w-10 h-10  flex flex-col items-center "
-              title="Table"
-            >
-              <SquarePlus className="text-[#111827] pointer-events-none" />
-              <span className="text-[10px] font-bold text-[#111827] opacity-60 pointer-events-none">
-                Table
-              </span>
-            </button>
-          )}
-
-          {/* <button
-          draggable
-          onDragStart={(e) => {
-            e.dataTransfer.setData("shape-type", "feature_idea");
-          }}
-          className="w-10 h-10 flex items-center justify-center bg-indigo-300 rounded text-black font-bold"
-          title="Feature Idea"
-        >
-          Fi
-        </button> */}
-          {toolbarOptions.feature && (
-            <button
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData("shape-type", "feature_idea");
-              }}
-              className="w-10 h-10  flex flex-col items-center "
-              title="Feature Idea"
-            >
-              <SquarePlus className="text-[#111827] pointer-events-none" />
-              <span className="text-[10px] font-bold text-[#111827] opacity-60 pointer-events-none">
-                Feature
-              </span>
-            </button>
-          )}
-
-          {toolbarOptions.card && (
-            <button
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData("shape-type", "card");
-              }}
-              className="w-10 h-10 gap-1 flex flex-col items-center "
-              title="Card"
-            >
-              {/* <SquarePlus className="text-[#111827] pointer-events-none" /> */}
               <NextImage
                 src={"/card.svg"}
-                alt="Card"
-                width={20}
-                height={20}
+                alt="Cards"
+                width={18}
+                height={18}
                 className="pointer-events-none"
               />
-              <span className="text-[10px] font-bold text-[#111827] opacity-60 pointer-events-none">
-                Card
+              <span className="text-[10px] font-bold opacity-60 pointer-events-none">
+                Cards
               </span>
             </button>
-          )}
+
+            {/* Submenu popover */}
+            {openToolGroup && (
+              <div
+                className="absolute left-15 top-0 bg-white rounded-xl shadow-lg border p-2 flex flex-col gap-1 min-w-[200px]"
+                onPointerDown={(e) => {
+                  // prevent bg click placing/clearing when interacting with menu
+                  e.stopPropagation();
+                }}
+              >
+                {openToolGroup === "shapes" && (
+                  <>
+                    {toolbarOptions.rectangle && (
+                      <ToolItem
+                        label="Rectangle"
+                        iconSrc="/rectangle.svg"
+                        active={
+                          placementTool?.kind === "shape" &&
+                          placementTool?.type === "rect"
+                        }
+                        onClick={() =>
+                          selectPlacementTool({ kind: "shape", type: "rect" })
+                        }
+                      />
+                    )}
+                    {toolbarOptions.ellipse && (
+                      <ToolItem
+                        label="Ellipse"
+                        iconSrc="/ellipse.svg"
+                        active={
+                          placementTool?.kind === "shape" &&
+                          placementTool?.type === "ellipse"
+                        }
+                        onClick={() =>
+                          selectPlacementTool({
+                            kind: "shape",
+                            type: "ellipse",
+                          })
+                        }
+                      />
+                    )}
+                    {toolbarOptions.text && (
+                      <ToolItem
+                        label="Text"
+                        iconSrc="/text.svg"
+                        active={
+                          placementTool?.kind === "shape" &&
+                          placementTool?.type === "text"
+                        }
+                        onClick={() =>
+                          selectPlacementTool({ kind: "shape", type: "text" })
+                        }
+                      />
+                    )}
+                  </>
+                )}
+
+                {openToolGroup === "cards" && (
+                  <>
+                    {/* {toolbarOptions.card && (
+                      <ToolItem
+                        label="Card"
+                        iconSrc="/card.svg"
+                        active={placementTool?.kind === "card" && placementTool?.type === "card"}
+                        onClick={() =>
+                          selectPlacementTool({ kind: "card", type: "card" })
+                        }
+                      />
+                    )}
+                    {toolbarOptions.interview && (
+                      <ToolItem
+                        label="Interview"
+                        icon={
+                          <SquarePlus className="text-[#111827]" size={18} />
+                        }
+                        active={placementTool?.type === "interview"}
+                        onClick={() =>
+                          selectPlacementTool({
+                            kind: "card",
+                            type: "interview",
+                          })
+                        }
+                      />
+                    )}
+                    {toolbarOptions.question && (
+                      <ToolItem
+                        label="Question"
+                        icon={
+                          <SquarePlus className="text-[#111827]" size={18} />
+                        }
+                        active={placementTool?.type === "question"}
+                        onClick={() =>
+                          selectPlacementTool({
+                            kind: "card",
+                            type: "question",
+                          })
+                        }
+                      />
+                    )}
+                    {toolbarOptions.answer && (
+                      <ToolItem
+                        label="Answer"
+                        icon={
+                          <SquarePlus className="text-[#111827]" size={18} />
+                        }
+                        active={placementTool?.type === "question_answer"}
+                        onClick={() =>
+                          selectPlacementTool({
+                            kind: "card",
+                            type: "question_answer",
+                          })
+                        }
+                      />
+                    )}
+                    {toolbarOptions.table && (
+                      <ToolItem
+                        label="Table"
+                        icon={
+                          <SquarePlus className="text-[#111827]" size={18} />
+                        }
+                        active={placementTool?.type === "table"}
+                        onClick={() =>
+                          selectPlacementTool({ kind: "card", type: "table" })
+                        }
+                      />
+                    )}
+                    {toolbarOptions.feature && (
+                      <ToolItem
+                        label="Feature"
+                        icon={
+                          <SquarePlus className="text-[#111827]" size={18} />
+                        }
+                        active={placementTool?.type === "feature_idea"}
+                        onClick={() =>
+                          selectPlacementTool({
+                            kind: "card",
+                            type: "feature_idea",
+                          })
+                        }
+                      />
+                    )} */}
+                    <>
+                      <ToolItem
+                        label="Jobs To Be Done"
+                        icon={
+                          <SquarePlus className="text-[#111827]" size={18} />
+                        }
+                        active={
+                          placementTool?.kind === "card" &&
+                          placementTool.subtype === "jobs_to_be_done_card"
+                        }
+                        onClick={() =>
+                          selectPlacementTool({
+                            kind: "card",
+                            subtype: "jobs_to_be_done_card",
+                          })
+                        }
+                      />
+
+                      <ToolItem
+                        label="Pains"
+                        icon={
+                          <SquarePlus className="text-[#111827]" size={18} />
+                        }
+                        active={
+                          placementTool?.kind === "card" &&
+                          placementTool.subtype === "pains_card"
+                        }
+                        onClick={() =>
+                          selectPlacementTool({
+                            kind: "card",
+                            subtype: "pains_card",
+                          })
+                        }
+                      />
+
+                      <ToolItem
+                        label="Gains"
+                        icon={
+                          <SquarePlus className="text-[#111827]" size={18} />
+                        }
+                        active={
+                          placementTool?.kind === "card" &&
+                          placementTool.subtype === "gains_card"
+                        }
+                        onClick={() =>
+                          selectPlacementTool({
+                            kind: "card",
+                            subtype: "gains_card",
+                          })
+                        }
+                      />
+
+                      <ToolItem
+                        label="Products & Services"
+                        icon={
+                          <SquarePlus className="text-[#111827]" size={18} />
+                        }
+                        active={
+                          placementTool?.kind === "card" &&
+                          placementTool.subtype === "products_services_card"
+                        }
+                        onClick={() =>
+                          selectPlacementTool({
+                            kind: "card",
+                            subtype: "products_services_card",
+                          })
+                        }
+                      />
+
+                      <ToolItem
+                        label="Pain Relievers"
+                        icon={
+                          <SquarePlus className="text-[#111827]" size={18} />
+                        }
+                        active={
+                          placementTool?.kind === "card" &&
+                          placementTool.subtype === "pain_relievers_card"
+                        }
+                        onClick={() =>
+                          selectPlacementTool({
+                            kind: "card",
+                            subtype: "pain_relievers_card",
+                          })
+                        }
+                      />
+
+                      <ToolItem
+                        label="Gain Creators"
+                        icon={
+                          <SquarePlus className="text-[#111827]" size={18} />
+                        }
+                        active={
+                          placementTool?.kind === "card" &&
+                          placementTool.subtype === "gain_creators_card"
+                        }
+                        onClick={() =>
+                          selectPlacementTool({
+                            kind: "card",
+                            subtype: "gain_creators_card",
+                          })
+                        }
+                      />
+
+                      {/* <ToolItem
+                        label="Ad-Lib"
+                        icon={
+                          <SquarePlus className="text-[#111827]" size={18} />
+                        }
+                        active={
+                          placementTool?.kind === "card" &&
+                          placementTool.subtype === "ad_lib_card"
+                        }
+                        onClick={() =>
+                          selectPlacementTool({
+                            kind: "card",
+                            subtype: "ad_lib_card",
+                          })
+                        }
+                      /> */}
+                    </>
+                  </>
+                )}
+
+                {/* optional quick “cancel tool” */}
+                <button
+                  className="mt-1 text-left text-xs px-2 py-1 rounded hover:bg-gray-100 text-gray-600"
+                  onClick={() => setPlacementTool(null)}
+                >
+                  Esc / Cancel tool
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -1385,6 +1631,7 @@ export default function InfiniteCanvas({
         onDragStart={handleDragStart}
         onPointerMove={handleCanvasPointerMove}
         onPointerLeave={handleCanvasPointerLeave}
+        onPointerDownCapture={handleCanvasPointerDownCapture}
       >
         {showGrid && (
           <div
@@ -1444,7 +1691,7 @@ export default function InfiniteCanvas({
               if (isValuePropCanvas) {
                 if (!problems) {
                   const toShape = shapes.find(
-                    (s) => s.id === endpoint.connection.toShapeId
+                    (s) => s.id === endpoint.connection.toShapeId,
                   );
 
                   if (
@@ -1459,7 +1706,7 @@ export default function InfiniteCanvas({
 
                 if (!solutions) {
                   const toShape = shapes.find(
-                    (s) => s.id === endpoint.connection.toShapeId
+                    (s) => s.id === endpoint.connection.toShapeId,
                   );
 
                   if (
@@ -1516,7 +1763,7 @@ export default function InfiniteCanvas({
                     onSelect={editable ? selectConnection : undefined}
                   />
                 );
-              }
+              },
             )}
 
           {shapes
@@ -1633,7 +1880,7 @@ export default function InfiniteCanvas({
                   zIndex: 250,
                 }}
               />
-            )
+            ),
           )}
         </div>
       </div>
@@ -1661,7 +1908,7 @@ function computePreviewOrthogonalPoints(
   tx: number,
   ty: number,
   fromSide?: Side,
-  toSide?: Side
+  toSide?: Side,
 ): { x: number; y: number }[] {
   const pts: { x: number; y: number }[] = [];
   pts.push({ x: fx, y: fy });
@@ -1775,7 +2022,7 @@ export const CurvedArrow: React.FC<CurvedArrowProps> = ({
     tx1,
     ty1,
     fromSide,
-    toSide
+    toSide,
   );
 
   const d =
@@ -1790,7 +2037,7 @@ export const CurvedArrow: React.FC<CurvedArrowProps> = ({
   // Unique marker id per instance so previews don't conflict
   const markerId = useMemo(
     () => `arrowhead-preview-${Math.random().toString(36).slice(2)}`,
-    []
+    [],
   );
 
   return (
@@ -1828,3 +2075,47 @@ export const CurvedArrow: React.FC<CurvedArrowProps> = ({
     </svg>
   );
 };
+
+function ToolItem({
+  label,
+  iconSrc,
+  icon,
+  active,
+  onClick,
+}: {
+  label: string;
+  iconSrc?: string;
+  icon?: React.ReactNode;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className={[
+        "flex items-center gap-2 px-2 py-2 rounded-lg text-left",
+        active ? "bg-blue-50 border border-blue-200" : "hover:bg-gray-100",
+      ].join(" ")}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick();
+      }}
+      title={label}
+    >
+      <div className="w-5 h-5 flex items-center justify-center">
+        {iconSrc ? (
+          <NextImage
+            src={iconSrc}
+            alt={label}
+            width={18}
+            height={18}
+            className="pointer-events-none"
+          />
+        ) : (
+          icon
+        )}
+      </div>
+      <span className="text-sm text-[#111827]">{label}</span>
+    </button>
+  );
+}

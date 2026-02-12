@@ -21,9 +21,7 @@ export default function VideoTodo({
   return (
     <li
       key={todo.id}
-      className={`text-[#B5BCCB] border-[0.5px] border-[#B5BCCC] rounded-[8px] flex flex-col gap-2 ${
-        isCompleted ? "bg-[#E4E5ED66]" : ""
-      }`}
+      className={`text-[#B5BCCB] border-[0.5px] border-white rounded-[8px] flex flex-col gap-2 bg-white`}
     >
       <div className="flex flex-row gap-3.5 items-center px-[12px] py-[12px]">
         <div

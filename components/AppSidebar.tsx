@@ -36,61 +36,87 @@ import CollapsibleSidebar from "./MainSidebar";
 const data = {
   subMain: [
     {
-      name: "Todo's",
-      url: "/",
+      name: "Leaderboard",
+      url: "/teams-dashboard",
       //icon: Frame,
+      conditionalMenu: true,
     },
-    // {
-    //   name: "Progress",
-    //   url: "/progress",
-    //   //icon: Frame,
-    // },
     {
-      name: "Idea Brainstorm",
+      name: "My Progress",
+      //url: "/teams-dashboard",
+      url: "/progress-dashboard",
+      //icon: Frame,
+      conditionalMenu: false,
+    },
+    {
+      name: "Brainstorm",
       url: "/idea-brainstorm",
       //icon: PieChart,
+      conditionalMenu: true,
+    },
+    {
+      name: "Value Prop Canvas",
+      url: "/value-proposition-canvas",
+      //icon: PieChart,
+      conditionalMenu: true,
+    },
+    {
+      name: "Hypothesis",
+      url: "/hypotheses",
+      //icon: PieChart,
+      conditionalMenu: true,
+    },
+    {
+      name: "Participants & Interviews",
+      url: "/participants",
+      //icon: PieChart,
+      conditionalMenu: true,
     },
   ],
   navMain: [
-    {
-      title: "Hypothesize",
-      items: [
-        {
-          title: "Segments",
-          url: "/segments",
-        },
-        {
-          title: "Value Proposition",
-          url: "/value-proposition",
-        },
-        {
-          title: "Ecosystem Map",
-          url: "/ecosystem-map",
-        },
-      ],
-    },
-    {
-      title: "Validate",
-      items: [
-        {
-          title: "Questions",
-          url: "/questions",
-          isActive: true,
-        },
-        {
-          title: "Participants",
-          url: "/participants",
-        },
-        // {
-        //   title: "Interviews",
-        //   url: "/interviews",
-        // },
-        {
-          title: "Analysis",
-          url: "/analysis",
-        },
-      ],
-    },
+    // {
+    //   title: "Hypothesize",
+    //   items: [
+    //     {
+    //       title: "Segments",
+    //       url: "/segments",
+    //     },
+    //     {
+    //       title: "Value Proposition",
+    //       url: "/value-proposition",
+    //     },
+    //     {
+    //       title: "Ecosystem Map",
+    //       url: "/ecosystem-map",
+    //     },
+    //     {
+    //       title: "Hypotheses",
+    //       url: "/hypotheses",
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: "Validate",
+    //   items: [
+    //     {
+    //       title: "Questions",
+    //       url: "/questions",
+    //       isActive: true,
+    //     },
+    //     {
+    //       title: "Participants",
+    //       url: "/participants",
+    //     },
+    //     // {
+    //     //   title: "Interviews",
+    //     //   url: "/interviews",
+    //     // },
+    //     {
+    //       title: "Analysis",
+    //       url: "/analysis",
+    //     },
+    //   ],
+    // },
     {
       title: "Resources",
       items: [
@@ -108,23 +134,36 @@ const data = {
         },
       ],
     },
-    {
-      title: "Examples",
-      items: [
-        {
-          title: "Pickup Truck",
-          url: "/examples/pickup-truck",
-        },
-        {
-          title: "Laptop",
-          url: "/examples/laptop",
-        },
-        {
-          title: "Ecosystem Maps",
-          url: "/examples/ecosystem-maps",
-        },
-      ],
-    },
+    // {
+    //   title: "Excercises",
+    //   items: [
+    //     {
+    //       title: "Excercise 1",
+    //       url: "/excercises/excercise-1",
+    //     },
+    //     {
+    //       title: "Excercise 2",
+    //       url: "/excercises/excercise-2",
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: "Examples",
+    //   items: [
+    //     {
+    //       title: "Pickup Truck",
+    //       url: "/examples/pickup-truck",
+    //     },
+    //     {
+    //       title: "Laptop",
+    //       url: "/examples/laptop",
+    //     },
+    //     {
+    //       title: "Ecosystem Maps",
+    //       url: "/examples/ecosystem-maps",
+    //     },
+    //   ],
+    // },
     // {
     //   title: "Needs",
     //   url: "/needs",
@@ -153,6 +192,11 @@ export function AppSidebar({
 }: React.ComponentProps<typeof Sidebar> & { isAdminOrMentor: boolean }) {
   const { user } = useUser();
   const { organization } = useOrganization();
+
+  const showAllPages = process.env.NEXT_PUBLIC_SHOW_ALL_PAGES === "true";
+
+  console.log("showAllPages", showAllPages);
+  console.log("isAdminOrMentor", isAdminOrMentor);
 
   return (
     <Sidebar className="bg-white" {...props}>
@@ -224,7 +268,14 @@ export function AppSidebar({
       <SidebarContent className="p-3 bg-white border-t flex justify-between">
         <div>
           <SecondarySidebar
-            items={data.subMain}
+            items={data.subMain.filter((item) => {
+              if (showAllPages) return true;
+
+              if (!showAllPages && item.conditionalMenu && !isAdminOrMentor)
+                return false;
+
+              return true;
+            })}
             isAdminOrMentor={isAdminOrMentor}
           />
           <CollapsibleSidebar items={data.navMain} />

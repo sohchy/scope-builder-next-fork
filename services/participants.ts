@@ -39,6 +39,18 @@ export async function getParticipants() {
   return participants;
 }
 
+export async function getAllParticipants() {
+  const { userId } = await auth();
+
+  if (!userId) redirect("/sign-in");
+
+  const participants = await prisma.participant.findMany({
+    orderBy: [{ scheduled_date: "asc" }, { name: "asc" }],
+  });
+
+  return participants;
+}
+
 export async function createParticipant(
   values: z.infer<typeof participantFormSchema>
 ) {

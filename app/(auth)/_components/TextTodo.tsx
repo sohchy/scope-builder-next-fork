@@ -15,16 +15,14 @@ export default function TextTodo({
 }: TextTodoProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showButton, setShowButton] = useState(false);
-  
+
   const contentLength = todo.task_description?.length || 0;
   const needsShowMore = contentLength > 200;
 
   return (
     <li
       key={todo.id}
-      className={`text-[#B5BCCB] border-[0.5px] border-[#B5BCCC] rounded-[8px] px-[12px] py-[12px] flex flex-col gap-2 ${
-        isCompleted ? "bg-[#E4E5ED66]" : ""
-      }`}
+      className={`text-[#B5BCCB] border-[0.5px] border-white rounded-[8px] px-[12px] py-[12px] flex flex-col gap-2 bg-white`}
     >
       <div className="flex flex-row gap-3.5 items-center">
         <div
@@ -51,15 +49,13 @@ export default function TextTodo({
             data-todo-content
             className={`text-[14px] font-medium text-[#2E3545] break-words overflow-wrap-anywhere ${
               isCompleted ? "line-through" : ""
-            } ${
-              !isExpanded && needsShowMore ? "line-clamp-3" : ""
-            }`}
-            dangerouslySetInnerHTML={{ 
-              __html: todo.task_description || "" 
+            } ${!isExpanded && needsShowMore ? "line-clamp-3" : ""}`}
+            dangerouslySetInnerHTML={{
+              __html: todo.task_description || "",
             }}
             style={{
               maxHeight: !isExpanded && needsShowMore ? "4.5rem" : "none",
-              overflow: !isExpanded && needsShowMore ? "hidden" : "visible"
+              overflow: !isExpanded && needsShowMore ? "hidden" : "visible",
             }}
           />
           {needsShowMore && (

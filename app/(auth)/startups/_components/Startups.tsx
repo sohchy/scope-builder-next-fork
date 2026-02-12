@@ -26,10 +26,10 @@ export default function Startups() {
 
       const founders = memberships.data.filter(
         (membership) =>
-          membership.role === "org:founder" || membership.role === "org:member"
+          membership.role === "org:founder" || membership.role === "org:member",
       );
       const mentors = memberships.data.filter(
-        (membership) => membership.role === "org:mentor"
+        (membership) => membership.role === "org:mentor",
       );
 
       data.push({

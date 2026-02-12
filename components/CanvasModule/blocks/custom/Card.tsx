@@ -621,7 +621,7 @@ export const Card: React.FC<CardProps> = (props) => {
           <span className="font-manrope font-semibold font-weight-600  text-[13px] text-[#111827]">
             {getTitle()}
           </span>
-          <DropdownMenu defaultOpen={subtype === "select_subtype"}>
+          {/* <DropdownMenu defaultOpen={subtype === "select_subtype"}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Open</span>
@@ -634,7 +634,7 @@ export const Card: React.FC<CardProps> = (props) => {
             >
               {getMenuOptions()}
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
         </div>
       }
       body={getBody()}

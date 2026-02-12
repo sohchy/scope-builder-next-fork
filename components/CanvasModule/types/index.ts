@@ -56,6 +56,7 @@ export interface Shape {
   height: number;
   type: ShapeType;
   subtype?: CardType;
+  kanbanOrder?: number;
 
   // interview block
   draftRaw?: string;
@@ -137,6 +138,7 @@ export type ShapeComponentProps = {
     shapeId: string,
     direction: "top" | "right" | "bottom" | "left"
   ) => void;
+  kanbanView?: boolean;
 };
 
 export type ShapeComponent = React.FC<ShapeComponentProps>;

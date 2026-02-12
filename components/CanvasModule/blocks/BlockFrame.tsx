@@ -39,6 +39,7 @@ export interface ShapeFrameProps {
   selectable?: boolean; // default true
   interactive?: boolean;
   minHeight?: number;
+  kanbanView?: boolean;
 
   onChangeTags?: (id: string, tagIds: string[]) => void;
   onCommitStyle?: (id: string, patch: Partial<IShape>) => void;
@@ -59,6 +60,7 @@ export const ShapeFrame: React.FC<ShapeFrameProps> = ({
   onChangeTags,
   interactive = true,
   onCommitStyle,
+  kanbanView = false,
 }) => {
   const { ref, height } = useElementSize<HTMLDivElement>({
     box: "content-box",
@@ -208,13 +210,14 @@ export const ShapeFrame: React.FC<ShapeFrameProps> = ({
   return (
     <div
       ref={ref}
+      data-no-dnd="true"
       data-shapeid={shape.id}
       onMouseDown={onMouseDown}
       style={{
-        position: "absolute",
-        left: shape.x,
-        top: shape.y,
-        width: shape.width,
+        position: kanbanView ? "relative" : "absolute",
+        left: kanbanView ? undefined : shape.x,
+        top: kanbanView ? undefined : shape.y,
+        width: kanbanView ? undefined : shape.width,
         // height: shape.height,
         height: "min-content",
         minHeight,

@@ -1,148 +1,103 @@
-import { v4 as uuidv4 } from "uuid";
-import { redirect } from "next/navigation";
+import { getTopicProgress, getTopics } from "@/services/topics";
+import Topic from "./progress-dashboard/_components/Topic";
 
-import {
-  Todo as ITodo,
-  Task,
-  TaskList,
-  TaskSectionTitle,
-  TodoType,
-} from "@/lib/generated/prisma";
-import {
-  getCompletedTasks,
-  getTasks,
-  TaskWithListAndSection,
-} from "@/services/tasks";
-import TaskCard from "./_components/Task";
+/*
+Task Table  
+  task_id
+  topic_id
+  type
+  subtype
+  order
 
-type GroupedTasks = Array<{
-  task_list: TaskList;
-  sections: Array<{
-    section_title: TaskSectionTitle;
-    tasks: TaskWithListAndSection[];
-  }>;
-}>;
+Topics Table
+  topic_id
+  name
+  description
+  topic_type
+  deadline
+  order
 
-export default async function Home({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const tasks = await getTasks();
-  const completedTasks = await getCompletedTasks();
-  const groupedTasks = groupTasksByListAndSection(tasks || []);
+TopicProgress Table
+  org_id
+  task_id optional
+  topic_id optional
+  completed
+*/
+
+export default async function ProgressDashboardPage() {
+  const topics = await getTopics();
+  const topicProgress = await getTopicProgress();
+
+  const topicWithProgress = topics.map((topic) => {
+    const progress = topicProgress.find((tp) => tp.topic_id === topic.id);
+    const isCompleted = !!progress?.completed;
+
+    return {
+      id: topic.id,
+      name: topic.name,
+      type: topic.type,
+      deadline: topic.deadline,
+      description: topic.description,
+      isDone: isCompleted,
+      concept_tasks: topic.topic_tasks
+        .filter((t) => t.type === "concept")
+        .map((t) => {
+          const taskProgress = topicProgress.find((tp) => tp.task_id === t.id);
+          return {
+            id: t.id,
+            subtype: t.subtype,
+            completed: !!taskProgress?.completed,
+          };
+        }),
+      excercises_tasks: topic.topic_tasks
+        .filter((t) => t.type === "exercise")
+        .map((t) => {
+          const taskProgress = topicProgress.find((tp) => tp.task_id === t.id);
+          return {
+            id: t.id,
+            subtype: t.subtype,
+            completed: !!taskProgress?.completed,
+          };
+        }),
+      startup_tasks: topic.topic_tasks
+        .filter((t) => t.type === "startup")
+        .map((t) => {
+          const taskProgress = topicProgress.find((tp) => tp.task_id === t.id);
+          return {
+            id: t.id,
+            subtype: t.subtype,
+            completed: !!taskProgress?.completed,
+          };
+        }),
+    };
+  });
+
+  console.log("topicWithProgress", JSON.stringify(topicWithProgress));
 
   return (
-    <div className="flex flex-row p-10 gap-6 w-full pb-20">
-      {groupedTasks.map((taskList) => {
-        return (
-          <div
-            key={taskList.task_list.id}
-            className="border-2 bg-white border-white rounded-[12px] w-[345px] min-w-[345px] overflow-y-auto h-full max-h-600"
-          >
-            <div className="px-[22px] py-[15px] bg-[#7559C3]">
-              <h3 className="text-[14px] font-semibold text-white">
-                {taskList.task_list.title}
-              </h3>
+    <div className="p-8 h-full bg-[#F0F1F5] flex justify-center">
+      <div className="flex flex-col gap-5 max-w-[1182px] h-full">
+        <div className="grid grid-cols-7 pr-8 gap-8">
+          <h1 className="text-[#111827]  text-2xl font-semibold col-span-2"></h1>
+          <div className="grid grid-cols-3 h-[34px] col-span-5 bg-[#2E3545] text-white text-sm font-semibold border border-[#EFF0F4] rounded-[4px]">
+            <div className="border-r border-[#F0F1F5] flex items-center px-4">
+              Concept
             </div>
-            <div className="px-[12px] py-[12px] flex flex-col gap-4">
-              {taskList.sections.map((section) => (
-                <div key={section.section_title.id}>
-                  <h5 className="text-[14px] text-[#111827] font-medium opacity-70 mb-3">
-                    {section.section_title.title}
-                  </h5>
-                  <ul className="flex gap-1 flex-col">
-                    {section.tasks.map((task) => {
-                      const isCompleted = completedTasks.some(
-                        (ct) => ct.task_id === task.id && ct.completed
-                      );
-                      const completedTask = completedTasks.find(
-                        (ct) => ct.task_id === task.id
-                      );
-
-                      return (
-                        <TaskCard
-                          task={task}
-                          key={task.id}
-                          isCompleted={isCompleted}
-                          data={
-                            completedTask
-                              ? (completedTask.data as Record<string, any>)
-                              : {}
-                          }
-                        />
-                      );
-                    })}
-                  </ul>
-                </div>
-              ))}
+            <div className="border-r border-[#F0F1F5] flex items-center px-4">
+              Practice exercises
+            </div>
+            <div className="border-r border-[#F0F1F5] flex items-center px-4  ">
+              My startup
             </div>
           </div>
-        );
-      })}
+        </div>
+
+        <div className="bg-white px-3.5 py-8 rounded-2xl w-full flex-1">
+          {topicWithProgress.map((topic) => (
+            <Topic key={topic.id} topic={topic} />
+          ))}
+        </div>
+      </div>
     </div>
   );
-}
-
-function groupTasksByListAndSection(
-  tasks: TaskWithListAndSection[]
-): GroupedTasks {
-  // First, build nested maps to avoid O(n^2) scans
-  const listMap = new Map<
-    number,
-    {
-      task_list: TaskList;
-      sections: Map<
-        number | null,
-        {
-          section_title: TaskSectionTitle;
-          tasks: Task[];
-        }
-      >;
-    }
-  >();
-
-  for (const t of tasks) {
-    const tl = t.task_list!;
-    if (!listMap.has(tl.id)) {
-      listMap.set(tl.id, {
-        task_list: tl,
-        sections: new Map(),
-      });
-    }
-    const listEntry = listMap.get(tl.id)!;
-
-    const st = t.section_title ?? null; // allow null/undefined
-    const sectionKey = st?.id ?? null;
-
-    if (!listEntry.sections.has(sectionKey)) {
-      listEntry.sections.set(sectionKey, {
-        section_title: st ?? {
-          id: null as any,
-          title: "Unsectioned",
-          order: Number.MAX_SAFE_INTEGER,
-        },
-        tasks: [],
-      });
-    }
-    listEntry.sections.get(sectionKey)!.tasks.push(t);
-  }
-
-  // Now materialize into sorted arrays
-  //@ts-ignore
-  const result: GroupedTasks = Array.from(listMap.values())
-    .sort((a, b) => (a.task_list.order ?? 0) - (b.task_list.order ?? 0))
-    .map(({ task_list, sections }) => ({
-      task_list,
-      sections: Array.from(sections.values())
-        .sort(
-          (a, b) => (a.section_title.order ?? 0) - (b.section_title.order ?? 0)
-        )
-        .map(({ section_title, tasks }) => ({
-          section_title,
-          tasks: tasks.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
-        })),
-    }));
-
-  return result;
 }

@@ -24,7 +24,8 @@ export const columns: ColumnDef<any>[] = [
       return (
         <div className="capitalize">
           <Link
-            href={`/participants/${participantId}`}
+            // href={`/participants/${participantId}`}
+            href={`/participants/${participantId}/interview`}
             className="hover:underline"
           >
             {row.getValue("name")}
@@ -42,7 +43,7 @@ export const columns: ColumnDef<any>[] = [
 
       const schedule_date = format(
         row.getValue("scheduled_date"),
-        "MMM d, k:mm"
+        "MMM d, k:mm",
       );
 
       return <div className="capitalize">{schedule_date}</div>;
