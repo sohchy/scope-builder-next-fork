@@ -287,7 +287,7 @@ export const Rect: React.FC<RectBlockProps> = (props) => {
     >
       <div
         onDoubleClick={beginEdit}
-        className={` w-full rounded border-1 border-gray-400 shadow-[0px_4px_33.3px_0px_rgba(30,39,143,0.2)]`}
+        className={` w-full flex items-center justify-center rounded border-1 border-gray-400 shadow-[0px_4px_33.3px_0px_rgba(30,39,143,0.2)]`}
         style={{
           borderRadius: 6,
           backgroundColor: shape.color || "#EAFBE3",
@@ -297,7 +297,7 @@ export const Rect: React.FC<RectBlockProps> = (props) => {
         {/* View mode: centered display (no caret) */}
         {!isEditing && (
           <div
-            className="absolute inset-0 flex flex-row items-center justify-center p-2 text-center pointer-events-none whitespace-pre-wrap break-words flex-wrap"
+            className="flex flex-row items-center justify-center p-2 text-center pointer-events-none whitespace-pre-wrap wrap-anywhere  flex-wrap"
             style={{
               color: shape.textColor || "#0f172a",
               lineHeight: 1.25,
@@ -324,7 +324,7 @@ export const Rect: React.FC<RectBlockProps> = (props) => {
             onMouseDown={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
             placeholder="Add text…"
-            className="absolute inset-0 w-full h-full bg-transparent outline-none resize-none p-2 text-sm"
+            className="w-full h-full bg-transparent outline-none resize-none p-2 text-sm"
             style={{
               // You can start centering here:
               textAlign: "center",

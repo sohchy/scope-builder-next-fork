@@ -7,7 +7,8 @@ import {
   useHistory,
   useCanRedo,
 } from "@liveblocks/react";
-import { useRef, useState, useEffect } from "react";
+import { Hand } from "lucide-react";
+import { useRef, useState, useEffect, useMemo } from "react";
 
 import {
   writeClipboard,
@@ -55,6 +56,7 @@ import NextImage from "next/image";
 import { HelperQuestions } from "./CanvasModule/HelperQuestions";
 import { HelperValueProp } from "./CanvasModule/HelperValueProp";
 import { HelperAnalysis } from "./CanvasModule/HelperAnalysis";
+import { OrthogonalArrow } from "./CanvasModule/OrthogonalArrow";
 
 type RelativeAnchor = {
   x: number; // valor entre 0 y 1, representa el porcentaje del ancho
@@ -121,6 +123,7 @@ export default function InfiniteCanvas({
   const [examples, setExamples] = useState(true);
   const [solutions, setSolutions] = useState(true);
   const [valueArea, setValueArea] = useState(false);
+  const [panToolEnabled, setPanToolEnabled] = useState(false);
 
   const undo = useUndo();
   const redo = useRedo();
@@ -392,7 +395,9 @@ export default function InfiniteCanvas({
     setSelectedShapeIds,
   });
 
-  const startMarqueeSafe = editable ? startMarquee : () => {};
+  // const startMarqueeSafe = editable ? startMarquee : () => {};
+  const startMarqueeSafe =
+    editable && !panToolEnabled ? startMarquee : () => {};
 
   useShapeDragging({
     selectedShapeIds,
@@ -429,6 +434,7 @@ export default function InfiniteCanvas({
     // startMarquee,
     startMarquee: startMarqueeSafe,
     setMarqueeMousePos,
+    panToolEnabled,
   });
 
   const { handleShapeMouseDown, startResizing } = useShapeInteraction({
@@ -948,6 +954,37 @@ export default function InfiniteCanvas({
     clearSelection?.();
   };
 
+  const handleCanvasPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    // convert client → world
+    const x = (e.clientX - rect.left - position.x) / scale;
+    const y = (e.clientY - rect.top - position.y) / scale;
+    setCanvasMousePos({ x, y });
+  };
+
+  const handleCanvasPointerLeave = () => {
+    // so paste falls back to viewport center when cursor is outside
+    setCanvasMousePos({ x: NaN, y: NaN }); // or set to null if you prefer
+  };
+
+  type Side = "top" | "right" | "bottom" | "left";
+
+  function sideFromAnchor(a: {
+    x: number;
+    y: number;
+  }): "top" | "right" | "bottom" | "left" {
+    const dTop = a.y;
+    const dBottom = 1 - a.y;
+    const dLeft = a.x;
+    const dRight = 1 - a.x;
+    const min = Math.min(dTop, dBottom, dLeft, dRight);
+    if (min === dTop) return "top";
+    if (min === dBottom) return "bottom";
+    if (min === dLeft) return "left";
+    return "right";
+  }
+
   return (
     <div className="w-full h-full overflow-hidden bg-[#EFF0F4] relative flex">
       <div className="absolute top-4 right-4 z-20 flex flex-row gap-6 bg-black p-2 rounded-md text-white">
@@ -1076,6 +1113,23 @@ export default function InfiniteCanvas({
       {/* Toolbar */}
       {editable && (
         <div className="absolute top-1/2 -translate-y-1/2 left-4 z-20 py-4 px-3 bg-white  rounded-2xl shadow flex flex-col gap-6 items-center">
+          <button
+            onClick={() => setPanToolEnabled((v) => !v)}
+            className={`w-10 h-10 flex flex-col items-center justify-center rounded-xl
+    ${
+      panToolEnabled
+        ? "bg-blue-600 text-white"
+        : "bg-transparent text-[#111827]"
+    }
+  `}
+            title="Pan tool"
+          >
+            <Hand className="pointer-events-none" size={18} />
+            <span className="text-[10px] font-bold opacity-60 pointer-events-none">
+              Pan
+            </span>
+          </button>
+
           {toolbarOptions.rectangle && (
             <button
               draggable
@@ -1319,10 +1373,18 @@ export default function InfiniteCanvas({
       {/* Canvas */}
       <div
         ref={canvasRef}
-        className="flex-1 relative"
+        // className="flex-1 relative"
+        // className={`flex-1 relative ${panToolEnabled ? "cursor-grab" : ""}`}
+        className={[
+          "flex-1 relative",
+          panToolEnabled ? "cursor-grab" : "",
+          isPanning ? "cursor-grabbing" : "",
+        ].join(" ")}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragStart={handleDragStart}
+        onPointerMove={handleCanvasPointerMove}
+        onPointerLeave={handleCanvasPointerLeave}
       >
         {showGrid && (
           <div
@@ -1363,6 +1425,8 @@ export default function InfiniteCanvas({
           {connecting && connectingMousePos && (
             <CurvedArrow
               from={connecting.fromPosition}
+              fromSide={connecting.fromDirection}
+              toSide={snapResult?.side}
               to={snapResult?.snappedPosition ?? connectingMousePos}
             />
           )}
@@ -1411,18 +1475,49 @@ export default function InfiniteCanvas({
 
               return true;
             })
-            .map(({ id, from, to }) => (
-              <SelectableConnectionArrow
-                key={id}
-                id={id}
-                from={from}
-                to={to}
-                // selected={selectedConnectionId === id}
-                // onSelect={selectConnection}
-                selected={editable && selectedConnectionId === id}
-                onSelect={editable ? selectConnection : undefined}
-              />
-            ))}
+            .map(
+              ({
+                id,
+                from,
+                to,
+                fromSide,
+                toSide,
+                connection,
+                fromRect,
+                toRect,
+              }) => {
+                // const fromSide = sideFromAnchor(connection.fromAnchor);
+                // const toSide = sideFromAnchor(connection.toAnchor);
+
+                return (
+                  // <SelectableConnectionArrow
+                  //   key={id}
+                  //   id={id}
+                  //   from={from}
+                  //   to={to}
+                  //   zIndex={400}
+                  //   fromSide={fromSide} // <- pass through
+                  //   toSide={toSide} // <- pass through
+                  //   selected={editable && selectedConnectionId === id}
+                  //   onSelect={editable ? selectConnection : undefined}
+                  //   layout="orthogonal"
+                  // />
+                  <OrthogonalArrow
+                    key={id}
+                    id={id}
+                    from={from}
+                    to={to}
+                    zIndex={1}
+                    fromSide={fromSide}
+                    toSide={toSide}
+                    fromRect={fromRect} // 👈 new
+                    toRect={toRect}
+                    selected={editable && selectedConnectionId === id}
+                    onSelect={editable ? selectConnection : undefined}
+                  />
+                );
+              }
+            )}
 
           {shapes
             .filter((shape) => {
@@ -1545,26 +1640,92 @@ export default function InfiniteCanvas({
     </div>
   );
 }
-interface CurvedArrowProps {
+type Side = "top" | "right" | "bottom" | "left";
+
+type CurvedArrowProps = {
   from: { x: number; y: number };
   to: { x: number; y: number };
+  /** Optional: which side of the source/target shape the arrow attaches to */
+  fromSide?: Side;
+  toSide?: Side;
   color?: string;
   strokeWidth?: number;
-  zIndex?: number; // optional, defaults below
+  zIndex?: number;
+  /** How “curvy” the line is in px. Defaults to 40. */
+  bend?: number;
+};
+
+function computePreviewOrthogonalPoints(
+  fx: number,
+  fy: number,
+  tx: number,
+  ty: number,
+  fromSide?: Side,
+  toSide?: Side
+): { x: number; y: number }[] {
+  const pts: { x: number; y: number }[] = [];
+  pts.push({ x: fx, y: fy });
+
+  const dx = tx - fx;
+  const dy = ty - fy;
+
+  const axisOf = (side?: Side): "h" | "v" | null => {
+    if (!side) return null;
+    if (side === "left" || side === "right") return "h";
+    return "v"; // top / bottom
+  };
+
+  const fromAxis = axisOf(fromSide);
+  const toAxis = axisOf(toSide);
+
+  if (!fromAxis || !toAxis || Math.abs(dx) < 4 || Math.abs(dy) < 4) {
+    pts.push({ x: tx, y: ty });
+    return pts;
+  }
+
+  if (fromAxis === toAxis) {
+    if (fromAxis === "h") {
+      const midX = fx + dx / 2;
+      pts.push({ x: midX, y: fy });
+      pts.push({ x: midX, y: ty });
+    } else {
+      const midY = fy + dy / 2;
+      pts.push({ x: fx, y: midY });
+      pts.push({ x: tx, y: midY });
+    }
+    pts.push({ x: tx, y: ty });
+    return pts;
+  }
+
+  if (fromAxis === "h" && toAxis === "v") {
+    pts.push({ x: tx, y: fy });
+    pts.push({ x: tx, y: ty });
+    return pts;
+  }
+
+  if (fromAxis === "v" && toAxis === "h") {
+    pts.push({ x: fx, y: ty });
+    pts.push({ x: tx, y: ty });
+    return pts;
+  }
+
+  pts.push({ x: tx, y: ty });
+  return pts;
 }
 
-/**
- * An SVG that auto-sizes to the arrow's bounding box so it never clips
- * when the canvas is heavily panned/zoomed.
- */
 export const CurvedArrow: React.FC<CurvedArrowProps> = ({
   from,
   to,
+  fromSide,
+  toSide,
   color = "#3B82F6",
   strokeWidth = 2,
-  zIndex = 30,
+  zIndex = 50,
+  bend = 40,
 }) => {
-  // Compute a padded bounding box around the two points
+  const OUT = 6;
+
+  // Bounding box (with padding) so the SVG is small & absolutely positioned
   const pad = 40;
   const minX = Math.min(from.x, to.x) - pad;
   const minY = Math.min(from.y, to.y) - pad;
@@ -1574,20 +1735,63 @@ export const CurvedArrow: React.FC<CurvedArrowProps> = ({
   const width = Math.max(1, maxX - minX);
   const height = Math.max(1, maxY - minY);
 
-  // Convert world points to local coords within this svg
+  // Local coords
   const fx = from.x - minX;
   const fy = from.y - minY;
   const tx = to.x - minX;
   const ty = to.y - minY;
 
-  // Curve control points (same logic as before, but in local coords)
-  const dx = tx - fx;
-  const dy = ty - fy;
-  const curveFactor = 0.3;
-  const cp1 = { x: fx + dx * curveFactor, y: fy };
-  const cp2 = { x: tx - dx * curveFactor, y: ty };
+  // Unit normals for each side (pointing outward from shape border)
+  const normalFor = (side?: Side) => {
+    switch (side) {
+      case "top":
+        return { nx: 0, ny: -1 };
+      case "bottom":
+        return { nx: 0, ny: 1 };
+      case "left":
+        return { nx: -1, ny: 0 };
+      case "right":
+        return { nx: 1, ny: 0 };
+      default:
+        return null;
+    }
+  };
 
-  const d = `M ${fx},${fy} C ${cp1.x},${cp1.y} ${cp2.x},${cp2.y} ${tx},${ty}`;
+  // Control points: if we know the side, push the control point along that side’s normal
+  // so the tangent at the endpoint points in/out of the border.
+  const fromN = normalFor(fromSide);
+  const toN = normalFor(toSide);
+
+  // Small offset out of the shapes, same idea as final arrow
+  const fx1 = fromN ? fx + fromN.nx * OUT : fx;
+  const fy1 = fromN ? fy + fromN.ny * OUT : fy;
+  const tx1 = toN ? tx + toN.nx * OUT : tx;
+  const ty1 = toN ? ty + toN.ny * OUT : ty;
+
+  // ORTHOGONAL preview path
+  const pts = computePreviewOrthogonalPoints(
+    fx1,
+    fy1,
+    tx1,
+    ty1,
+    fromSide,
+    toSide
+  );
+
+  const d =
+    pts.length > 0
+      ? `M ${pts[0].x},${pts[0].y}` +
+        pts
+          .slice(1)
+          .map((p) => ` L ${p.x},${p.y}`)
+          .join("")
+      : `M ${fx1},${fy1} L ${tx1},${ty1}`;
+
+  // Unique marker id per instance so previews don't conflict
+  const markerId = useMemo(
+    () => `arrowhead-preview-${Math.random().toString(36).slice(2)}`,
+    []
+  );
 
   return (
     <svg
@@ -1602,24 +1806,24 @@ export const CurvedArrow: React.FC<CurvedArrowProps> = ({
     >
       <defs>
         <marker
-          id="arrowhead-preview"
+          id={markerId}
           markerWidth="10"
           markerHeight="7"
           refX="10"
           refY="3.5"
-          orient="auto"
+          orient="auto-start-reverse"
+          markerUnits="strokeWidth"
         >
           <polygon points="0 0, 10 3.5, 0 7" fill={color} />
         </marker>
       </defs>
 
-      {/* wide transparent hit area not needed for preview; keep only visible path */}
       <path
         d={d}
         stroke={color}
         strokeWidth={strokeWidth}
         fill="none"
-        markerEnd="url(#arrowhead-preview)"
+        markerEnd={`url(#${markerId})`}
       />
     </svg>
   );

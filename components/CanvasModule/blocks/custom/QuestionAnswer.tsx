@@ -432,7 +432,8 @@ export const QuestionAnswer: React.FC<QuestionAnswerProps> = (props) => {
             <div className="grid grid-cols-2 gap-4 max-h-full overflow-y-auto">
               {question_answers.map((answer, index) => {
                 const raw = JSON.parse(answer.draftRaw);
-
+                const individualAnswerEditorState =
+                  EditorState.createWithContent(convertFromRaw(raw));
                 return (
                   <div
                     key={index}
@@ -459,7 +460,7 @@ export const QuestionAnswer: React.FC<QuestionAnswerProps> = (props) => {
 
                     <div className="bg-[#FFFFFF66] rounded-lg flex-1 min-h-[150px]">
                       <RteEditor
-                        editorState={answerEditorState}
+                        editorState={individualAnswerEditorState}
                         readOnly={true}
                         toolbar={{
                           options: ["inline", "list", "link"],

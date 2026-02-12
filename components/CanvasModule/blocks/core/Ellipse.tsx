@@ -280,7 +280,7 @@ export const Ellipse: React.FC<EllipseBlockProps> = (props) => {
     >
       <div
         onDoubleClick={beginEdit}
-        className={` w-full rounded-full shadow-[0px_4px_33.3px_0px_rgba(30,39,143,0.2)] border-1 border-gray-400`}
+        className={` w-full flex items-center justify-center rounded-full shadow-[0px_4px_33.3px_0px_rgba(30,39,143,0.2)] border-1 border-gray-400`}
         style={{
           backgroundColor: shape.color || "#EAFBE3",
           height: shape.height,
@@ -289,7 +289,7 @@ export const Ellipse: React.FC<EllipseBlockProps> = (props) => {
         {/* View mode: centered display (no caret) */}
         {!isEditing && (
           <div
-            className="absolute inset-0 flex items-center justify-center p-2 text-center pointer-events-none whitespace-pre-wrap break-words"
+            className=" flex h-full items-center justify-center p-2 text-center pointer-events-none whitespace-pre-wrap wrap-anywhere"
             style={{
               color: shape.textColor || "#0f172a",
               lineHeight: 1.25,
@@ -316,7 +316,7 @@ export const Ellipse: React.FC<EllipseBlockProps> = (props) => {
             onMouseDown={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
             placeholder="Add text…"
-            className="absolute inset-0 w-full h-full bg-transparent outline-none resize-none p-2 text-sm"
+            className="w-full bg-transparent outline-none resize-none p-2 text-sm"
             style={{
               // You can start centering here:
               textAlign: "center",
