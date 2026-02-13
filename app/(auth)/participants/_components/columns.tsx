@@ -107,11 +107,11 @@ export const columns: ColumnDef<any>[] = [
     minSize: 350,
   },
   {
-    accessorKey: "rationale",
-    header: "Rationale",
+    accessorKey: "notes",
+    header: "Notes",
     cell: ({ row }) => (
       <div className="capitalize whitespace-normal">
-        {row.getValue("rationale")}
+        {row.getValue("notes")}
       </div>
     ),
     size: 350,
@@ -119,39 +119,61 @@ export const columns: ColumnDef<any>[] = [
     minSize: 350,
   },
   {
-    accessorKey: "blocking_issues",
-    header: "Blocking Issues",
+    accessorKey: "tags",
+    header: "Tags",
     cell: ({ row }) => (
-      <div className="capitalize whitespace-normal">
-        {row.getValue("blocking_issues")}
-      </div>
+      <div className="capitalize whitespace-normal">{row.getValue("tags")}</div>
     ),
     size: 350,
     maxSize: 350,
     minSize: 350,
   },
-  {
-    accessorKey: "hypothesis_to_validate",
-    header: "Hypothesis to Validate",
-    cell: ({ row }) => (
-      <div className="capitalize whitespace-normal">
-        {row.getValue("hypothesis_to_validate")}
-      </div>
-    ),
-    size: 350,
-    maxSize: 350,
-    minSize: 350,
-  },
-  {
-    accessorKey: "learnings",
-    header: "Learnings",
-    cell: ({ row }) => (
-      <div className="capitalize whitespace-normal">
-        {row.getValue("learnings")}
-      </div>
-    ),
-    size: 350,
-    maxSize: 350,
-    minSize: 350,
-  },
+  // {
+  //   accessorKey: "rationale",
+  //   header: "Rationale",
+  //   cell: ({ row }) => (
+  //     <div className="capitalize whitespace-normal">
+  //       {row.getValue("rationale")}
+  //     </div>
+  //   ),
+  //   size: 350,
+  //   maxSize: 350,
+  //   minSize: 350,
+  // },
+  // {
+  //   accessorKey: "blocking_issues",
+  //   header: "Blocking Issues",
+  //   cell: ({ row }) => (
+  //     <div className="capitalize whitespace-normal">
+  //       {row.getValue("blocking_issues")}
+  //     </div>
+  //   ),
+  //   size: 350,
+  //   maxSize: 350,
+  //   minSize: 350,
+  // },
+  // {
+  //   accessorKey: "hypothesis_to_validate",
+  //   header: "Hypothesis to Validate",
+  //   cell: ({ row }) => (
+  //     <div className="capitalize whitespace-normal">
+  //       {row.getValue("hypothesis_to_validate")}
+  //     </div>
+  //   ),
+  //   size: 350,
+  //   maxSize: 350,
+  //   minSize: 350,
+  // },
+  // {
+  //   accessorKey: "learnings",
+  //   header: "Learnings",
+  //   cell: ({ row }) => (
+  //     <div className="capitalize whitespace-normal">
+  //       {row.getValue("learnings")}
+  //     </div>
+  //   ),
+  //   size: 350,
+  //   maxSize: 350,
+  //   minSize: 350,
+  // },
 ];

@@ -46,6 +46,8 @@ model Participant {
   blocking_issues        String?
   hypothesis_to_validate String?
   learnings              String?
+  notes                  String?
+  tags                   String[]            @default([])
   status                 ParticipantStatus   @default(need_to_schedule)
   scheduled_date         DateTime?
   created_at             DateTime            @default(now())

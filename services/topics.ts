@@ -22,7 +22,11 @@ export async function getTopics() {
 
   const topics = await prisma.topic.findMany({
     orderBy: { order: "asc" },
-    include: { topic_tasks: true },
+    include: {
+      topic_tasks: {
+        orderBy: { order: "asc" },
+      },
+    },
   });
 
   return topics;

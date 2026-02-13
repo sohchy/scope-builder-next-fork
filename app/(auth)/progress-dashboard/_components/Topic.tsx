@@ -273,12 +273,14 @@ const TaskItem = ({
         onComplete={onComplete}
       >
         <div>
-          <YouTubeEmbed
-            width={400}
-            height={226}
-            params="controls=0"
-            videoid={getYouTubeVideoId(url || "")}
-          />
+          <div className="w-full flex items-center justify-center">
+            <YouTubeEmbed
+              width={700}
+              height={400}
+              params="controls=0"
+              videoid={getYouTubeVideoId(url || "")}
+            />
+          </div>
           <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
             YouTube
           </span>
@@ -304,12 +306,14 @@ const TaskItem = ({
         onComplete={onComplete}
       >
         <div>
-          <Image
-            width={400}
-            height={226}
-            src={url || ""}
-            alt={title || "Image"}
-          />
+          <div className="w-full flex items-center justify-center">
+            <img
+              width={"100%"}
+              height={"100%"}
+              src={url || ""}
+              alt={title || "Image"}
+            />
+          </div>
           <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
             Image
           </span>
@@ -336,7 +340,9 @@ const TaskItem = ({
         onComplete={onComplete}
       >
         <div>
-          <video width={400} height={226} controls src={url || ""} />
+          <div className="w-full flex items-center justify-center">
+            <video width={600} height={400} controls src={url || ""} />
+          </div>
           <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
             Video
           </span>
@@ -421,7 +427,7 @@ const ProgressItem = ({
       <DialogTrigger className="cursor-pointer" asChild>
         {triggerEl}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[448px]">
+      <DialogContent className="sm:max-w-[890px] h-[700px]">
         <DialogHeader>
           <DialogTitle>Details</DialogTitle>
         </DialogHeader>
