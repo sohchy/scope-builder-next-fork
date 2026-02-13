@@ -189,14 +189,14 @@ export default function Notes() {
           <SheetTitle>Notes</SheetTitle>
         </SheetHeader>
         <div className="flex flex-col justify-between h-full">
-          <div className="flex flex-1 w-full">
+          <div className="flex flex-1 w-full overflow-y-scroll">
             {isLoading ? (
               <EllipsisIcon
                 size={40}
                 className="text-[#6A35FF] animate-pulse self-center ml-auto mr-auto"
               />
             ) : (
-              <div className="flex flex-col gap-4 p-4 overflow-y-auto w-full">
+              <div className="flex flex-col gap-4 p-4  w-full h-[250px]">
                 {notes
                   .filter((note) => {
                     let canUserSeeNote = true;

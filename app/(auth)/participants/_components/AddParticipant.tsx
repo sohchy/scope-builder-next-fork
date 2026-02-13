@@ -164,6 +164,7 @@ export default function AddParticipant({
                     </Select> */}
                     <FormControl>
                       <MultiSelect
+                        creatable={false}
                         options={ROLE_OPTIONS}
                         value={field.value}
                         onChange={field.onChange}
