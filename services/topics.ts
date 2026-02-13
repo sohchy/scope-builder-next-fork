@@ -21,6 +21,7 @@ export async function getTopics() {
   if (!orgId) redirect("/pick-startup");
 
   const topics = await prisma.topic.findMany({
+    orderBy: { order: "asc" },
     include: { topic_tasks: true },
   });
 
@@ -35,6 +36,7 @@ export async function getTopicTasks() {
   if (!orgId) redirect("/pick-startup");
 
   const topicTasks = await prisma.topicTask.findMany({
+    orderBy: { id: "asc" },
     include: { topic: true },
   });
 
@@ -57,6 +59,26 @@ export async function createTopic(values: z.infer<typeof topicFormSchema>) {
   revalidatePath("/admin-panel");
 }
 
+export async function updateTopic(
+  topicId: number,
+  values: z.infer<typeof topicFormSchema>,
+) {
+  const { orgId, userId } = await auth();
+
+  if (!userId) redirect("/sign-in");
+
+  if (!orgId) redirect("/pick-startup");
+
+  await prisma.topic.update({
+    where: { id: topicId },
+    data: {
+      ...values,
+    },
+  });
+
+  revalidatePath("/admin-panel");
+}
+
 export async function createTopicTask(
   values: z.infer<typeof topicTaskFormSchema>,
 ) {
@@ -67,6 +89,26 @@ export async function createTopicTask(
   if (!orgId) redirect("/pick-startup");
 
   await prisma.topicTask.create({
+    data: {
+      ...values,
+    },
+  });
+
+  revalidatePath("/admin-panel");
+}
+
+export async function updateTopicTask(
+  topicTaskId: number,
+  values: z.infer<typeof topicTaskFormSchema>,
+) {
+  const { orgId, userId } = await auth();
+
+  if (!userId) redirect("/sign-in");
+
+  if (!orgId) redirect("/pick-startup");
+
+  await prisma.topicTask.update({
+    where: { id: topicTaskId },
     data: {
       ...values,
     },
