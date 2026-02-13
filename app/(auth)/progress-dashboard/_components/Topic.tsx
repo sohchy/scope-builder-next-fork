@@ -262,6 +262,7 @@ const TaskItem = ({
   if (type === "youtube")
     return (
       <ProgressItem
+        title={title}
         isCompleted={completed}
         triggerEl={
           <div
@@ -284,10 +285,23 @@ const TaskItem = ({
           <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
             YouTube
           </span>
-          <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3>
-          <p className="text-[#697288] text-xs font-medium mb-1">
+          {/* <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3> */}
+          {/* <p className="text-[#697288] text-[16px] font-medium mb-1">
             {description}
-          </p>
+          </p> */}
+          <div
+            data-todo-content
+            className={`text-[14px] font-medium text-[#2E3545] break-words overflow-wrap-anywhere `}
+            dangerouslySetInnerHTML={{
+              __html: description || "",
+            }}
+            style={
+              {
+                //maxHeight: !isExpanded && needsShowMore ? "4.5rem" : "none",
+                //overflow: !isExpanded && needsShowMore ? "hidden" : "visible",
+              }
+            }
+          />
         </div>
       </ProgressItem>
     );
@@ -295,6 +309,7 @@ const TaskItem = ({
   if (type === "image") {
     return (
       <ProgressItem
+        title={title}
         isCompleted={completed}
         triggerEl={
           <div
@@ -317,10 +332,23 @@ const TaskItem = ({
           <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
             Image
           </span>
-          <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3>
-          <p className="text-[#697288] text-xs font-medium mb-1">
+          {/* <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3> */}
+          {/* <p className="text-[#697288] text-[16px] font-medium mb-1">
             {description}
-          </p>
+          </p> */}
+          <div
+            data-todo-content
+            className={`text-[14px] font-medium text-[#2E3545] break-words overflow-wrap-anywhere `}
+            dangerouslySetInnerHTML={{
+              __html: description || "",
+            }}
+            style={
+              {
+                //maxHeight: !isExpanded && needsShowMore ? "4.5rem" : "none",
+                //overflow: !isExpanded && needsShowMore ? "hidden" : "visible",
+              }
+            }
+          />
         </div>
       </ProgressItem>
     );
@@ -329,6 +357,7 @@ const TaskItem = ({
   if (type === "video") {
     return (
       <ProgressItem
+        title={title}
         isCompleted={completed}
         triggerEl={
           <div
@@ -346,10 +375,23 @@ const TaskItem = ({
           <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
             Video
           </span>
-          <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3>
-          <p className="text-[#697288] text-xs font-medium mb-1">
+          {/* <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3> */}
+          {/* <p className="text-[#697288] text-[16px] font-medium mb-1">
             {description}
-          </p>
+          </p> */}
+          <div
+            data-todo-content
+            className={`text-[14px] font-medium text-[#2E3545] break-words overflow-wrap-anywhere `}
+            dangerouslySetInnerHTML={{
+              __html: description || "",
+            }}
+            style={
+              {
+                //maxHeight: !isExpanded && needsShowMore ? "4.5rem" : "none",
+                //overflow: !isExpanded && needsShowMore ? "hidden" : "visible",
+              }
+            }
+          />
         </div>
       </ProgressItem>
     );
@@ -410,11 +452,13 @@ const TaskItem = ({
 };
 
 const ProgressItem = ({
+  title,
   children,
   triggerEl,
   onComplete,
   isCompleted,
 }: {
+  title?: string;
   isCompleted: boolean;
   children: React.ReactNode;
   triggerEl: React.ReactNode;
@@ -429,7 +473,7 @@ const ProgressItem = ({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[890px] h-[700px]">
         <DialogHeader>
-          <DialogTitle>Details</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         {children}
         {!isCompleted && (

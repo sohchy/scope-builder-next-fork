@@ -11,4 +11,5 @@ export const participantFormSchema = z.object({
   market_segment: z.string().optional(),
   status: z.string(),
   scheduled_date: z.date().optional(),
+  notes: z.string().optional(),
 });

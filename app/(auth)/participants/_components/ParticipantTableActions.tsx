@@ -125,6 +125,7 @@ export default function ParticipantTableActions({
       learnings: participant.learnings || "",
       status: participant.status || "need_to_schedule",
       scheduled_date: participant.scheduled_date || undefined,
+      notes: participant.notes || "",
     },
   });
 
@@ -307,7 +308,8 @@ export default function ParticipantTableActions({
                                   <SelectLabel>{segment.title}</SelectLabel>
                                   {segment.data
                                     .filter(
-                                      (s: any) => s.cardTitle?.trim().length > 0
+                                      (s: any) =>
+                                        s.cardTitle?.trim().length > 0,
                                     )
                                     .map((s: any) => (
                                       <SelectItem
@@ -343,7 +345,7 @@ export default function ParticipantTableActions({
                   )}
                 />
 
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="rationale"
                   render={({ field }) => (
@@ -356,9 +358,9 @@ export default function ParticipantTableActions({
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
 
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="blocking_issues"
                   render={({ field }) => (
@@ -371,9 +373,9 @@ export default function ParticipantTableActions({
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
 
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="hypothesis_to_validate"
                   render={({ field }) => (
@@ -386,14 +388,28 @@ export default function ParticipantTableActions({
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
 
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="learnings"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Learnings</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                /> */}
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Notes</FormLabel>
                       <FormControl>
                         <Textarea {...field} />
                       </FormControl>
@@ -416,7 +432,7 @@ export default function ParticipantTableActions({
                               variant={"outline"}
                               className={cn(
                                 "pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
+                                !field.value && "text-muted-foreground",
                               )}
                             >
                               {field.value ? (
