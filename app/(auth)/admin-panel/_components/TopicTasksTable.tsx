@@ -80,6 +80,9 @@ export default function TopicTasksTable({
       type: "",
       subtype: "",
       order: 0,
+      url: "",
+      title: "",
+      description: "",
     },
   });
 
@@ -88,6 +91,8 @@ export default function TopicTasksTable({
     setOpen(false);
     form.reset();
   }
+
+  const subtype = form.watch("subtype");
 
   return (
     <div>
@@ -180,7 +185,12 @@ export default function TopicTasksTable({
                         <FormLabel>Subtype</FormLabel>
                         <Select
                           value={field.value}
-                          onValueChange={field.onChange}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            form.setValue("url", "");
+                            form.setValue("title", "");
+                            form.setValue("description", "");
+                          }}
                         >
                           <FormControl>
                             <SelectTrigger className="w-full">
@@ -188,6 +198,8 @@ export default function TopicTasksTable({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
+                            <SelectItem value="image">Image</SelectItem>
+                            <SelectItem value="video">Video</SelectItem>
                             <SelectItem value="youtube">Youtube</SelectItem>
                             <SelectItem value="article">Article</SelectItem>
                             <SelectItem value="book">Book</SelectItem>
@@ -200,6 +212,52 @@ export default function TopicTasksTable({
                       </FormItem>
                     )}
                   />
+
+                  {["image", "video", "youtube"].includes(subtype) && (
+                    <>
+                      <FormField
+                        name="url"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>URL</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        name="title"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Title</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        name="description"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  )}
 
                   <FormField
                     name="order"

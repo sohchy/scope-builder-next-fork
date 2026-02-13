@@ -13,4 +13,7 @@ export const topicTaskFormSchema = z.object({
   type: z.string().min(1, "Type is required."),
   subtype: z.string().min(1, "Subtype is required."),
   order: z.number().min(0, "Order must be a positive number."),
+  url: z.string().url("Must be a valid URL.").optional(),
+  title: z.string().optional(),
+  description: z.string().optional(),
 });

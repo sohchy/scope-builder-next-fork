@@ -195,9 +195,6 @@ export function AppSidebar({
 
   const showAllPages = process.env.NEXT_PUBLIC_SHOW_ALL_PAGES === "true";
 
-  console.log("showAllPages", showAllPages);
-  console.log("isAdminOrMentor", isAdminOrMentor);
-
   return (
     <Sidebar className="bg-white" {...props}>
       <SidebarHeader className="bg-white p-3 flex gap-4">

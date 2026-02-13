@@ -8,12 +8,12 @@ import InfiniteCanvas from "@/components/InfiniteCanvas";
 import { Badge } from "@/components/ui/badge";
 
 const VIEW_OPTIONS = [
-  "Gains",
-  "Pains",
-  "Customer Jobs",
+  "Products & Services",
   "Gain Creators",
   "Pain Relievers",
-  "Products & Services",
+  "Gains",
+  "Customer Jobs",
+  "Pains",
 ];
 
 export default function MultiCanvas({
@@ -65,60 +65,13 @@ export default function MultiCanvas({
         </div>
       </div>
       <div className={`flex-1 bg-white grid gap-2 p-2 ${getGridClassname()}`}>
-        {shownCanvases.includes("Gains") && (
+        {shownCanvases.includes("Products & Services") && (
           <div className="border-2 relative">
-            <Badge className="absolute z-50 top-1 left-1">Gains</Badge>
+            <Badge className="absolute z-50 top-1 left-1">
+              Products & Services
+            </Badge>
             <Room
-              roomId={`value-proposition-gains-${orgId}${example ? "-example" : ""}`}
-            >
-              <InfiniteCanvas
-                toolbarOptions={{
-                  text: false,
-                  card: true,
-                  table: false,
-                  answer: false,
-                  ellipse: false,
-                  feature: false,
-                  question: false,
-                  rectangle: false,
-                  interview: false,
-                }}
-                valuePropCanvasMode
-                editable={!example}
-              />
-            </Room>
-          </div>
-        )}
-
-        {shownCanvases.includes("Pains") && (
-          <div className="border-2 relative">
-            <Badge className="absolute z-50 top-1 left-1">Pains</Badge>
-            <Room
-              roomId={`value-proposition-pains-${orgId}${example ? "-example" : ""}`}
-            >
-              <InfiniteCanvas
-                toolbarOptions={{
-                  text: false,
-                  card: true,
-                  table: false,
-                  answer: false,
-                  ellipse: false,
-                  feature: false,
-                  question: false,
-                  rectangle: false,
-                  interview: false,
-                }}
-                valuePropCanvasMode
-              />
-            </Room>
-          </div>
-        )}
-
-        {shownCanvases.includes("Customer Jobs") && (
-          <div className="border-2 relative">
-            <Badge className="absolute z-50 top-1 left-1">Customer Jobs</Badge>
-            <Room
-              roomId={`value-proposition-customer-jobs-${orgId}${example ? "-example" : ""}`}
+              roomId={`value-proposition-products-services-${orgId}${example ? "-example" : ""}`}
             >
               <InfiniteCanvas
                 toolbarOptions={{
@@ -186,13 +139,60 @@ export default function MultiCanvas({
           </div>
         )}
 
-        {shownCanvases.includes("Products & Services") && (
+        {shownCanvases.includes("Gains") && (
           <div className="border-2 relative">
-            <Badge className="absolute z-50 top-1 left-1">
-              Products & Services
-            </Badge>
+            <Badge className="absolute z-50 top-1 left-1">Gains</Badge>
             <Room
-              roomId={`value-proposition-products-services-${orgId}${example ? "-example" : ""}`}
+              roomId={`value-proposition-gains-${orgId}${example ? "-example" : ""}`}
+            >
+              <InfiniteCanvas
+                toolbarOptions={{
+                  text: false,
+                  card: true,
+                  table: false,
+                  answer: false,
+                  ellipse: false,
+                  feature: false,
+                  question: false,
+                  rectangle: false,
+                  interview: false,
+                }}
+                valuePropCanvasMode
+                editable={!example}
+              />
+            </Room>
+          </div>
+        )}
+
+        {shownCanvases.includes("Customer Jobs") && (
+          <div className="border-2 relative">
+            <Badge className="absolute z-50 top-1 left-1">Customer Jobs</Badge>
+            <Room
+              roomId={`value-proposition-customer-jobs-${orgId}${example ? "-example" : ""}`}
+            >
+              <InfiniteCanvas
+                toolbarOptions={{
+                  text: false,
+                  card: true,
+                  table: false,
+                  answer: false,
+                  ellipse: false,
+                  feature: false,
+                  question: false,
+                  rectangle: false,
+                  interview: false,
+                }}
+                valuePropCanvasMode
+              />
+            </Room>
+          </div>
+        )}
+
+        {shownCanvases.includes("Pains") && (
+          <div className="border-2 relative">
+            <Badge className="absolute z-50 top-1 left-1">Pains</Badge>
+            <Room
+              roomId={`value-proposition-pains-${orgId}${example ? "-example" : ""}`}
             >
               <InfiniteCanvas
                 toolbarOptions={{

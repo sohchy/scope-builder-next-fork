@@ -44,6 +44,7 @@ import {
   createHypothesisQuestion,
   updateHypothesisConclusion,
   updateHypothesisTitle,
+  updateHypothesisStatus,
   updateHypothesisType,
 } from "@/services/hypothesis";
 import {
@@ -117,14 +118,16 @@ export default function HypothesesCard({
 }: HypothesesCardProps) {
   const [open, setOpen] = useState(false);
   const [openType, setOpenType] = useState(false);
+  const [openStatus, setOpenStatus] = useState(false);
   const [showEditTitle, setShowEditTitle] = useState(false);
   const [showResponses, setShowResponses] = useState(false);
   const [openConclusion, setOpenConclusion] = useState(false);
-  const [editableTitle, setEditableTitle] = useState(hypothesis.title);
-  const [type, setType] = useState(hypothesis.conclusion_status || "");
   const [conclusionContent, setConclusionContent] = useState(
     hypothesis.conclusion_content || "",
   );
+  const [type, setType] = useState(hypothesis.type || "");
+  const [editableTitle, setEditableTitle] = useState(hypothesis.title);
+  const [status, setStatus] = useState(hypothesis.conclusion_status || "");
 
   const form = useForm<z.infer<typeof hypothesisFormSchema>>({
     resolver: zodResolver(hypothesisFormSchema),
@@ -186,6 +189,11 @@ export default function HypothesesCard({
     setOpenType(false);
   }
 
+  async function onUpdateStatus() {
+    await updateHypothesisStatus(hypothesis.id, status);
+    setOpenStatus(false);
+  }
+
   async function onUpdateConclusion() {
     await updateHypothesisConclusion(hypothesis.id, conclusionContent);
     setOpenConclusion(false);
@@ -245,6 +253,11 @@ export default function HypothesesCard({
                   Update Hypothesis Type
                   {/* </SheetTrigger> */}
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setOpenStatus(true)}>
+                  {/* <SheetTrigger className="w-full text-left"> */}
+                  Update Hypothesis Status
+                  {/* </SheetTrigger> */}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setOpenConclusion(true)}>
                   {/* <SheetTrigger className="w-full text-left"> */}
                   Update Conclusion
@@ -300,7 +313,7 @@ export default function HypothesesCard({
             open={openType}
             onOpenChange={(open) => {
               setOpenType(open);
-              setType(hypothesis.conclusion_status || "");
+              setStatus(hypothesis.type || "");
             }}
           >
             <SheetContent>
@@ -319,9 +332,9 @@ export default function HypothesesCard({
                         <SelectValue placeholder="Select a type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Testing">Testing</SelectItem>
-                        <SelectItem value="Validated">Validated</SelectItem>
-                        <SelectItem value="Invalidated">Invalidated</SelectItem>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -341,10 +354,54 @@ export default function HypothesesCard({
           </Sheet>
 
           <Sheet
+            open={openStatus}
+            onOpenChange={(open) => {
+              setOpenStatus(open);
+              setStatus(hypothesis.conclusion_status || "");
+            }}
+          >
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle className="text-[26px] font-medium text-[#162A4F]">
+                  Update status
+                </SheetTitle>
+              </SheetHeader>
+              <div className="h-full flex flex-col gap-8 overflow-auto">
+                <div className="space-y-8 p-4">
+                  <div className="flex flex-col gap-2">
+                    <Label>Status</Label>
+
+                    <Select value={status} onValueChange={setStatus}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Testing">Testing</SelectItem>
+                        <SelectItem value="Validated">Validated</SelectItem>
+                        <SelectItem value="Invalidated">Invalidated</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex ">
+                    <Button
+                      type="button"
+                      onClick={onUpdateStatus}
+                      className="bg-[#162A4F] cursor-pointer ml-auto"
+                    >
+                      Update
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <Sheet
             open={openConclusion}
             onOpenChange={(open) => {
               setOpenConclusion(open);
-              setType(hypothesis.conclusion_content || "");
+              setStatus(hypothesis.conclusion_content || "");
             }}
           >
             <SheetContent>
@@ -467,7 +524,7 @@ export default function HypothesesCard({
       <div className="flex flex-col gap-4">
         <div className="flex flex-row items-center justify-between">
           <div className="bg-[#F3F0FD] text-xs rounded-full text-[#6E6588] font-semibold px-2 py-0.5">
-            [Type]
+            {hypothesis.type || "No type"}
           </div>
           <div className="flex flex-row items-center gap-2.5">
             {hypothesis.priority > 0 && (

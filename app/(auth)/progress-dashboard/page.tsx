@@ -46,6 +46,9 @@ export default async function ProgressDashboardPage() {
           return {
             id: t.id,
             subtype: t.subtype,
+            url: t.url || undefined,
+            title: t.title || undefined,
+            description: t.description || undefined,
             completed: !!taskProgress?.completed,
           };
         }),
@@ -56,6 +59,9 @@ export default async function ProgressDashboardPage() {
           return {
             id: t.id,
             subtype: t.subtype,
+            url: t.url || undefined,
+            title: t.title || undefined,
+            description: t.description || undefined,
             completed: !!taskProgress?.completed,
           };
         }),
@@ -66,6 +72,9 @@ export default async function ProgressDashboardPage() {
           return {
             id: t.id,
             subtype: t.subtype,
+            url: t.url || undefined,
+            title: t.title || undefined,
+            description: t.description || undefined,
             completed: !!taskProgress?.completed,
           };
         }),

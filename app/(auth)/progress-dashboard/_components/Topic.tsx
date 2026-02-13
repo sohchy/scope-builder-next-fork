@@ -9,6 +9,8 @@ import {
   ChevronRightIcon,
   MessageSquareMoreIcon,
   CircleCheckIcon,
+  ImageIcon,
+  PlayIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { YouTubeEmbed } from "@next/third-parties/google";
@@ -30,6 +32,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { markTaskAsCompleted, markTopicAsCompleted } from "@/services/topics";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 type Topic = {
   id: number;
@@ -38,9 +41,30 @@ type Topic = {
   isDone: boolean;
   deadline: string;
   description: string | null;
-  concept_tasks: { id: number; subtype: string; completed: boolean }[];
-  startup_tasks: { id: number; subtype: string; completed: boolean }[];
-  excercises_tasks: { id: number; subtype: string; completed: boolean }[];
+  concept_tasks: {
+    id: number;
+    subtype: string;
+    completed: boolean;
+    url?: string;
+    title?: string;
+    description?: string;
+  }[];
+  startup_tasks: {
+    id: number;
+    subtype: string;
+    completed: boolean;
+    url?: string;
+    title?: string;
+    description?: string;
+  }[];
+  excercises_tasks: {
+    id: number;
+    subtype: string;
+    completed: boolean;
+    url?: string;
+    title?: string;
+    description?: string;
+  }[];
 };
 
 interface TopicProps {
@@ -151,8 +175,11 @@ export default function Topic({ topic }: TopicProps) {
             {topicState.concept_tasks.map((task) => (
               <TaskItem
                 key={task.id}
+                url={task.url}
+                title={task.title}
                 type={task.subtype}
                 completed={task.completed}
+                description={task.description}
                 onComplete={() => completeTask(task.id)}
               />
             ))}
@@ -161,8 +188,11 @@ export default function Topic({ topic }: TopicProps) {
             {topicState.excercises_tasks.map((task) => (
               <TaskItem
                 key={task.id}
+                url={task.url}
+                title={task.title}
                 type={task.subtype}
                 completed={task.completed}
+                description={task.description}
                 onComplete={() => completeTask(task.id)}
               />
             ))}
@@ -171,8 +201,11 @@ export default function Topic({ topic }: TopicProps) {
             {topicState.startup_tasks.map((task) => (
               <TaskItem
                 key={task.id}
+                url={task.url}
+                title={task.title}
                 type={task.subtype}
                 completed={task.completed}
+                description={task.description}
                 onComplete={() => completeTask(task.id)}
               />
             ))}
@@ -186,14 +219,46 @@ export default function Topic({ topic }: TopicProps) {
 }
 
 const TaskItem = ({
+  url,
   type,
+  title,
   completed,
   onComplete,
+  description,
 }: {
   type: string;
+  url?: string;
   completed: boolean;
+  title?: string;
+  description?: string;
   onComplete: () => Promise<void>;
 }) => {
+  function getYouTubeVideoId(input: string): string {
+    try {
+      const url = new URL(input);
+
+      // https://www.youtube.com/watch?v=VIDEOID
+      if (url.hostname.includes("youtube.com")) {
+        const v = url.searchParams.get("v");
+        if (v && /^[A-Za-z0-9_-]{11}$/.test(v)) return v;
+
+        // https://www.youtube.com/embed/VIDEOID  | /shorts/VIDEOID | /v/VIDEOID
+        const m = url.pathname.match(/\/(embed|shorts|v)\/([A-Za-z0-9_-]{11})/);
+        if (m) return m[2];
+      }
+
+      // https://youtu.be/VIDEOID
+      if (url.hostname === "youtu.be") {
+        const id = url.pathname.replace(/^\/+/, "");
+        if (/^[A-Za-z0-9_-]{11}$/.test(id)) return id;
+      }
+
+      return "";
+    } catch {
+      return ""; // invalid URL
+    }
+  }
+
   if (type === "youtube")
     return (
       <ProgressItem
@@ -212,21 +277,77 @@ const TaskItem = ({
             width={400}
             height={226}
             params="controls=0"
-            videoid="TZ43SRdTMs0"
+            videoid={getYouTubeVideoId(url || "")}
           />
           <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
             YouTube
           </span>
-          <h3 className="text-[#111827] text-sm font-semibold mb-3">
-            AI allocation in corporate management 2026{" "}
-          </h3>
+          <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3>
           <p className="text-[#697288] text-xs font-medium mb-1">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua.{" "}
+            {description}
           </p>
         </div>
       </ProgressItem>
     );
+
+  if (type === "image") {
+    return (
+      <ProgressItem
+        isCompleted={completed}
+        triggerEl={
+          <div
+            className={`size-10 border ${completed ? "bg-[#28BF58] text-[#FFFFFF]" : "bg-[#EDF6F0] text-[#8F84AE] border-gray-400"} flex items-center justify-center rounded-[8px] `}
+          >
+            <ImageIcon size={20} />
+          </div>
+        }
+        onComplete={onComplete}
+      >
+        <div>
+          <Image
+            width={400}
+            height={226}
+            src={url || ""}
+            alt={title || "Image"}
+          />
+          <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
+            Image
+          </span>
+          <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3>
+          <p className="text-[#697288] text-xs font-medium mb-1">
+            {description}
+          </p>
+        </div>
+      </ProgressItem>
+    );
+  }
+
+  if (type === "video") {
+    return (
+      <ProgressItem
+        isCompleted={completed}
+        triggerEl={
+          <div
+            className={`size-10 border ${completed ? "bg-[#28BF58] text-[#FFFFFF]" : "bg-[#EDF6F0] text-[#8F84AE] border-gray-400"} flex items-center justify-center rounded-[8px] `}
+          >
+            <PlayIcon size={20} />
+          </div>
+        }
+        onComplete={onComplete}
+      >
+        <div>
+          <video width={400} height={226} controls src={url || ""} />
+          <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
+            Video
+          </span>
+          <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3>
+          <p className="text-[#697288] text-xs font-medium mb-1">
+            {description}
+          </p>
+        </div>
+      </ProgressItem>
+    );
+  }
 
   if (type === "lecture")
     return (

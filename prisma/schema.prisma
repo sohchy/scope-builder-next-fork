@@ -232,11 +232,14 @@ model Topic {
 }
 
 model TopicTask {
-  id       Int    @id @default(autoincrement())
-  topic_id Int
-  type     String
-  subtype  String
-  order    Int
+  id          Int     @id @default(autoincrement())
+  topic_id    Int
+  type        String
+  subtype     String
+  order       Int
+  url         String?
+  title       String?
+  description String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
