@@ -49,15 +49,16 @@ interface AddParticipantProps {
 }
 
 const ROLE_OPTIONS = [
-  { value: "Customer", label: "Customer" },
+  //{ value: "Customer", label: "Customer" },
   { value: "End-User", label: "End-User" },
-  { value: "Both Customer & End-User", label: "Both Customer & End-User" },
+  //{ value: "Both Customer & End-User", label: "Both Customer & End-User" },
+  { value: "Buyer-Decision-Maker", label: "Buyer/Decision Maker" },
   { value: "Payer", label: "Payer" },
   { value: "Influencer", label: "Influencer" },
   { value: "Recommender", label: "Recommender" },
   { value: "Saboteur", label: "Saboteur" },
-  { value: "Additional Decision Maker", label: "Additional Decision Maker" },
-  { value: "Additional Stakeholder", label: "Additional Stakeholder" },
+  //{ value: "Additional Decision Maker", label: "Additional Decision Maker" },
+  //{ value: "Additional Stakeholder", label: "Additional Stakeholder" },
 ];
 
 export default function AddParticipant(
@@ -191,15 +192,15 @@ export default function AddParticipant(
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="complete">Complete</SelectItem>
+                        {/* <SelectItem value="complete">Complete</SelectItem> */}
+                        <SelectItem value="need_to_schedule">
+                          Need to Schedule
+                        </SelectItem>
                         <SelectItem value="scheduled">Scheduled</SelectItem>
-                        <SelectItem value="incomplete">Incomplete</SelectItem>
+                        {/* <SelectItem value="incomplete">Incomplete</SelectItem> */}
                         <SelectItem value="interviewed">Interviewed</SelectItem>
                         <SelectItem value="not_available">
                           Not Available
-                        </SelectItem>
-                        <SelectItem value="need_to_schedule">
-                          Need to Schedule
                         </SelectItem>
                       </SelectContent>
                     </Select>

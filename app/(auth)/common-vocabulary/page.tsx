@@ -59,29 +59,36 @@ const vocabularyData = {
       id: 10,
       term: "Customer Role",
       definition:
-        "Defining customer roles encourages teams to look beyond their end user when interviewing. Roles are designed to help innovators expand understanding of their ecosystem map. Innovators should be able to identify at least one end user, buyer, payer, recommender, influencer, saboteur, etc. for their eco-system. The teaching points are: 1) every ecosystem has people playing these roles, who are they in your eco-system? and 2) adoption/buying decisions are made by collections of people with different motivations and degrees of influence.",
-    },{
+        "Defining customer roles encourages teams to look beyond their end user when interviewing. Roles are designed to help innovators expand understanding of their ecosystem map. Innovators should be able to identify at least one end user, buyer, payer, recommender, influencer, saboteur, etc. for their eco-system.<br/> Things to note: 1) every ecosystem has people playing these roles, who are they in your eco-system? and 2) adoption/buying decisions are made by collections of people with different motivations and degrees of influence.",
+    },
+    {
       id: 11,
+      term: "Different Stakeholder Roles",
+      definition:
+        "<ul><li><b>End User - </b>The person who will actually use the product or service. </li><li><b>Buyer/Decision Maker - </b>The person with the clout to decide which solution gets adopted</li><li><b>Payer - </b>The person who has the budget for the solution</li><li><b>Influencer  - </b>The person who weighs in on the solution selection, adoption, and/or purchase</li><li><b>Recommender - </b>A person tasked with making solution recommendations</li><li><b>Saboteur - </b>A person who loses out if the solution is adopted</li></ul>",
+    },  
+    {
+      id: 12,
       term: "Pain Reliever",
       definition:
         "Pains represent issues a customer is aware of and actively seeking solutions for. An innovator should be able to link from one side of the VP canvas to the other. 1) Articulate their customer&#39;s Job to Be Done, 2) Quantify the Pain they experience while doing that job(s). 3) Quantify how much of that pain is relieved by their innovative Pain Reliever. 4) What feature/tech provides the Pain Reliever. Customers are most motivated to solve their pain points. Any gains provided by the innovation are further incentive.",
     },{
-      id: 12,
+      id: 13,
       term: "Gain Creator",
       definition:
         "A gain creator addresses an issue or opportunity that isn&#39;t &quot;top of mind&quot; for the customer, yet can add significant value.",
     },{
-      id: 13,
+      id: 14,
       term: "Product-Market Fit",
       definition:
         "A specific, quantified, and compelling Who (Customer Segment) and Why (Value Proposition).",
     },{
-      id: 14,
+      id: 15,
       term: "Pivot",
       definition:
         "Any change to the elements of the business model based on data coming from the customer/stakeholder interviews.",
     },{
-      id: 15,
+      id: 16,
       term: "Ecosystem Map",
       definition:
         "A visual depiction of the various stakeholders involved in the use, adoption, implementation, or purchase of a new product or service and how they relate to each other. The flow between stakeholders could be information, money, materials or other relationships. The purpose of the map is to expand our knowledge of the stakeholders, who is influencing them, and understand their motivations, as well as to identify gaps in our knowledge.",
