@@ -7,13 +7,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import InfiniteCanvas from "@/components/InfiniteCanvas";
 import { Badge } from "@/components/ui/badge";
 
-const VIEW_OPTIONS = [
+const VIEW_OPTIONS_1 = ["Jobs to be Done", "Pains", "Gains"];
+
+const VIEW_OPTIONS_2 = [
   "Products & Services",
-  "Gain Creators",
   "Pain Relievers",
-  "Gains",
-  "Customer Jobs",
-  "Pains",
+  "Gain Creators",
 ];
 
 export default function MultiCanvas({
@@ -23,7 +22,11 @@ export default function MultiCanvas({
   orgId?: string | null;
   example?: boolean;
 }) {
-  const [shownCanvases, setShownCanvases] = useState<string[]>(VIEW_OPTIONS);
+  const [shownCanvases, setShownCanvases] = useState<string[]>([
+    "Jobs to be Done",
+    "Pains",
+    "Gains",
+  ]);
 
   const shownCount = shownCanvases.length;
 
@@ -41,37 +44,61 @@ export default function MultiCanvas({
     <div className="flex flex-col h-full">
       <div className="p-2 bg-white flex flex-row gap-4 items-center">
         <h3 className="pl-2 font-semibold">View Panel</h3>
-        <div className="flex flex-row gap-2">
-          {VIEW_OPTIONS.map((option) => (
-            <div
-              key={option}
-              className="flex flex-row gap-4 items-center border-r border-r-gray-300 pr-4 pl-4"
-            >
-              <Checkbox
-                checked={shownCanvases.includes(option)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setShownCanvases([...shownCanvases, option]);
-                  } else {
-                    setShownCanvases(
-                      shownCanvases.filter((item) => item !== option),
-                    );
-                  }
-                }}
-              />
-              <Label>{option}</Label>
-            </div>
-          ))}
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-row gap-2">
+            {VIEW_OPTIONS_1.map((option) => (
+              <div
+                key={option}
+                className="flex flex-row gap-4 w-[200px] items-center border-r border-r-gray-300 pr-4 pl-4"
+              >
+                <Checkbox
+                  checked={shownCanvases.includes(option)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setShownCanvases([...shownCanvases, option]);
+                    } else {
+                      setShownCanvases(
+                        shownCanvases.filter((item) => item !== option),
+                      );
+                    }
+                  }}
+                />
+                <Label>{option}</Label>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-row gap-2">
+            {VIEW_OPTIONS_2.map((option) => (
+              <div
+                key={option}
+                className="flex flex-row gap-4 w-[200px] items-center border-r border-r-gray-300 pr-4 pl-4"
+              >
+                <Checkbox
+                  checked={shownCanvases.includes(option)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setShownCanvases([...shownCanvases, option]);
+                    } else {
+                      setShownCanvases(
+                        shownCanvases.filter((item) => item !== option),
+                      );
+                    }
+                  }}
+                />
+                <Label>{option}</Label>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       <div className={`flex-1 bg-white grid gap-2 p-2 ${getGridClassname()}`}>
-        {shownCanvases.includes("Products & Services") && (
+        {shownCanvases.includes("Jobs to be Done") && (
           <div className="border-2 relative">
             <Badge className="absolute z-50 top-1 left-1">
-              Products & Services
+              Jobs to be Done
             </Badge>
             <Room
-              roomId={`value-proposition-products-services-${orgId}${example ? "-example" : ""}`}
+              roomId={`value-proposition-jobs-to-be-done-${orgId}${example ? "-example" : ""}`}
             >
               <InfiniteCanvas
                 toolbarOptions={{
@@ -91,35 +118,11 @@ export default function MultiCanvas({
           </div>
         )}
 
-        {shownCanvases.includes("Gain Creators") && (
+        {shownCanvases.includes("Pains") && (
           <div className="border-2 relative">
-            <Badge className="absolute z-50 top-1 left-1">Gain Creators</Badge>
+            <Badge className="absolute z-50 top-1 left-1">Pains</Badge>
             <Room
-              roomId={`value-proposition-gain-creators-${orgId}${example ? "-example" : ""}`}
-            >
-              <InfiniteCanvas
-                toolbarOptions={{
-                  text: false,
-                  card: true,
-                  table: false,
-                  answer: false,
-                  ellipse: false,
-                  feature: false,
-                  question: false,
-                  rectangle: false,
-                  interview: false,
-                }}
-                valuePropCanvasMode
-              />
-            </Room>
-          </div>
-        )}
-
-        {shownCanvases.includes("Pain Relievers") && (
-          <div className="border-2 relative">
-            <Badge className="absolute z-50 top-1 left-1">Pain Relievers</Badge>
-            <Room
-              roomId={`value-proposition-pain-relievers-${orgId}${example ? "-example" : ""}`}
+              roomId={`value-proposition-pains-${orgId}${example ? "-example" : ""}`}
             >
               <InfiniteCanvas
                 toolbarOptions={{
@@ -164,11 +167,13 @@ export default function MultiCanvas({
           </div>
         )}
 
-        {shownCanvases.includes("Customer Jobs") && (
+        {shownCanvases.includes("Products & Services") && (
           <div className="border-2 relative">
-            <Badge className="absolute z-50 top-1 left-1">Customer Jobs</Badge>
+            <Badge className="absolute z-50 top-1 left-1">
+              Products & Services
+            </Badge>
             <Room
-              roomId={`value-proposition-customer-jobs-${orgId}${example ? "-example" : ""}`}
+              roomId={`value-proposition-products-services-${orgId}${example ? "-example" : ""}`}
             >
               <InfiniteCanvas
                 toolbarOptions={{
@@ -188,11 +193,35 @@ export default function MultiCanvas({
           </div>
         )}
 
-        {shownCanvases.includes("Pains") && (
+        {shownCanvases.includes("Pain Relievers") && (
           <div className="border-2 relative">
-            <Badge className="absolute z-50 top-1 left-1">Pains</Badge>
+            <Badge className="absolute z-50 top-1 left-1">Pain Relievers</Badge>
             <Room
-              roomId={`value-proposition-pains-${orgId}${example ? "-example" : ""}`}
+              roomId={`value-proposition-pain-relievers-${orgId}${example ? "-example" : ""}`}
+            >
+              <InfiniteCanvas
+                toolbarOptions={{
+                  text: false,
+                  card: true,
+                  table: false,
+                  answer: false,
+                  ellipse: false,
+                  feature: false,
+                  question: false,
+                  rectangle: false,
+                  interview: false,
+                }}
+                valuePropCanvasMode
+              />
+            </Room>
+          </div>
+        )}
+
+        {shownCanvases.includes("Gain Creators") && (
+          <div className="border-2 relative">
+            <Badge className="absolute z-50 top-1 left-1">Gain Creators</Badge>
+            <Room
+              roomId={`value-proposition-gain-creators-${orgId}${example ? "-example" : ""}`}
             >
               <InfiniteCanvas
                 toolbarOptions={{

@@ -27,13 +27,18 @@ export default async function ValuePropositionCanvasPage() {
         <QuestionsProvider segments={segmentsPropData} questions={questions}>
           <div className="h-full p-2">
             <Tabs defaultValue="canvas" className="h-full">
-              <TabsList>
-                <TabsTrigger value="canvas">Canvas</TabsTrigger>
-                <TabsTrigger value="examples">Examples</TabsTrigger>
-                <div className="ml-2">
+              <div className="flex flex-row">
+                <TabsList className="">
+                  <TabsTrigger value="canvas">Canvas</TabsTrigger>
+                  <TabsTrigger value="examples">Examples</TabsTrigger>
+                </TabsList>
+
+                <div className="ml-auto">
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant={"outline"}>Show Design</Button>
+                      <Button variant={"outline"}>
+                        Show Value Prop Canvas Reference
+                      </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent
                       style={{
@@ -56,7 +61,7 @@ export default async function ValuePropositionCanvasPage() {
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>
-              </TabsList>
+              </div>
               <TabsContent value="canvas" className="h-full">
                 <MultiCanvas orgId={orgId} />
               </TabsContent>
