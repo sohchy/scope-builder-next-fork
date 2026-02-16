@@ -46,6 +46,7 @@ import {
   updateHypothesisTitle,
   updateHypothesisStatus,
   updateHypothesisType,
+  deleteHypothesis,
 } from "@/services/hypothesis";
 import {
   Select,
@@ -56,6 +57,16 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 /*
   Hypotheses Table
@@ -119,6 +130,7 @@ export default function HypothesesCard({
   const [open, setOpen] = useState(false);
   const [openType, setOpenType] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
   const [showEditTitle, setShowEditTitle] = useState(false);
   const [showResponses, setShowResponses] = useState(false);
   const [openConclusion, setOpenConclusion] = useState(false);
@@ -199,6 +211,11 @@ export default function HypothesesCard({
     setOpenConclusion(false);
   }
 
+  async function onDeleteHypothesis() {
+    await deleteHypothesis(hypothesis.id);
+    setOpenDelete(false);
+  }
+
   return (
     <div className="bg-white rounded-2xl px-10 py-8 grid grid-cols-3 gap-10">
       <div className="w-full col-span-2 border-r border-r-[#E4E5ED] pr-10">
@@ -261,6 +278,14 @@ export default function HypothesesCard({
                 <DropdownMenuItem onClick={() => setOpenConclusion(true)}>
                   {/* <SheetTrigger className="w-full text-left"> */}
                   Update Conclusion
+                  {/* </SheetTrigger> */}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setOpenDelete(true)}
+                  variant="destructive"
+                >
+                  {/* <SheetTrigger className="w-full text-left"> */}
+                  Delete
                   {/* </SheetTrigger> */}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -434,6 +459,26 @@ export default function HypothesesCard({
               </div>
             </SheetContent>
           </Sheet>
+
+          <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Are you sure you want to delete?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the
+                  hypothesis.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={onDeleteHypothesis}>
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </h3>
         {hypothesis.questions.length === 0 && (
           <span className="text-[#697288] font-semibold text-xs">
