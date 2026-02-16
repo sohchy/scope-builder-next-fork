@@ -65,6 +65,7 @@ type CardSubtype =
   | "interview_card"
   | "solution_card"
   | "problem_statement_card"
+  | "value_prop_card"
   | "select_subtype"
   | "jobs_to_be_done_card"
   | "pains_card"
@@ -1398,6 +1399,35 @@ export default function InfiniteCanvas({
 
                 {openToolGroup === "cards" && (
                   <>
+                    <ToolItem
+                      label="Problem Statement"
+                      icon={<SquarePlus className="text-[#111827]" size={18} />}
+                      active={
+                        placementTool?.kind === "card" &&
+                        placementTool.subtype === "problem_statement_card"
+                      }
+                      onClick={() =>
+                        selectPlacementTool({
+                          kind: "card",
+                          subtype: "problem_statement_card",
+                        })
+                      }
+                    />
+
+                    <ToolItem
+                      label="Value Prop"
+                      icon={<SquarePlus className="text-[#111827]" size={18} />}
+                      active={
+                        placementTool?.kind === "card" &&
+                        placementTool.subtype === "value_prop_card"
+                      }
+                      onClick={() =>
+                        selectPlacementTool({
+                          kind: "card",
+                          subtype: "value_prop_card",
+                        })
+                      }
+                    />
                     {/* {toolbarOptions.card && (
                       <ToolItem
                         label="Card"
@@ -1481,7 +1511,7 @@ export default function InfiniteCanvas({
                       />
                     )} */}
                     <>
-                      <ToolItem
+                      {/* <ToolItem
                         label="Jobs To Be Done"
                         icon={
                           <SquarePlus className="text-[#111827]" size={18} />
@@ -1496,9 +1526,9 @@ export default function InfiniteCanvas({
                             subtype: "jobs_to_be_done_card",
                           })
                         }
-                      />
+                      /> */}
 
-                      <ToolItem
+                      {/* <ToolItem
                         label="Pains"
                         icon={
                           <SquarePlus className="text-[#111827]" size={18} />
@@ -1513,9 +1543,9 @@ export default function InfiniteCanvas({
                             subtype: "pains_card",
                           })
                         }
-                      />
+                      /> */}
 
-                      <ToolItem
+                      {/* <ToolItem
                         label="Gains"
                         icon={
                           <SquarePlus className="text-[#111827]" size={18} />
@@ -1530,9 +1560,9 @@ export default function InfiniteCanvas({
                             subtype: "gains_card",
                           })
                         }
-                      />
+                      /> */}
 
-                      <ToolItem
+                      {/* <ToolItem
                         label="Products & Services"
                         icon={
                           <SquarePlus className="text-[#111827]" size={18} />
@@ -1547,9 +1577,9 @@ export default function InfiniteCanvas({
                             subtype: "products_services_card",
                           })
                         }
-                      />
+                      /> */}
 
-                      <ToolItem
+                      {/* <ToolItem
                         label="Pain Relievers"
                         icon={
                           <SquarePlus className="text-[#111827]" size={18} />
@@ -1564,9 +1594,9 @@ export default function InfiniteCanvas({
                             subtype: "pain_relievers_card",
                           })
                         }
-                      />
+                      /> */}
 
-                      <ToolItem
+                      {/* <ToolItem
                         label="Gain Creators"
                         icon={
                           <SquarePlus className="text-[#111827]" size={18} />
@@ -1581,7 +1611,7 @@ export default function InfiniteCanvas({
                             subtype: "gain_creators_card",
                           })
                         }
-                      />
+                      /> */}
 
                       {/* <ToolItem
                         label="Ad-Lib"

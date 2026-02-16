@@ -75,6 +75,8 @@ export const Card: React.FC<CardProps> = (props) => {
     switch (subtype) {
       case "industry_market_segment_card":
         return "Industry/Market Segment";
+      case "value_prop_card":
+        return "Value Proposition";
       case "customer_card":
         return "Customer";
       case "end_user_card":
@@ -170,6 +172,15 @@ export const Card: React.FC<CardProps> = (props) => {
         return <AdditionalDecisionMaker {...props} />;
       case "additional_stakeholder_card":
         return <AdditionalStakeholder {...props} />;
+      case "problem_statement_card":
+        return (
+          <div className="p-2 bg-white">This is the Problem statement card</div>
+        );
+      case "value_prop_card":
+        return (
+          <div className="p-2 bg-white">This is the Value Proposition card</div>
+        );
+
       case "select_subtype":
         return <span>Please select a card type from the menu.</span>;
     }
@@ -188,6 +199,7 @@ export const Card: React.FC<CardProps> = (props) => {
       case "saboteur_card":
       case "additional_decision_maker_card":
       case "additional_stakeholder_card":
+      case "value_prop_card":
         return false;
       case "interview_card":
         return false;

@@ -14,6 +14,7 @@ export type CardType =
   | "assumption_card"
   | "interview_card"
   | "solution_card"
+  | "value_prop_card"
   | "problem_statement_card"
   | "select_subtype"
   | "jobs_to_be_done_card"
@@ -129,14 +130,14 @@ export type ShapeComponentProps = {
   onResizeStart: (
     e: React.MouseEvent<HTMLDivElement>,
     id: string,
-    handle: string
+    handle: string,
   ) => void;
   interactive?: boolean;
   onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
   onConnectorMouseDown?: (
     e: React.MouseEvent,
     shapeId: string,
-    direction: "top" | "right" | "bottom" | "left"
+    direction: "top" | "right" | "bottom" | "left",
   ) => void;
   kanbanView?: boolean;
 };

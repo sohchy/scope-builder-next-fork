@@ -45,7 +45,7 @@ import { MultiSelect } from "@/components/ui/multiselect";
 import { useState } from "react";
 
 interface AddParticipantProps {
-  marketSegments: any[];
+  //marketSegments: any[];
 }
 
 const ROLE_OPTIONS = [
@@ -60,20 +60,22 @@ const ROLE_OPTIONS = [
   { value: "Additional Stakeholder", label: "Additional Stakeholder" },
 ];
 
-export default function AddParticipant({
-  marketSegments,
-}: AddParticipantProps) {
+export default function AddParticipant(
+  {
+    //marketSegments,
+  }: AddParticipantProps,
+) {
   const [open, setOpen] = useState(false);
-  const marketSegmentOptions = marketSegments
-    ?.filter((s: any) => s.draftRaw)
-    .map((segment: any) => {
-      const draftRaw = segment.draftRaw;
-      const raw = JSON.parse(draftRaw);
-      const editor = EditorState.createWithContent(convertFromRaw(raw));
-      const text = editor.getCurrentContent().getPlainText();
+  // const marketSegmentOptions = marketSegments
+  //   ?.filter((s: any) => s.draftRaw)
+  //   .map((segment: any) => {
+  //     const draftRaw = segment.draftRaw;
+  //     const raw = JSON.parse(draftRaw);
+  //     const editor = EditorState.createWithContent(convertFromRaw(raw));
+  //     const text = editor.getCurrentContent().getPlainText();
 
-      return text;
-    });
+  //     return text;
+  //   });
 
   const form = useForm<z.infer<typeof participantFormSchema>>({
     resolver: zodResolver(participantFormSchema),
@@ -206,7 +208,7 @@ export default function AddParticipant({
                 )}
               />
 
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="market_segment"
                 render={({ field }) => (
@@ -219,33 +221,6 @@ export default function AddParticipant({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {/* {marketSegmentOptions
-                          ?.filter(
-                            (segment: string) => segment.trim().length > 0
-                          )
-                          .map((segment: string) => {
-                            return (
-                              <SelectItem key={segment} value={segment}>
-                                {segment}
-                              </SelectItem>
-                            );
-                          })} */}
-                        {/* {marketSegments.map((segment) => {
-                          return (
-                            <SelectGroup key={segment.title}>
-                              <SelectLabel>{segment.title}</SelectLabel>
-                              {segment.data
-                                .filter(
-                                  (s: any) => s.cardTitle?.trim().length > 0
-                                )
-                                .map((s: any) => (
-                                  <SelectItem key={s.id} value={s.cardTitle}>
-                                    {s.cardTitle}
-                                  </SelectItem>
-                                ))}
-                            </SelectGroup>
-                          );
-                        })} */}
                         {marketSegments.length === 0 ? (
                           <div className="py-2 px-3 text-sm text-gray-500">
                             No segments available
@@ -273,7 +248,7 @@ export default function AddParticipant({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
 
               <FormField
                 control={form.control}

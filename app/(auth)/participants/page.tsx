@@ -5,7 +5,7 @@ import { getParticipants } from "@/services/participants";
 import { getSegments } from "@/services/segments";
 
 export default async function ParticipantsPage() {
-  const marketSegments = await getSegments();
+  // const marketSegments = await getSegments();
   const participants = await getParticipants();
 
   return (
@@ -20,7 +20,7 @@ export default async function ParticipantsPage() {
               Manage your interview pipeline and scheduling
             </span>
           </div>
-          <AddParticipant marketSegments={marketSegments} />
+          <AddParticipant />
         </header>
 
         <ParticipantsTable data={participants} />

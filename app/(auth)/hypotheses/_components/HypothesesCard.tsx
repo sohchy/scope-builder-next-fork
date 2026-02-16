@@ -50,6 +50,7 @@ import {
   deleteHypothesis,
   updateHypothesisQuestion,
   deleteHypothesisQuestion,
+  updateHypothesisPriority,
 } from "@/services/hypothesis";
 import {
   Select,
@@ -135,12 +136,14 @@ export default function HypothesesCard({
   const [openStatus, setOpenStatus] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [openQuestion, setOpenQuestion] = useState(false);
+  const [openPriority, setOpenPriority] = useState(false);
   const [showEditTitle, setShowEditTitle] = useState(false);
   const [showResponses, setShowResponses] = useState(false);
   const [openConclusion, setOpenConclusion] = useState(false);
   const [conclusionContent, setConclusionContent] = useState(
     hypothesis.conclusion_content || "",
   );
+  const [priority, setPriority] = useState(hypothesis.priority || 0);
   const [type, setType] = useState(hypothesis.type || "");
   const [openQuestionDelete, setOpenQuestionDelete] = useState(false);
   const [editableTitle, setEditableTitle] = useState(hypothesis.title);
@@ -161,11 +164,11 @@ export default function HypothesesCard({
     if (!priority) return "No priority";
     switch (priority) {
       case 1:
-        return "Low priority";
+        return "Priority";
       case 2:
-        return "Medium priority";
+        return "Priority";
       case 3:
-        return "High priority";
+        return "Priority";
       default:
         return "No priority";
     }
@@ -218,6 +221,11 @@ export default function HypothesesCard({
   async function onUpdateConclusion() {
     await updateHypothesisConclusion(hypothesis.id, conclusionContent);
     setOpenConclusion(false);
+  }
+
+  async function onUpdatePriority() {
+    await updateHypothesisPriority(hypothesis.id, priority);
+    setOpenPriority(false);
   }
 
   async function onDeleteHypothesis() {
@@ -297,6 +305,11 @@ export default function HypothesesCard({
                 <DropdownMenuItem onClick={() => setOpenType(true)}>
                   {/* <SheetTrigger className="w-full text-left"> */}
                   Update Hypothesis Type
+                  {/* </SheetTrigger> */}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setOpenPriority(true)}>
+                  {/* <SheetTrigger className="w-full text-left"> */}
+                  Update Hypothesis Priority
                   {/* </SheetTrigger> */}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setOpenStatus(true)}>
@@ -386,6 +399,12 @@ export default function HypothesesCard({
                         <SelectValue placeholder="Select a type" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="Identify which Stakeholder role">
+                          Gather information
+                        </SelectItem>
+                        <SelectItem value="Identify which Stakeholder role">
+                          Identify which Stakeholder role
+                        </SelectItem>
                         <SelectItem value="Identify which Market Segment">
                           Identify which Market Segment
                         </SelectItem>
@@ -497,6 +516,60 @@ export default function HypothesesCard({
                     <Button
                       type="button"
                       onClick={onUpdateConclusion}
+                      className="bg-[#162A4F] cursor-pointer ml-auto"
+                    >
+                      Update
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <Sheet
+            open={openPriority}
+            onOpenChange={(open) => {
+              setOpenPriority(open);
+              setPriority(hypothesis.priority || 0);
+            }}
+          >
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle className="text-[26px] font-medium text-[#162A4F]">
+                  Update priority
+                </SheetTitle>
+              </SheetHeader>
+              <div className="h-full flex flex-col gap-8 overflow-auto">
+                <div className="space-y-8 p-4">
+                  <div className="flex flex-col gap-2">
+                    <Label>Priority</Label>
+
+                    <div className="flex flex-row items-center">
+                      <FlameIcon
+                        size={20}
+                        onClick={() => setPriority(1)}
+                        fill={priority > 0 ? "#DF6E5A" : "#F3F0FD"}
+                        color={priority > 0 ? "#DF6E5A" : "#F3F0FD"}
+                      />
+                      <FlameIcon
+                        size={20}
+                        onClick={() => setPriority(2)}
+                        fill={priority > 1 ? "#DF6E5A" : "#F3F0FD"}
+                        color={priority > 1 ? "#DF6E5A" : "#F3F0FD"}
+                      />
+                      <FlameIcon
+                        size={20}
+                        onClick={() => setPriority(3)}
+                        fill={priority > 2 ? "#DF6E5A" : "#F3F0FD"}
+                        color={priority > 2 ? "#DF6E5A" : "#F3F0FD"}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex ">
+                    <Button
+                      type="button"
+                      onClick={onUpdatePriority}
                       className="bg-[#162A4F] cursor-pointer ml-auto"
                     >
                       Update
@@ -702,7 +775,7 @@ export default function HypothesesCard({
           <div className="bg-[#F3F0FD] text-xs rounded-full text-[#6E6588] font-semibold px-2 py-0.5">
             {hypothesis.type || "No type"}
           </div>
-          <div className="flex flex-row items-center gap-2.5">
+          <div className="flex flex-col items-center gap-2.5">
             {hypothesis.priority > 0 && (
               <div className="flex flex-row items-center">
                 <FlameIcon

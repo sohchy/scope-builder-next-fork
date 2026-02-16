@@ -15,7 +15,7 @@ export default async function TeamsDashboardPage() {
 
   const getInterviewsData = (orgId: string) => {
     const scheduleInterviews = participants.filter(
-      (p) => p.org_id === orgId && p.scheduled_date
+      (p) => p.org_id === orgId && p.scheduled_date,
     );
 
     const conductedInterviews = interviewResponses.filter((ir) => {
@@ -23,9 +23,17 @@ export default async function TeamsDashboardPage() {
       return participant?.org_id === orgId;
     });
 
+    const conductedInterviewsIds: string[] = [];
+
+    conductedInterviews.forEach((ir) => {
+      if (!conductedInterviewsIds.includes(ir.participant_id)) {
+        conductedInterviewsIds.push(ir.participant_id);
+      }
+    });
+
     return {
       scheduled: scheduleInterviews.length,
-      conducted: conductedInterviews.length,
+      conducted: conductedInterviewsIds.length,
     };
   };
 
@@ -33,13 +41,13 @@ export default async function TeamsDashboardPage() {
     const orgHypotheses = hypothesis.filter((h) => h.org_id === orgId);
 
     const testingHypotheses = orgHypotheses.filter(
-      (h) => h.conclusion_status === "Testing"
+      (h) => h.conclusion_status === "Testing",
     ).length;
     const validatedHypotheses = orgHypotheses.filter(
-      (h) => h.conclusion_status === "Validated"
+      (h) => h.conclusion_status === "Validated",
     ).length;
     const invalidatedHypotheses = orgHypotheses.filter(
-      (h) => h.conclusion_status === "Invalidated"
+      (h) => h.conclusion_status === "Invalidated",
     ).length;
 
     return {

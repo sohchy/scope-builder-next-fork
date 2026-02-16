@@ -189,6 +189,26 @@ export async function updateHypothesisConclusion(
   revalidatePath("/hypotheses");
 }
 
+export async function updateHypothesisPriority(
+  hypothesisId: number,
+  priority: number,
+) {
+  const { orgId, userId } = await auth();
+
+  if (!userId) redirect("/sign-in");
+
+  if (!orgId) redirect("/pick-startup");
+
+  const question = await prisma.hypothesis.update({
+    where: { id: hypothesisId },
+    data: {
+      priority,
+    },
+  });
+
+  revalidatePath("/hypotheses");
+}
+
 export async function deleteHypothesis(hypothesisId: number) {
   const { orgId, userId } = await auth();
 
