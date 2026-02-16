@@ -6,11 +6,24 @@ import { getParticipant } from "@/services/participants";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Notes from "./Notes";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
+import { Button } from "./ui/button";
+import { InfoIcon } from "lucide-react";
 
 export default function AppHeader() {
   const { user } = useUser();
   const pathname = usePathname();
   const [header, setHeader] = useState<any>(null);
+  const [content, setContent] = useState<any>(null);
 
   const renderTitle = async (pathname: string) => {
     let title = "";
@@ -62,13 +75,58 @@ export default function AppHeader() {
     }
   };
 
+  const renderInfo = (pathname: string) => {
+    let content;
+
+    if (pathname === "/") {
+      content = <>This is the home page info</>;
+    }
+
+    if (pathname.includes("/hypotheses")) {
+      content = (
+        <>
+          This is the hypothesis page info
+          <video
+            controls
+            className="w-full"
+            src={
+              "https://orkbbwgueesgrxzpgjag.supabase.co/storage/v1/object/public/attachments/videos/2026-02-10/8101432f-0df5-497a-9165-e02677114156.mov"
+            }
+          />
+        </>
+      );
+    }
+
+    setContent(content);
+  };
+
   useEffect(() => {
+    renderInfo(pathname);
     renderTitle(pathname);
   }, [pathname]);
 
   return (
     <header className="flex items-center px-4 h-[46px] bg-white border-b-[0.5px] border-b-[#E4E5ED] justify-between font-semibold text-lg text-[#111827]">
       {header}
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="outline" size="icon" className="ml-4">
+            <InfoIcon size={18} />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent className="w-[750px] min-w-[750px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>This is the title</AlertDialogTitle>
+            <AlertDialogDescription>
+              This is the description for this popup info.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div>{content}</div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Close</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="flex items-center flex-row gap-2.5 ml-auto">
         <UserButton />

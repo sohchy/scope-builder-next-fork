@@ -11,6 +11,7 @@ import {
   MessageCircleIcon,
   XIcon,
   CheckIcon,
+  EllipsisVerticalIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -47,6 +48,8 @@ import {
   updateHypothesisStatus,
   updateHypothesisType,
   deleteHypothesis,
+  updateHypothesisQuestion,
+  deleteHypothesisQuestion,
 } from "@/services/hypothesis";
 import {
   Select,
@@ -131,6 +134,7 @@ export default function HypothesesCard({
   const [openType, setOpenType] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openQuestion, setOpenQuestion] = useState(false);
   const [showEditTitle, setShowEditTitle] = useState(false);
   const [showResponses, setShowResponses] = useState(false);
   const [openConclusion, setOpenConclusion] = useState(false);
@@ -138,8 +142,13 @@ export default function HypothesesCard({
     hypothesis.conclusion_content || "",
   );
   const [type, setType] = useState(hypothesis.type || "");
+  const [openQuestionDelete, setOpenQuestionDelete] = useState(false);
   const [editableTitle, setEditableTitle] = useState(hypothesis.title);
   const [status, setStatus] = useState(hypothesis.conclusion_status || "");
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+    null,
+  );
+  const [editableQuestionTitle, setEditableQuestionTitle] = useState("");
 
   const form = useForm<z.infer<typeof hypothesisFormSchema>>({
     resolver: zodResolver(hypothesisFormSchema),
@@ -214,6 +223,26 @@ export default function HypothesesCard({
   async function onDeleteHypothesis() {
     await deleteHypothesis(hypothesis.id);
     setOpenDelete(false);
+  }
+
+  async function onUpdateQuestionTitle() {
+    if (selectedQuestion) {
+      await updateHypothesisQuestion(
+        selectedQuestion.id,
+        editableQuestionTitle,
+      );
+      setOpenQuestion(false);
+      setSelectedQuestion(null);
+      setEditableQuestionTitle("");
+    }
+  }
+
+  async function onDeleteQuestion() {
+    if (selectedQuestion) {
+      await deleteHypothesisQuestion(selectedQuestion.id);
+      setSelectedQuestion(null);
+      setOpenQuestionDelete(false);
+    }
   }
 
   return (
@@ -357,9 +386,27 @@ export default function HypothesesCard({
                         <SelectValue placeholder="Select a type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">1</SelectItem>
-                        <SelectItem value="2">2</SelectItem>
-                        <SelectItem value="3">3</SelectItem>
+                        <SelectItem value="Identify which Market Segment">
+                          Identify which Market Segment
+                        </SelectItem>
+                        <SelectItem value="Identify Job to be Done">
+                          Identify Job to be Done
+                        </SelectItem>
+                        <SelectItem value="Identify Pains">
+                          Identify Pains
+                        </SelectItem>
+                        <SelectItem value="Identify Pains">
+                          Identify Gains
+                        </SelectItem>
+                        <SelectItem value="Identify Pains">
+                          Identify Market Size
+                        </SelectItem>
+                        <SelectItem value="Identify Pains">
+                          Identify Pains Severity
+                        </SelectItem>
+                        <SelectItem value="Identify Pains">
+                          Identify Gains Significance
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -460,6 +507,38 @@ export default function HypothesesCard({
             </SheetContent>
           </Sheet>
 
+          <Sheet open={openQuestion} onOpenChange={setOpenQuestion}>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle className="text-[26px] font-medium text-[#162A4F]">
+                  Update question
+                </SheetTitle>
+              </SheetHeader>
+              <div className="h-full flex flex-col gap-8 overflow-auto">
+                <div className="space-y-8 p-4">
+                  <div className="flex flex-col gap-2">
+                    <Label>Title</Label>
+
+                    <Textarea
+                      value={editableQuestionTitle}
+                      onChange={(e) => setEditableQuestionTitle(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex ">
+                    <Button
+                      type="button"
+                      onClick={onUpdateQuestionTitle}
+                      className="bg-[#162A4F] cursor-pointer ml-auto"
+                    >
+                      Update
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+
           <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -474,6 +553,29 @@ export default function HypothesesCard({
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={onDeleteHypothesis}>
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <AlertDialog
+            open={openQuestionDelete}
+            onOpenChange={setOpenQuestionDelete}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Are you sure you want to delete?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the
+                  question.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={onDeleteQuestion}>
                   Continue
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -544,6 +646,35 @@ export default function HypothesesCard({
                   <span className="font-semibold text-xs w-1.5">
                     {question.responses.length}
                   </span>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <EllipsisVerticalIcon size={18} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    {!example && (
+                      <DropdownMenuContent>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setOpenQuestion(true);
+                            setSelectedQuestion(question);
+                            setEditableQuestionTitle(question.title);
+                          }}
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={() => {
+                            setOpenQuestionDelete(true);
+                            setSelectedQuestion(question);
+                          }}
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    )}
+                  </DropdownMenu>
                 </div>
               </div>
 
