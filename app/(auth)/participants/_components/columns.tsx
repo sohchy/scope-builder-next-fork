@@ -5,14 +5,17 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
-export const columns: ColumnDef<any>[] = [
+export const columns: (tags: string[]) => ColumnDef<any>[] = (tags) => [
   {
     id: "actions",
     cell: ({ row }) => {
       const participant = row.original;
 
       return (
-        <ParticipantTableActions participant={participant as Participant} />
+        <ParticipantTableActions
+          tags={tags}
+          participant={participant as Participant}
+        />
       );
     },
   },
@@ -121,9 +124,23 @@ export const columns: ColumnDef<any>[] = [
   {
     accessorKey: "tags",
     header: "Tags",
-    cell: ({ row }) => (
-      <div className="capitalize whitespace-normal">{row.getValue("tags")}</div>
-    ),
+    cell: ({ row }) => {
+      const tags = row.getValue("tags") as string;
+
+      return (
+        <div className="capitalize flex flex-row gap-1">
+          {tags &&
+            tags.split(",").map((tag) => (
+              <Badge
+                key={tag}
+                className={`text-[10px] font-semibold h-6 bg-[#F4F0FF] text-[#6A35FF]`}
+              >
+                {tag}
+              </Badge>
+            ))}
+        </div>
+      );
+    },
     size: 350,
     maxSize: 350,
     minSize: 350,

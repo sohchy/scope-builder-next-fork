@@ -17,7 +17,9 @@ import {
 import { CalendarIcon, MoreHorizontal } from "lucide-react";
 import { Participant } from "@/lib/generated/prisma";
 import {
+  createParticipantTag,
   deleteParticipant,
+  getParticipantTags,
   markParticipantAsComplete,
   updateParticipant,
 } from "@/services/participants";
@@ -69,6 +71,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface ParticipantTableActionsProps {
+  tags: string[];
   participant: Participant;
 }
 
@@ -86,6 +89,7 @@ const ROLE_OPTIONS = [
 ];
 
 export default function ParticipantTableActions({
+  tags,
   participant,
 }: ParticipantTableActionsProps) {
   const [open, setOpen] = useState(false);
@@ -109,9 +113,15 @@ export default function ParticipantTableActions({
     setMarketSegments(segments);
   };
 
-  useEffect(() => {
-    getMarketSegments();
-  }, []);
+  // const getTags = async () => {
+  //   const tags = await getParticipantTags();
+  //   setTags(tags.map((tag) => ({ value: tag, label: tag })));
+  // };
+
+  // useEffect(() => {
+  //   //getTags();
+  //   //getMarketSegments();
+  // }, [tags]);
 
   const form = useForm<z.infer<typeof participantFormSchema>>({
     resolver: zodResolver(participantFormSchema),
@@ -127,6 +137,7 @@ export default function ParticipantTableActions({
       status: participant.status || "need_to_schedule",
       scheduled_date: participant.scheduled_date || undefined,
       notes: participant.notes || "",
+      tags: participant.tags || "",
     },
   });
 
@@ -144,6 +155,10 @@ export default function ParticipantTableActions({
     await deleteParticipant(openAlert!);
     setOpenAlert(undefined);
   };
+
+  async function onCreateTagOption(opt: string) {
+    await createParticipantTag(opt);
+  }
 
   return (
     <>
@@ -254,17 +269,19 @@ export default function ParticipantTableActions({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                        {/* <SelectItem value="complete">Complete</SelectItem> */}
-                        <SelectItem value="need_to_schedule">
-                          Need to Schedule
-                        </SelectItem>
-                        <SelectItem value="scheduled">Scheduled</SelectItem>
-                        {/* <SelectItem value="incomplete">Incomplete</SelectItem> */}
-                        <SelectItem value="interviewed">Interviewed</SelectItem>
-                        <SelectItem value="not_available">
-                          Not Available
-                        </SelectItem>
-                      </SelectContent>
+                          {/* <SelectItem value="complete">Complete</SelectItem> */}
+                          <SelectItem value="need_to_schedule">
+                            Need to Schedule
+                          </SelectItem>
+                          <SelectItem value="scheduled">Scheduled</SelectItem>
+                          {/* <SelectItem value="incomplete">Incomplete</SelectItem> */}
+                          <SelectItem value="interviewed">
+                            Interviewed
+                          </SelectItem>
+                          <SelectItem value="not_available">
+                            Not Available
+                          </SelectItem>
+                        </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
@@ -413,6 +430,29 @@ export default function ParticipantTableActions({
                         <Textarea {...field} />
                       </FormControl>
 
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tags</FormLabel>
+                      <FormControl>
+                        <MultiSelect
+                          options={tags.map((tag) => ({
+                            value: tag,
+                            label: tag,
+                          }))}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Select or create a tag"
+                          onCreateOption={(opt) => onCreateTagOption(opt.value)}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

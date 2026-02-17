@@ -103,8 +103,8 @@ export default function Topic({ topic }: TopicProps) {
   }, [topicState.isDone]);
 
   return (
-    <div key={topic.id} className="grid grid-cols-7 pr-4">
-      <div className="col-span-2 flex flex-row items-center ">
+    <div key={topic.id} className="grid grid-cols-7 ">
+      <div className="col-span-2 w-[330px] flex flex-row items-center ">
         <div className="h-full flex flex-col items-center justify-center">
           <div
             onClick={() => setIsOpen(!isOpen)}
@@ -170,8 +170,8 @@ export default function Topic({ topic }: TopicProps) {
       </div>
 
       {isOpen && (
-        <div className="grid grid-cols-3 col-span-5  font-semibold border border-gray-400 rounded-[10px] mb-[30px]">
-          <div className="border-r border-gray-400 p-4 h-[172px] grid grid-cols-4 gap-2 content-start">
+        <div className="grid grid-cols-3 w-[750px] col-span-5  font-semibold border border-gray-400 rounded-[10px] mb-[30px]">
+          <div className="border-r w-[250px] border-gray-400 p-4 h-[172px] grid grid-cols-4 gap-2 content-start">
             {topicState.concept_tasks.map((task) => (
               <TaskItem
                 key={task.id}
@@ -184,7 +184,7 @@ export default function Topic({ topic }: TopicProps) {
               />
             ))}
           </div>
-          <div className="border-r border-gray-400  p-4 h-[172px] grid grid-cols-4 gap-8">
+          <div className="border-r w-[250px] border-gray-400  p-4 h-[172px] grid grid-cols-4 gap-8">
             {topicState.excercises_tasks.map((task) => (
               <TaskItem
                 key={task.id}
@@ -197,7 +197,7 @@ export default function Topic({ topic }: TopicProps) {
               />
             ))}
           </div>
-          <div className="border-r border-gray-400  p-4  h-[172px] grid grid-cols-4 gap-8">
+          <div className=" w-[250px] border-gray-400  p-4  h-[172px] grid grid-cols-4 gap-8">
             {topicState.startup_tasks.map((task) => (
               <TaskItem
                 key={task.id}

@@ -113,6 +113,8 @@ export default function MultiCanvas({
                   interview: false,
                 }}
                 valuePropCanvasMode
+                valuePropCanvasTool="jobs-to-be-done"
+                editable={!example}
               />
             </Room>
           </div>
@@ -137,6 +139,8 @@ export default function MultiCanvas({
                   interview: false,
                 }}
                 valuePropCanvasMode
+                valuePropCanvasTool="pains"
+                editable={!example}
               />
             </Room>
           </div>
@@ -161,6 +165,7 @@ export default function MultiCanvas({
                   interview: false,
                 }}
                 valuePropCanvasMode
+                valuePropCanvasTool="gains"
                 editable={!example}
               />
             </Room>
@@ -188,6 +193,8 @@ export default function MultiCanvas({
                   interview: false,
                 }}
                 valuePropCanvasMode
+                valuePropCanvasTool="value-proposition-products-services"
+                editable={!example}
               />
             </Room>
           </div>
@@ -212,6 +219,8 @@ export default function MultiCanvas({
                   interview: false,
                 }}
                 valuePropCanvasMode
+                valuePropCanvasTool="value-proposition-pain-relievers"
+                editable={!example}
               />
             </Room>
           </div>
@@ -236,6 +245,8 @@ export default function MultiCanvas({
                   interview: false,
                 }}
                 valuePropCanvasMode
+                valuePropCanvasTool="value-proposition-gain-creators"
+                editable={!example}
               />
             </Room>
           </div>

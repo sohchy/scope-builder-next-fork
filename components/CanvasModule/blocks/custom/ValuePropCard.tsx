@@ -24,7 +24,7 @@ import { FloatingInput } from "@/components/ui/floating-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-type ProblemStatementCardProps = Omit<ShapeFrameProps, "children" | "shape"> & {
+type ValuePropCardProps = Omit<ShapeFrameProps, "children" | "shape"> & {
   shape: IShape;
   onCommitStyle?: (id: string, patch: Partial<IShape>) => void;
 };
@@ -35,9 +35,7 @@ const RteEditor = dynamic(
   { ssr: false },
 );
 
-export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
-  props,
-) => {
+export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
   const questions = [
     {
       id: "summary_question_1",

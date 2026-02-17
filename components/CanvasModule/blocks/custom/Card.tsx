@@ -35,7 +35,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@radix-ui/react-dropdown-menu";
-import { ProblemStatement } from "./ProblemStatement";
+import { ProblemStatementCard } from "./ProblemStatement";
 import { Interview } from "./InterviewCard";
 import { JobsToBeDone } from "./JobsToBeDone";
 import { Pains } from "./Pains";
@@ -58,6 +58,7 @@ import { Recommender } from "./Recommender";
 import { Saboteur } from "./Saboteur";
 import { AdditionalDecisionMaker } from "./AdditionalDecisionMaker";
 import { AdditionalStakeholder } from "./AdditionalStakeholder";
+import { ValuePropCard } from "./ValuePropCard";
 
 type CardProps = Omit<ShapeFrameProps, "children" | "shape"> & {
   shape: IShape;
@@ -173,13 +174,9 @@ export const Card: React.FC<CardProps> = (props) => {
       case "additional_stakeholder_card":
         return <AdditionalStakeholder {...props} />;
       case "problem_statement_card":
-        return (
-          <div className="p-2 bg-white">This is the Problem statement card</div>
-        );
+        return <ProblemStatementCard {...props} />;
       case "value_prop_card":
-        return (
-          <div className="p-2 bg-white">This is the Value Proposition card</div>
-        );
+        return <ValuePropCard {...props} />;
 
       case "select_subtype":
         return <span>Please select a card type from the menu.</span>;

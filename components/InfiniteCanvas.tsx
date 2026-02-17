@@ -125,6 +125,7 @@ interface InfiniteCanvasProps {
     rectangle: boolean;
     interview: boolean;
   };
+  valuePropCanvasTool?: string;
   valuePropCanvasMode?: boolean;
 }
 
@@ -141,6 +142,7 @@ export default function InfiniteCanvas({
     rectangle: true,
     interview: true,
   },
+  valuePropCanvasTool,
   valuePropCanvasMode = false,
 }: InfiniteCanvasProps) {
   const pathname = usePathname();
@@ -825,6 +827,12 @@ export default function InfiniteCanvas({
         ...s,
 
         subtype: placementTool.subtype,
+        width:
+          placementTool.subtype === "value_prop_card"
+            ? 500
+            : placementTool.subtype === "problem_statement_card"
+              ? 500
+              : 440,
       }));
     }
     setSelectedShapeIds([id]);
@@ -1399,35 +1407,181 @@ export default function InfiniteCanvas({
 
                 {openToolGroup === "cards" && (
                   <>
-                    <ToolItem
-                      label="Problem Statement"
-                      icon={<SquarePlus className="text-[#111827]" size={18} />}
-                      active={
-                        placementTool?.kind === "card" &&
-                        placementTool.subtype === "problem_statement_card"
-                      }
-                      onClick={() =>
-                        selectPlacementTool({
-                          kind: "card",
-                          subtype: "problem_statement_card",
-                        })
-                      }
-                    />
+                    {!valuePropCanvasMode && (
+                      <>
+                        <ToolItem
+                          label="Problem Statement"
+                          icon={
+                            <SquarePlus className="text-[#111827]" size={18} />
+                          }
+                          active={
+                            placementTool?.kind === "card" &&
+                            placementTool.subtype === "problem_statement_card"
+                          }
+                          onClick={() =>
+                            selectPlacementTool({
+                              kind: "card",
+                              subtype: "problem_statement_card",
+                            })
+                          }
+                        />
 
-                    <ToolItem
-                      label="Value Prop"
-                      icon={<SquarePlus className="text-[#111827]" size={18} />}
-                      active={
-                        placementTool?.kind === "card" &&
-                        placementTool.subtype === "value_prop_card"
-                      }
-                      onClick={() =>
-                        selectPlacementTool({
-                          kind: "card",
-                          subtype: "value_prop_card",
-                        })
-                      }
-                    />
+                        <ToolItem
+                          label="Value Prop"
+                          icon={
+                            <SquarePlus className="text-[#111827]" size={18} />
+                          }
+                          active={
+                            placementTool?.kind === "card" &&
+                            placementTool.subtype === "value_prop_card"
+                          }
+                          onClick={() =>
+                            selectPlacementTool({
+                              kind: "card",
+                              subtype: "value_prop_card",
+                            })
+                          }
+                        />
+                      </>
+                    )}
+                    {valuePropCanvasMode && (
+                      <>
+                        {valuePropCanvasTool === "jobs-to-be-done" && (
+                          <ToolItem
+                            label="Jobs To Be Done"
+                            icon={
+                              <SquarePlus
+                                className="text-[#111827]"
+                                size={18}
+                              />
+                            }
+                            active={
+                              placementTool?.kind === "card" &&
+                              placementTool.subtype === "jobs_to_be_done_card"
+                            }
+                            onClick={() =>
+                              selectPlacementTool({
+                                kind: "card",
+                                subtype: "jobs_to_be_done_card",
+                              })
+                            }
+                          />
+                        )}
+
+                        {valuePropCanvasTool === "pains" && (
+                          <ToolItem
+                            label="Pains"
+                            icon={
+                              <SquarePlus
+                                className="text-[#111827]"
+                                size={18}
+                              />
+                            }
+                            active={
+                              placementTool?.kind === "card" &&
+                              placementTool.subtype === "pains_card"
+                            }
+                            onClick={() =>
+                              selectPlacementTool({
+                                kind: "card",
+                                subtype: "pains_card",
+                              })
+                            }
+                          />
+                        )}
+
+                        {valuePropCanvasTool === "gains" && (
+                          <ToolItem
+                            label="Gains"
+                            icon={
+                              <SquarePlus
+                                className="text-[#111827]"
+                                size={18}
+                              />
+                            }
+                            active={
+                              placementTool?.kind === "card" &&
+                              placementTool.subtype === "gains_card"
+                            }
+                            onClick={() =>
+                              selectPlacementTool({
+                                kind: "card",
+                                subtype: "gains_card",
+                              })
+                            }
+                          />
+                        )}
+
+                        {valuePropCanvasTool ===
+                          "value-proposition-products-services" && (
+                          <ToolItem
+                            label="Products & Services"
+                            icon={
+                              <SquarePlus
+                                className="text-[#111827]"
+                                size={18}
+                              />
+                            }
+                            active={
+                              placementTool?.kind === "card" &&
+                              placementTool.subtype === "products_services_card"
+                            }
+                            onClick={() =>
+                              selectPlacementTool({
+                                kind: "card",
+                                subtype: "products_services_card",
+                              })
+                            }
+                          />
+                        )}
+
+                        {valuePropCanvasTool ===
+                          "value-proposition-pain-relievers" && (
+                          <ToolItem
+                            label="Pain Relievers"
+                            icon={
+                              <SquarePlus
+                                className="text-[#111827]"
+                                size={18}
+                              />
+                            }
+                            active={
+                              placementTool?.kind === "card" &&
+                              placementTool.subtype === "pain_relievers_card"
+                            }
+                            onClick={() =>
+                              selectPlacementTool({
+                                kind: "card",
+                                subtype: "pain_relievers_card",
+                              })
+                            }
+                          />
+                        )}
+
+                        {valuePropCanvasTool ===
+                          "value-proposition-gain-creators" && (
+                          <ToolItem
+                            label="Gain Creators"
+                            icon={
+                              <SquarePlus
+                                className="text-[#111827]"
+                                size={18}
+                              />
+                            }
+                            active={
+                              placementTool?.kind === "card" &&
+                              placementTool.subtype === "gain_creators_card"
+                            }
+                            onClick={() =>
+                              selectPlacementTool({
+                                kind: "card",
+                                subtype: "gain_creators_card",
+                              })
+                            }
+                          />
+                        )}
+                      </>
+                    )}
                     {/* {toolbarOptions.card && (
                       <ToolItem
                         label="Card"
@@ -1634,12 +1788,12 @@ export default function InfiniteCanvas({
                 )}
 
                 {/* optional quick “cancel tool” */}
-                <button
+                {/* <button
                   className="mt-1 text-left text-xs px-2 py-1 rounded hover:bg-gray-100 text-gray-600"
                   onClick={() => setPlacementTool(null)}
                 >
                   Esc / Cancel tool
-                </button>
+                </button> */}
               </div>
             )}
           </div>

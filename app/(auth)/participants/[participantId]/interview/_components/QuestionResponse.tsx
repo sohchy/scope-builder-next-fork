@@ -19,11 +19,13 @@ import { Attachment } from "@/components/Notes";
 import { cn } from "@/lib/utils";
 
 interface QuestionResponseProps {
+  idx: number;
   question: Question;
   participantId: string;
 }
 
 export default function QuestionResponse({
+  idx,
   question,
   participantId,
 }: QuestionResponseProps) {
@@ -81,7 +83,7 @@ export default function QuestionResponse({
   };
 
   return (
-    <div className="relative w-full bg-[#E6CFFF] border border-[#B4B9C9] rounded-lg shadow-lg flex flex-col overflow-hidden px-6 py-6 gap-4">
+    <div className="relative w-full bg-[#F3F0FD] border border-[#B4B9C9] rounded-lg shadow-lg flex flex-col overflow-hidden px-6 py-6 gap-4">
       <div className="absolute top-1 right-1">
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger asChild>
@@ -96,12 +98,13 @@ export default function QuestionResponse({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <span className="flex flex-row items-center gap-2.5 text-sm text-[#111827] font-medium">
+      <span className="flex flex-row  gap-2.5 text-[14px] text-[#111827] font-semibold">
+        <span className="text-[#6A35FF]">{`${idx + 1}.`}</span>
         {question.title}
       </span>
       <Textarea
         value={response}
-        className="bg-white"
+        className="bg-white text-[14px] font-medium"
         onBlur={onUpdateResponse}
         onChange={(e) => setResponse(e.target.value)}
       />

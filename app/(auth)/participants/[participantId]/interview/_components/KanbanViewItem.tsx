@@ -48,15 +48,17 @@ export default function KanbanViewItem({
   };
 
   return (
-    <Card className="w-[440px] min-w-[440px] relative overflow-y-scroll">
+    <Card className="w-[440px] min-w-[440px] relative overflow-y-auto">
       <CardHeader className="">
         <CardTitle className="text-lg font-semibold text-[#111827]">
-          {hypothesis.title}
-          <div className="absolute top-5 right-5">
+          <div className="flex flex-row items-center justify-between mb-3">
+            <span className="bg-[#F3F0FD] text-[#6A35FF] font-semibold text-xs p-2 rounded-full">
+              Hypothesis
+            </span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
-                  <EllipsisIcon />
+                  <EllipsisIcon className="text-[#8B92A1]" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -68,13 +70,16 @@ export default function KanbanViewItem({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+          {hypothesis.title}
         </CardTitle>
         <CardDescription>{hypothesis.description}</CardDescription>
       </CardHeader>
       <CardContent>
+        <h3 className="text-[#6E6588] text-xs font-semibold mb-4">Replies</h3>
         <div className="flex flex-col gap-3">
-          {hypothesis.questions.map((question) => (
+          {hypothesis.questions.map((question, idx) => (
             <QuestionResponse
+              idx={idx}
               key={question.id}
               question={question}
               participantId={participantId}

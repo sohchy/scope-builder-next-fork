@@ -85,15 +85,15 @@ export default async function ProgressDashboardPage() {
     <div className="p-8 h-full bg-[#F0F1F5] flex justify-center">
       <div className="flex flex-col gap-5 max-w-[1182px] h-full">
         <div className="grid grid-cols-7 pr-8 gap-8">
-          <h1 className="text-[#111827]  text-2xl font-semibold col-span-2"></h1>
-          <div className="grid grid-cols-3 h-[34px] col-span-5 bg-[#2E3545] text-white text-sm font-semibold border border-[#EFF0F4] rounded-[4px]">
-            <div className="border-r border-[#F0F1F5] flex items-center px-4">
+          <h1 className="text-[#111827] w-[330px]  text-2xl font-semibold col-span-2"></h1>
+          <div className="grid grid-cols-3 w-[750px] h-[34px] col-span-5 bg-[#2E3545] text-white text-sm font-semibold border border-[#EFF0F4] rounded-[4px]">
+            <div className="border-r w-[250px] border-[#F0F1F5] flex items-center px-4">
               Concept
             </div>
-            <div className="border-r border-[#F0F1F5] flex items-center px-4">
+            <div className="border-r w-[250px] border-[#F0F1F5] flex items-center px-4">
               Practice exercises
             </div>
-            <div className="border-r border-[#F0F1F5] flex items-center px-4  ">
+            <div className="border-r w-[250px] border-[#F0F1F5] flex items-center px-4  ">
               My startup
             </div>
           </div>

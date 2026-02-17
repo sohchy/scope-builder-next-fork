@@ -38,10 +38,16 @@ import { Participant } from "@/lib/generated/prisma";
 import { useEffect, useState } from "react";
 import { columns } from "./columns";
 
-export default function ParticipantsTable({ data }: { data: any[] }) {
+export default function ParticipantsTable({
+  data,
+  tags,
+}: {
+  data: any[];
+  tags: string[];
+}) {
   const table = useReactTable({
     data,
-    columns: columns,
+    columns: columns(tags),
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -59,7 +65,7 @@ export default function ParticipantsTable({ data }: { data: any[] }) {
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 );

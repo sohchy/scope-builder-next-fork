@@ -12,4 +12,5 @@ export const participantFormSchema = z.object({
   status: z.string(),
   scheduled_date: z.date().optional(),
   notes: z.string().optional(),
+  tags: z.string().optional(),
 });

@@ -10,6 +10,37 @@ import { auth } from "@clerk/nextjs/server";
 import { participantFormSchema } from "@/schemas/participant";
 import { ParticipantStatus } from "@/lib/generated/prisma";
 
+export async function getParticipantTags() {
+  const { orgId, userId } = await auth();
+
+  if (!userId) redirect("/sign-in");
+
+  if (!orgId) redirect("/pick-startup");
+
+  const tags = await prisma.participantTag.findMany({
+    where: { org_id: orgId },
+  });
+
+  return tags.map((tag) => tag.name);
+}
+
+export async function createParticipantTag(tagName: string) {
+  const { orgId, userId } = await auth();
+
+  if (!userId) redirect("/sign-in");
+
+  if (!orgId) redirect("/pick-startup");
+
+  const newTag = await prisma.participantTag.create({
+    data: {
+      name: tagName,
+      org_id: orgId,
+    },
+  });
+
+  revalidatePath(`/participants`);
+}
+
 export async function getParticipant(participantId: string) {
   const { orgId, userId } = await auth();
 
@@ -52,7 +83,7 @@ export async function getAllParticipants() {
 }
 
 export async function createParticipant(
-  values: z.infer<typeof participantFormSchema>
+  values: z.infer<typeof participantFormSchema>,
 ) {
   const participantId = uuidv4();
   const { orgId, userId } = await auth();
@@ -82,7 +113,7 @@ export async function createParticipant(
 
 export async function updateParticipant(
   participantId: string,
-  values: z.infer<typeof participantFormSchema>
+  values: z.infer<typeof participantFormSchema>,
 ) {
   const { orgId, userId } = await auth();
 

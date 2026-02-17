@@ -9,7 +9,6 @@ import { Ellipse } from "./core/Ellipse";
 import { Question } from "./custom/Question";
 import { Interview } from "./custom/Interview";
 import { FeatureIdea } from "./custom/FeatureIdea";
-import { ProblemStatement } from "./custom/ProblemStatement";
 import { QuestionAnswer } from "./custom/QuestionAnswer";
 import { ExampleBrainstormCard } from "./custom/ExampleBrainstormCard";
 

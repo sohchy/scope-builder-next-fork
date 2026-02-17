@@ -40,12 +40,16 @@ import {
 import { SelectValue } from "@radix-ui/react-select";
 import { EditorState, convertFromRaw } from "draft-js";
 import { participantFormSchema } from "@/schemas/participant";
-import { createParticipant } from "@/services/participants";
+import {
+  createParticipant,
+  createParticipantTag,
+} from "@/services/participants";
 import { MultiSelect } from "@/components/ui/multiselect";
 import { useState } from "react";
 
 interface AddParticipantProps {
   //marketSegments: any[];
+  tags: string[];
 }
 
 const ROLE_OPTIONS = [
@@ -61,11 +65,10 @@ const ROLE_OPTIONS = [
   //{ value: "Additional Stakeholder", label: "Additional Stakeholder" },
 ];
 
-export default function AddParticipant(
-  {
-    //marketSegments,
-  }: AddParticipantProps,
-) {
+export default function AddParticipant({
+  //marketSegments,
+  tags,
+}: AddParticipantProps) {
   const [open, setOpen] = useState(false);
   // const marketSegmentOptions = marketSegments
   //   ?.filter((s: any) => s.draftRaw)
@@ -92,6 +95,7 @@ export default function AddParticipant(
       status: "need_to_schedule",
       scheduled_date: undefined,
       notes: "",
+      tags: "",
     },
   });
 
@@ -99,6 +103,10 @@ export default function AddParticipant(
     await createParticipant(values);
     form.reset();
     setOpen(false);
+  }
+
+  async function onCreateTagOption(opt: string) {
+    await createParticipantTag(opt);
   }
 
   return (
@@ -141,30 +149,6 @@ export default function AddParticipant(
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Role</FormLabel>
-                    {/* <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Customer">Customer</SelectItem>
-                        <SelectItem value="End-User">End-User</SelectItem>
-                        <SelectItem value="Both Customer & End-User">
-                          Both Customer & End-User
-                        </SelectItem>
-                        <SelectItem value="Payer">Payer</SelectItem>
-                        <SelectItem value="Influencer">Influencer</SelectItem>
-                        <SelectItem value="Recommender">Recommender</SelectItem>
-                        <SelectItem value="Saboteur">Saboteur</SelectItem>
-                        <SelectItem value="Additional Decision Maker">
-                          Additional Decision Maker
-                        </SelectItem>
-                        <SelectItem value="Additional Stakeholder">
-                          Additional Stakeholder
-                        </SelectItem>
-                      </SelectContent>
-                    </Select> */}
                     <FormControl>
                       <MultiSelect
                         creatable={false}
@@ -336,6 +320,29 @@ export default function AddParticipant(
                       <Textarea {...field} />
                     </FormControl>
 
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tags</FormLabel>
+                    <FormControl>
+                      <MultiSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={tags.map((tag) => ({
+                          value: tag,
+                          label: tag,
+                        }))}
+                        placeholder="Select or create a tag"
+                        onCreateOption={(opt) => onCreateTagOption(opt.value)}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

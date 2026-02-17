@@ -61,7 +61,7 @@ export const CardFrame: React.FC<CardFrame> = (props) => {
   }
 
   function setAttachmentsNext(
-    next: Attachment[] | ((prev: Attachment[]) => Attachment[])
+    next: Attachment[] | ((prev: Attachment[]) => Attachment[]),
   ) {
     const base = attRef.current ?? [];
     const value = typeof next === "function" ? next(base) : next;
@@ -70,7 +70,7 @@ export const CardFrame: React.FC<CardFrame> = (props) => {
 
   function upsertAttachment(id: string, patch: Partial<Attachment>) {
     setAttachmentsNext((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, ...patch } : a))
+      prev.map((a) => (a.id === id ? { ...a, ...patch } : a)),
     );
   }
 
@@ -106,7 +106,7 @@ export const CardFrame: React.FC<CardFrame> = (props) => {
             (ext || "FILE").toUpperCase(),
             "#E5E7EB",
             220,
-            140
+            140,
           ); // gray
         }
       } catch {
@@ -114,7 +114,7 @@ export const CardFrame: React.FC<CardFrame> = (props) => {
           (ext || "FILE").toUpperCase(),
           "#E5E7EB",
           220,
-          140
+          140,
         );
       }
 
@@ -198,7 +198,10 @@ export const CardFrame: React.FC<CardFrame> = (props) => {
       interactive={props.interactive ?? true}
       showConnectors={props.isSelected && props.selectedCount === 1}
     >
-      <div className="w-fullbg-white border-1 border-[#B4B9C9] rounded-xl flex flex-col overflow-hidden shadow-[0px_4px_33.3px_0px_rgba(30,39,143,0.2)]" onClick={onClick}>
+      <div
+        className="w-full bg-white border-1 border-[#B4B9C9] rounded-xl flex flex-col overflow-hidden shadow-[0px_4px_33.3px_0px_rgba(30,39,143,0.2)]"
+        onClick={onClick}
+      >
         {/* Header */}
         <div
           className={`px-3 py-2 font-semibold text-[14px] flex items-start justify-between break-words whitespace-normal`}
@@ -416,7 +419,7 @@ async function makeLabelThumb(
   label: string,
   bg = "#E5E7EB",
   w = 220,
-  h = 140
+  h = 140,
 ): Promise<string> {
   const canvas = document.createElement("canvas");
   canvas.width = w;
@@ -558,7 +561,7 @@ function formatBytes(bytes?: number) {
   const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.min(
     Math.floor(Math.log(bytes) / Math.log(1024)),
-    sizes.length - 1
+    sizes.length - 1,
   );
   const val = bytes / Math.pow(1024, i);
   return `${val.toFixed(val >= 10 || i === 0 ? 0 : 1)} ${sizes[i]}`;

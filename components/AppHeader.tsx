@@ -53,26 +53,30 @@ export default function AppHeader() {
     if (pathname.includes("/hypotheses")) title = "Hypotheses";
     if (pathname.includes("/admin-panel")) title = "Admin Panel";
     if (pathname.includes("/todos")) title = "Tasks & Todos";
+    if (pathname.includes("/teams-dashboard")) title = "Leaderboard";
+    if (pathname.includes("/excercises/excercise-1")) title = "Excercise 1";
+    if (pathname.includes("/excercises/excercise-2")) title = "Excercise 2";
 
-    if (
-      pathname.includes("/participants/") ||
-      pathname.includes("/interview")
-    ) {
-      const path = pathname.split("/");
+    // if (
+    //   pathname.includes("/participants/") ||
+    //   pathname.includes("/interview")
+    // ) {
+    //   const path = pathname.split("/");
 
-      const participantId = pathname.includes("/interview") ? path[2] : path[1];
-      const participant = await getParticipant(participantId);
+    //   const participantId = pathname.includes("/interview") ? path[2] : path[1];
+    //   const participant = await getParticipant(participantId);
 
-      setHeader(
-        <div>
-          <Link href={"/participants"}>{title}</Link>
-          <span>{" > "}</span>
-          <span>{participant?.name}</span>
-        </div>,
-      );
-    } else {
-      setHeader(title);
-    }
+    //   setHeader(
+    //     <div>
+    //       <Link href={"/participants"}>{title}</Link>
+    //       <span>{" > "}</span>
+    //       <span>{participant?.name}</span>
+    //     </div>,
+    //   );
+    // } else {
+    //   setHeader(title);
+    // }
+    setHeader(title);
   };
 
   const renderInfo = (pathname: string) => {

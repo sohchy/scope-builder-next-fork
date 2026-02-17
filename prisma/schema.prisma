@@ -47,7 +47,7 @@ model Participant {
   hypothesis_to_validate String?
   learnings              String?
   notes                  String?
-  tags                   String[]            @default([])
+  tags                   String?
   status                 ParticipantStatus   @default(need_to_schedule)
   scheduled_date         DateTime?
   created_at             DateTime            @default(now())
@@ -55,6 +55,17 @@ model Participant {
   interview_responses    InterviewResponse[]
 
   @@map("participants")
+}
+
+model ParticipantTag {
+  id     Int    @id @default(autoincrement())
+  name   String
+  org_id String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("participant_tags")
 }
 
 model ParticipantRoom {

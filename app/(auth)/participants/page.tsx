@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import ParticipantsTable from "./_components/ParticipantsTable";
 import AddParticipant from "./_components/AddParticipant";
-import { getParticipants } from "@/services/participants";
+import { getParticipants, getParticipantTags } from "@/services/participants";
 import { getSegments } from "@/services/segments";
 
 export default async function ParticipantsPage() {
   // const marketSegments = await getSegments();
+  const tags = await getParticipantTags();
   const participants = await getParticipants();
 
   return (
@@ -20,10 +21,10 @@ export default async function ParticipantsPage() {
               Manage your interview pipeline and scheduling
             </span>
           </div>
-          <AddParticipant />
+          <AddParticipant tags={tags} />
         </header>
 
-        <ParticipantsTable data={participants} />
+        <ParticipantsTable data={participants} tags={tags} />
       </div>
     </div>
   );
