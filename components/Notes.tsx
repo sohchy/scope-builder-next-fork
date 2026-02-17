@@ -339,9 +339,9 @@ function FileAttachment({
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors text-white no-underline",
+        "flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors text-foreground no-underline",
         isCurrentUser
-          ? "border-primary-foreground/20 hover:bg-primary-foreground/10"
+          ? "border-foreground/20 hover:bg-primary-foreground/10"
           : "border-border hover:bg-accent",
       )}
     >
@@ -472,14 +472,14 @@ export function ChatNote({
         </span>
         <div
           className={cn(
-            "rounded-2xl px-4 py-2.5 text-sm leading-relaxed max-w-prose",
+            "rounded-2xl px-4 py-2.5 text-sm leading-relaxed max-w-prose bg-muted",
             isAuthor
-              ? "bg-primary text-primary-foreground rounded-br-md"
+              ? "bg-muted text-foreground rounded-br-md"
               : "bg-muted text-foreground rounded-bl-md",
             hasAttachments ? "pb-2.5" : "",
           )}
         >
-          {images.length > 0 && (
+          {/* {images.length > 0 && (
             <div
               className={cn(
                 "grid gap-1",
@@ -492,7 +492,7 @@ export function ChatNote({
                 <ImageAttachment key={img.url} attachment={img} />
               ))}
             </div>
-          )}
+          )} */}
 
           {content && (
             <div
@@ -506,7 +506,7 @@ export function ChatNote({
             </div>
           )}
 
-          {files.length > 0 && (
+          {/* {files.length > 0 && (
             <div className="flex flex-col gap-1.5 px-2.5">
               {files.map((file) => (
                 <FileAttachment
@@ -516,7 +516,7 @@ export function ChatNote({
                 />
               ))}
             </div>
-          )}
+          )} */}
         </div>
         <span className="text-[11px] text-muted-foreground px-1 flex flex-row gap-1.5 items-center">
           {timestamp}
@@ -524,6 +524,33 @@ export function ChatNote({
             <span className="font-semibold text-[#6A35FF]">public</span>
           )}
         </span>
+
+        {files.length > 0 && (
+          <div className="flex flex-col gap-1.5 px-2.5">
+            {files.map((file) => (
+              <FileAttachment
+                key={file.url}
+                attachment={file}
+                isCurrentUser={isAuthor}
+              />
+            ))}
+          </div>
+        )}
+
+        {images.length > 0 && (
+          <div
+            className={cn(
+              "grid gap-1",
+              images.length === 1 && "grid-cols-1",
+              images.length === 2 && "grid-cols-2",
+              images.length >= 3 && "grid-cols-2",
+            )}
+          >
+            {images.map((img) => (
+              <ImageAttachment key={img.url} attachment={img} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
