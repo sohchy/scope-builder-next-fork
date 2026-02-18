@@ -22,12 +22,12 @@ export interface ShapeFrameProps {
   onResizeStart: (
     e: React.MouseEvent<HTMLDivElement>,
     id: string,
-    handle: Dir
+    handle: Dir,
   ) => void;
   onConnectorMouseDown?: (
     e: React.MouseEvent<HTMLDivElement>,
     shapeId: string,
-    direction: Connector
+    direction: Connector,
   ) => void;
 
   // visual content of the block (Rect, Ellipse, Text, etc.)
@@ -177,10 +177,10 @@ export const ShapeFrame: React.FC<ShapeFrameProps> = ({
       pos === "top"
         ? "-90deg"
         : pos === "bottom"
-        ? "90deg"
-        : pos === "left"
-        ? "180deg"
-        : "0deg";
+          ? "90deg"
+          : pos === "left"
+            ? "180deg"
+            : "0deg";
 
     return points.map((p) => (
       <div key={p.id} className="group absolute z-40" style={p.style}>
@@ -226,7 +226,7 @@ export const ShapeFrame: React.FC<ShapeFrameProps> = ({
       }}
     >
       {/* Floating toolbar (single select): Tag picker */}
-      {showSingleSelectionUI && (
+      {/* {showSingleSelectionUI && (
         <BlockToolbar
           shape={shape}
           flipBelow={flipBelow}
@@ -237,7 +237,7 @@ export const ShapeFrame: React.FC<ShapeFrameProps> = ({
           //onLockToggle={onLockToggle}
           locked={Boolean((shape as any).locked)}
         />
-      )}
+      )} */}
       {/* {showSingleSelectionUI && (
         <div
           className="absolute -top-9 left-0 z-50"

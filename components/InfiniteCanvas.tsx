@@ -9,6 +9,7 @@ import {
 } from "@liveblocks/react";
 import { Hand } from "lucide-react";
 import { useRef, useState, useEffect, useMemo } from "react";
+import "./styles.css";
 
 import {
   writeClipboard,
@@ -28,6 +29,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+
+import textCursor from "./text.png";
+import cardCursor from "./card.png";
+import squareCursor from "./square.png";
+import circleCursor from "./circle.png";
 
 import { shapeRegistry } from "./CanvasModule/blocks/blockRegistry";
 import { useShapeManager } from "./CanvasModule/hooks/useShapeManager";
@@ -1141,8 +1147,33 @@ export default function InfiniteCanvas({
     return "right";
   }
 
+  const getCursor = () => {
+    if (placementTool?.kind === "shape" && placementTool.type === "text") {
+      return `url(${textCursor.src}) 0 0, auto`;
+    }
+
+    if (placementTool?.kind === "shape" && placementTool.type === "rect") {
+      return `url(${squareCursor.src}) 0 0, auto`;
+    }
+
+    if (placementTool?.kind === "shape" && placementTool.type === "ellipse") {
+      return `url(${circleCursor.src}) 0 0, auto`;
+    }
+
+    if (placementTool?.kind === "card") {
+      return `url(${cardCursor.src}) 0 0, auto`;
+    }
+
+    return "default";
+  };
+
   return (
-    <div className="w-full h-full overflow-hidden bg-[#EFF0F4] relative flex">
+    <div
+      className={`w-full h-full overflow-hidden bg-[#EFF0F4] relative flex`}
+      style={{
+        cursor: getCursor(),
+      }}
+    >
       {/* {!valuePropCanvasMode && (
         <div className="absolute top-4 right-4 z-20 flex flex-row gap-6 bg-black p-2 rounded-md text-white">
           <div className="flex items-center gap-3 ">

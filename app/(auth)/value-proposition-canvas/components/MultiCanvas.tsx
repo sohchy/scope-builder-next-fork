@@ -102,14 +102,14 @@ export default function MultiCanvas({
             >
               <InfiniteCanvas
                 toolbarOptions={{
-                  text: false,
+                  text: true,
                   card: true,
                   table: false,
                   answer: false,
-                  ellipse: false,
+                  ellipse: true,
                   feature: false,
                   question: false,
-                  rectangle: false,
+                  rectangle: true,
                   interview: false,
                 }}
                 valuePropCanvasMode
@@ -128,14 +128,14 @@ export default function MultiCanvas({
             >
               <InfiniteCanvas
                 toolbarOptions={{
-                  text: false,
+                  text: true,
                   card: true,
                   table: false,
                   answer: false,
-                  ellipse: false,
+                  ellipse: true,
                   feature: false,
                   question: false,
-                  rectangle: false,
+                  rectangle: true,
                   interview: false,
                 }}
                 valuePropCanvasMode
@@ -154,14 +154,14 @@ export default function MultiCanvas({
             >
               <InfiniteCanvas
                 toolbarOptions={{
-                  text: false,
+                  text: true,
                   card: true,
                   table: false,
                   answer: false,
-                  ellipse: false,
+                  ellipse: true,
                   feature: false,
                   question: false,
-                  rectangle: false,
+                  rectangle: true,
                   interview: false,
                 }}
                 valuePropCanvasMode
@@ -182,14 +182,14 @@ export default function MultiCanvas({
             >
               <InfiniteCanvas
                 toolbarOptions={{
-                  text: false,
+                  text: true,
                   card: true,
                   table: false,
                   answer: false,
-                  ellipse: false,
+                  ellipse: true,
                   feature: false,
                   question: false,
-                  rectangle: false,
+                  rectangle: true,
                   interview: false,
                 }}
                 valuePropCanvasMode
@@ -208,14 +208,14 @@ export default function MultiCanvas({
             >
               <InfiniteCanvas
                 toolbarOptions={{
-                  text: false,
+                  text: true,
                   card: true,
                   table: false,
                   answer: false,
-                  ellipse: false,
+                  ellipse: true,
                   feature: false,
                   question: false,
-                  rectangle: false,
+                  rectangle: true,
                   interview: false,
                 }}
                 valuePropCanvasMode
@@ -234,14 +234,14 @@ export default function MultiCanvas({
             >
               <InfiniteCanvas
                 toolbarOptions={{
-                  text: false,
+                  text: true,
                   card: true,
                   table: false,
                   answer: false,
-                  ellipse: false,
+                  ellipse: true,
                   feature: false,
                   question: false,
-                  rectangle: false,
+                  rectangle: true,
                   interview: false,
                 }}
                 valuePropCanvasMode
