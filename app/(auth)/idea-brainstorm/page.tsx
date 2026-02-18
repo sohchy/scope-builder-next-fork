@@ -11,8 +11,9 @@ export default async function IdeaBrainstormPage() {
   const { orgId } = await auth();
 
   await initializeExampleCards(
-    `brainstorm-examples-${orgId}`,
-    createBrainstormExampleCards,
+    // `brainstorm-examples-${orgId}`,
+    `brainstorm-examples`,
+    // createBrainstormExampleCards,
   );
 
   return (
@@ -42,7 +43,7 @@ export default async function IdeaBrainstormPage() {
           </TabsContent>
 
           <TabsContent value="examples" className="h-full">
-            <Room roomId={`brainstorm-examples-${orgId}`}>
+            <Room roomId={`brainstorm-examples`}>
               <InfiniteCanvas
                 toolbarOptions={{
                   text: false,

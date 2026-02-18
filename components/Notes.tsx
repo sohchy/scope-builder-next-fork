@@ -180,7 +180,7 @@ export default function Notes() {
       }}
     >
       <SheetTrigger asChild>
-        <Button size={"icon"} className="cursor-pointer">
+        <Button size={"icon"} variant={"ghost"} className="cursor-pointer">
           <MessageCircleIcon size={14} />
         </Button>
       </SheetTrigger>

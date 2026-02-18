@@ -59,6 +59,7 @@ type TopicTaskWithTopicName = TopicTask & { topic_name: string };
 
 const columns: ColumnDef<TopicTaskWithTopicName>[] = [
   { accessorKey: "id", header: "Id" },
+  { accessorKey: "title", header: "Title" },
   { accessorKey: "topic_name", header: "Topic Name" },
   { accessorKey: "type", header: "Type" },
   { accessorKey: "subtype", header: "Subtype" },
@@ -291,7 +292,7 @@ export default function TopicTasksTable({
                           <FormItem>
                             <FormLabel>Description</FormLabel>
                             <FormControl>
-                              <Input {...field} />
+                              <Textarea {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -530,7 +531,14 @@ export default function TopicTasksTable({
                       )}
                     />
 
-                    {["image", "video", "youtube"].includes(subtype) && (
+                    {[
+                      "image",
+                      "video",
+                      "youtube",
+                      "book",
+                      "tool",
+                      "excercise",
+                    ].includes(subtype) && (
                       <>
                         <FormField
                           name="url"
@@ -567,7 +575,7 @@ export default function TopicTasksTable({
                             <FormItem>
                               <FormLabel>Description</FormLabel>
                               <FormControl>
-                                <Input {...field} />
+                                <Textarea {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>

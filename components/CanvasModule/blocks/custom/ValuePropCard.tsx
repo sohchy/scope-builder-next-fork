@@ -171,7 +171,7 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col gap-6 p-4">
-          <div className="flex flex-row items-center gap-1">
+          <div className="flex flex-row items-center gap-1 w-full">
             <h3
               className="text-3xl font-medium text-gray-300"
               style={{
@@ -184,7 +184,10 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
             >
               Our
             </h3>
-            <div className="relative">
+            <div className="relative w-full flex flex-col gap-2">
+              <Label className="text-gray-200 font-bold">
+                Products and Services
+              </Label>
               <Textarea
                 style={{}}
                 value={shape.summary?.["our"]}
@@ -196,8 +199,8 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
                     },
                   });
                 }}
-                className="w-105 border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
-                placeholder="Products and Services"
+                className="w-full border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
+                //placeholder="Products and Services"
               />
             </div>
           </div>
@@ -215,7 +218,10 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
             >
               Help(s)
             </h3>
-            <div className="relative">
+            <div className="relative w-full flex flex-col gap-2">
+              <Label className="text-gray-200 font-bold">
+                Customer Segment
+              </Label>
               <Textarea
                 value={shape.summary?.["help"]}
                 onChange={(e) => {
@@ -226,8 +232,7 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
                     },
                   });
                 }}
-                className="w-98 border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
-                placeholder="Customer Segment"
+                className="w-full border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-200 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
               />
             </div>
           </div>
@@ -245,7 +250,8 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
             >
               who want to
             </h3>
-            <div className="relative">
+            <div className="relative w-full flex flex-col gap-2">
+              <Label className="text-gray-200 font-bold">Jobs to be Done</Label>
               <Textarea
                 value={shape.summary?.["who"]}
                 onChange={(e) => {
@@ -256,8 +262,7 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
                     },
                   });
                 }}
-                className="w-88 border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
-                placeholder="Jobs to be Done"
+                className="w-full border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-200 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
               />
             </div>
           </div>
@@ -275,7 +280,8 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
             >
               By
             </h3>
-            <div className="relative">
+            <div className="relative w-full flex flex-col gap-2">
+              <Label className="text-gray-200 font-bold">Verb</Label>
               <Textarea
                 value={shape.summary?.["verb_pain"]}
                 onChange={(e) => {
@@ -286,11 +292,11 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
                     },
                   });
                 }}
-                className="w-52 border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
-                placeholder="Verb"
+                className="w-full border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-200 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
               />
             </div>
-            <div className="relative">
+            <div className="relative w-full flex flex-col gap-2">
+              <Label className="text-gray-200 font-bold">Customer Pain</Label>
               <Textarea
                 value={shape.summary?.["pain"]}
                 onChange={(e) => {
@@ -301,8 +307,7 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
                     },
                   });
                 }}
-                className="w-56 border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
-                placeholder="Customer Pain"
+                className="w-full border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-200 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
               />
             </div>
           </div>
@@ -320,7 +325,8 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
             >
               And
             </h3>
-            <div className="relative">
+            <div className="relative w-full flex flex-col gap-2">
+              <Label className="text-gray-200 font-bold">Verb</Label>
               <Textarea
                 value={shape.summary?.["verb_gain"]}
                 onChange={(e) => {
@@ -331,11 +337,11 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
                     },
                   });
                 }}
-                className="w-48 border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
-                placeholder="Verb"
+                className="w-full border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-200 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
               />
             </div>
-            <div className="relative">
+            <div className="relative w-full flex flex-col gap-2">
+              <Label className="text-gray-200 font-bold">Customer Gain</Label>
               <Textarea
                 value={shape.summary?.["gain"]}
                 onChange={(e) => {
@@ -346,8 +352,7 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
                     },
                   });
                 }}
-                className="w-56 border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
-                placeholder="Customer Gain"
+                className="w-full border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-200 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
               />
             </div>
           </div>
@@ -364,7 +369,10 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
             >
               (Unlike
             </h3>
-            <div className="relative">
+            <div className="relative w-full flex flex-col gap-2">
+              <Label className="text-gray-200 font-bold">
+                Competing Value Proposition
+              </Label>
               <Textarea
                 value={shape.summary?.["unlike"]}
                 onChange={(e) => {
@@ -375,8 +383,7 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
                     },
                   });
                 }}
-                className="w-96 border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
-                placeholder="Competing Value Proposition"
+                className="w-full border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
               />
             </div>
             <h3

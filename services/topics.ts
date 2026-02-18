@@ -21,7 +21,7 @@ export async function getTopics() {
   if (!orgId) redirect("/pick-startup");
 
   const topics = await prisma.topic.findMany({
-    orderBy: { order: "asc" },
+    orderBy: { order: "desc" },
     include: {
       topic_tasks: {
         orderBy: { order: "asc" },

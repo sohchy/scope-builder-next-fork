@@ -30,7 +30,7 @@ export async function initializeInterviewRoom(roomId: string) {
 
   const roomStorage = await liveblocks.getStorageDocument(roomId);
   const questionStorage: any = await liveblocks.getStorageDocument(
-    `questions-${orgId}`
+    `questions-${orgId}`,
   );
 
   console.log("roomStorage", roomStorage);
@@ -51,7 +51,7 @@ export async function initializeInterviewRoom(roomId: string) {
           },
         },
       };
-    }
+    },
   );
 
   if (Object.keys(roomStorage.data).length > 0) {
@@ -74,7 +74,7 @@ export async function initializeInterviewRoom(roomId: string) {
                 questionDate: new Date().toDateString(),
                 questionDetails: shape.data.draftRaw,
               },
-            })
+            }),
           );
         } else {
           // questions.set(
@@ -118,7 +118,7 @@ export async function initializeInterviewRoom(roomId: string) {
 
 export async function initializeExampleCards(
   roomId: string,
-  createExamples: () => LiveList<LiveObject<any>>
+  createExamples?: () => LiveList<LiveObject<any>>,
 ) {
   await liveblocks.getOrCreateRoom(roomId, {
     defaultAccesses: [],
@@ -148,12 +148,11 @@ export async function initializeExampleCards(
 
   const hasExample = hasExampleCards(
     //@ts-ignore
-    (roomStorage.data?.shapes?.data as any[]) || []
+    (roomStorage.data?.shapes?.data as any[]) || [],
   );
 
-  if (!hasExample) {
+  if (!hasExample && createExamples) {
     const exampleCards = await createExamples();
-    console.log("Initializing example cards", exampleCards);
 
     await liveblocks.mutateStorage(roomId, ({ root }) => {
       const shapes = root.get("shapes");
@@ -161,7 +160,7 @@ export async function initializeExampleCards(
         shapes.push(
           new LiveObject({
             ...card.toObject(),
-          })
+          }),
         );
       });
     });
@@ -172,7 +171,7 @@ export function hasExampleCards(shapes: any[]) {
   return shapes.some(
     (shape) =>
       shape.data.subtype?.includes("example") ||
-      shape.data.type?.includes("example")
+      shape.data.type?.includes("example"),
   );
 }
 
@@ -192,7 +191,7 @@ export function createSegmentExampleCards() {
         "Pickup eg: Drivers of luxury light duty pickup trucks configured to tow recreational trailers",
       draftRaw:
         '{"blocks":[{"key":"4sqit","text":"This is in comparison to a different customer segment who has to say use it in a heavy construction setting.","type":"unstyled","depth":0,"inlineStyleRanges":[{"offset":0,"length":108,"style":"BOLD"}],"entityRanges":[],"data":{}}],"entityMap":{}}',
-    })
+    }),
   );
   shapes.push(
     new LiveObject({
@@ -207,7 +206,7 @@ export function createSegmentExampleCards() {
       subtype: "example_industry_market_segment_card",
       draftRaw:
         '{"blocks":[{"key":"5hdom","text":"This is in addition to other Transportation segments like Farming, Commercial, Military, Aerospace, Marine, Rail etc.","type":"unstyled","depth":0,"inlineStyleRanges":[{"offset":0,"length":117,"style":"BOLD"}],"entityRanges":[],"data":{}}],"entityMap":{}}',
-    })
+    }),
   );
 
   return shapes;
@@ -224,7 +223,7 @@ export function createBrainstormExampleCards() {
       width: 997,
       height: 450,
       subtype: null,
-    })
+    }),
   );
 
   return shapes;

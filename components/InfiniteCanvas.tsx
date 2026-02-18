@@ -7,7 +7,7 @@ import {
   useHistory,
   useCanRedo,
 } from "@liveblocks/react";
-import { Hand } from "lucide-react";
+import { Hand, LayoutListIcon } from "lucide-react";
 import { useRef, useState, useEffect, useMemo } from "react";
 import "./styles.css";
 
@@ -378,8 +378,9 @@ export default function InfiniteCanvas({
           const exampleShapeIds = shapes
             .filter(
               (shape) =>
-                shape.type.includes("example") ||
-                shape.subtype?.includes("example"),
+                //shape.type.includes("example") ||
+                //shape.subtype?.includes("example"),
+                false,
             )
             .map((s) => s.id);
           setShowDeleteConfirm(
@@ -835,9 +836,9 @@ export default function InfiniteCanvas({
         subtype: placementTool.subtype,
         width:
           placementTool.subtype === "value_prop_card"
-            ? 500
+            ? 650
             : placementTool.subtype === "problem_statement_card"
-              ? 500
+              ? 650
               : 440,
       }));
     }
@@ -1230,11 +1231,11 @@ export default function InfiniteCanvas({
         </div>
       )}
 
-      {editable && !valuePropCanvasMode && (
+      {/* {editable && !valuePropCanvasMode && (
         <div className="absolute bottom-4 right-4 z-20">
           <Comments />
         </div>
-      )}
+      )} */}
 
       <div className="absolute bottom-4 right-35 z-20">
         {isAnalysisCanvas && !valuePropCanvasMode && <HelperAnalysis />}
@@ -1331,6 +1332,7 @@ export default function InfiniteCanvas({
             {/* Shapes group */}
             <button
               onClick={() => {
+                setPanToolEnabled(false); // disable pan when opening a tool group
                 setOpenToolGroup((g) => (g === "shapes" ? null : "shapes"));
               }}
               className={`w-13 h-13 flex flex-col items-center justify-center rounded-xl
@@ -1357,6 +1359,7 @@ export default function InfiniteCanvas({
             {/* Cards group */}
             <button
               onClick={() => {
+                setPanToolEnabled(false); // disable pan when opening a tool group
                 setOpenToolGroup((g) => (g === "cards" ? null : "cards"));
               }}
               className={`w-13 h-13 flex flex-col items-center justify-center rounded-xl
@@ -1443,7 +1446,10 @@ export default function InfiniteCanvas({
                         <ToolItem
                           label="Problem Statement"
                           icon={
-                            <SquarePlus className="text-[#111827]" size={18} />
+                            <LayoutListIcon
+                              className="text-[#111827]"
+                              size={18}
+                            />
                           }
                           active={
                             placementTool?.kind === "card" &&
@@ -1460,7 +1466,10 @@ export default function InfiniteCanvas({
                         <ToolItem
                           label="Value Prop"
                           icon={
-                            <SquarePlus className="text-[#111827]" size={18} />
+                            <LayoutListIcon
+                              className="text-[#111827]"
+                              size={18}
+                            />
                           }
                           active={
                             placementTool?.kind === "card" &&
@@ -1481,7 +1490,7 @@ export default function InfiniteCanvas({
                           <ToolItem
                             label="Jobs To Be Done"
                             icon={
-                              <SquarePlus
+                              <LayoutListIcon
                                 className="text-[#111827]"
                                 size={18}
                               />
@@ -1503,7 +1512,7 @@ export default function InfiniteCanvas({
                           <ToolItem
                             label="Pains"
                             icon={
-                              <SquarePlus
+                              <LayoutListIcon
                                 className="text-[#111827]"
                                 size={18}
                               />
@@ -1525,7 +1534,7 @@ export default function InfiniteCanvas({
                           <ToolItem
                             label="Gains"
                             icon={
-                              <SquarePlus
+                              <LayoutListIcon
                                 className="text-[#111827]"
                                 size={18}
                               />
@@ -1548,7 +1557,7 @@ export default function InfiniteCanvas({
                           <ToolItem
                             label="Products & Services"
                             icon={
-                              <SquarePlus
+                              <LayoutListIcon
                                 className="text-[#111827]"
                                 size={18}
                               />
@@ -1571,7 +1580,7 @@ export default function InfiniteCanvas({
                           <ToolItem
                             label="Pain Relievers"
                             icon={
-                              <SquarePlus
+                              <LayoutListIcon
                                 className="text-[#111827]"
                                 size={18}
                               />
@@ -1594,7 +1603,7 @@ export default function InfiniteCanvas({
                           <ToolItem
                             label="Gain Creators"
                             icon={
-                              <SquarePlus
+                              <LayoutListIcon
                                 className="text-[#111827]"
                                 size={18}
                               />
