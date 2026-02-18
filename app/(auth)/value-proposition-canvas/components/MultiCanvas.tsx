@@ -98,7 +98,7 @@ export default function MultiCanvas({
               Jobs to be Done
             </Badge>
             <Room
-              roomId={`value-proposition-jobs-to-be-done-${orgId}${example ? "-example" : ""}`}
+              roomId={`${example ? "value-proposition-jobs-to-be-done-example" : `value-proposition-jobs-to-be-done-${orgId}`} `}
             >
               <InfiniteCanvas
                 toolbarOptions={{
@@ -124,7 +124,7 @@ export default function MultiCanvas({
           <div className="border-2 relative">
             <Badge className="absolute z-50 top-1 left-1">Pains</Badge>
             <Room
-              roomId={`value-proposition-pains-${orgId}${example ? "-example" : ""}`}
+              roomId={`${example ? "value-proposition-pains-example" : `value-proposition-pains-${orgId}`} `}
             >
               <InfiniteCanvas
                 toolbarOptions={{
@@ -150,7 +150,7 @@ export default function MultiCanvas({
           <div className="border-2 relative">
             <Badge className="absolute z-50 top-1 left-1">Gains</Badge>
             <Room
-              roomId={`value-proposition-gains-${orgId}${example ? "-example" : ""}`}
+              roomId={`${example ? "value-proposition-gains-example" : `value-proposition-gains-${orgId}`} `}
             >
               <InfiniteCanvas
                 toolbarOptions={{
@@ -178,7 +178,7 @@ export default function MultiCanvas({
               Products & Services
             </Badge>
             <Room
-              roomId={`value-proposition-products-services-${orgId}${example ? "-example" : ""}`}
+              roomId={`${example ? "value-proposition-products-services-example" : `value-proposition-products-services-${orgId}`} `}
             >
               <InfiniteCanvas
                 toolbarOptions={{
@@ -204,7 +204,7 @@ export default function MultiCanvas({
           <div className="border-2 relative">
             <Badge className="absolute z-50 top-1 left-1">Pain Relievers</Badge>
             <Room
-              roomId={`value-proposition-pain-relievers-${orgId}${example ? "-example" : ""}`}
+              roomId={`${example ? "value-proposition-pain-relievers-example" : `value-proposition-pain-relievers-${orgId}`} `}
             >
               <InfiniteCanvas
                 toolbarOptions={{
@@ -230,7 +230,7 @@ export default function MultiCanvas({
           <div className="border-2 relative">
             <Badge className="absolute z-50 top-1 left-1">Gain Creators</Badge>
             <Room
-              roomId={`value-proposition-gain-creators-${orgId}${example ? "-example" : ""}`}
+              roomId={`${example ? "value-proposition-gain-creators-example" : `value-proposition-gain-creators-${orgId}`} `}
             >
               <InfiniteCanvas
                 toolbarOptions={{

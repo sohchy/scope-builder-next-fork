@@ -184,20 +184,18 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
                 letterSpacing: "0%",
               }}
             >
-              Our
+              Today
             </h3>
             <div className="relative w-full flex flex-col gap-2">
-              <Label className="text-gray-200 font-bold">
-                Products and Services
-              </Label>
+              <Label className="text-gray-200 font-bold">Stakeholder</Label>
               <Textarea
                 style={{}}
-                value={shape.summary?.["our"]}
+                value={shape.summary?.["today"]}
                 onChange={(e) => {
                   commit({
                     summary: {
                       ...shape.summary,
-                      ["our"]: e.target.value,
+                      ["today"]: e.target.value,
                     },
                   });
                 }}
@@ -218,19 +216,19 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
                 letterSpacing: "0%",
               }}
             >
-              Help(s)
+              when
             </h3>
             <div className="relative w-full flex flex-col gap-2">
               <Label className="text-gray-200 font-bold">
-                Customer Segment
+                Job they do or want done
               </Label>
               <Textarea
-                value={shape.summary?.["help"]}
+                value={shape.summary?.["when"]}
                 onChange={(e) => {
                   commit({
                     summary: {
                       ...shape.summary,
-                      ["help"]: e.target.value,
+                      ["when"]: e.target.value,
                     },
                   });
                 }}
@@ -250,17 +248,20 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
                 letterSpacing: "0%",
               }}
             >
-              who want to
+              they
             </h3>
             <div className="relative w-full flex flex-col gap-2">
-              <Label className="text-gray-200 font-bold">Jobs to be Done</Label>
+              <Label className="text-gray-200 font-bold">
+                Action they take to get job done; either
+                quantifiable/emotional/social
+              </Label>
               <Textarea
-                value={shape.summary?.["who"]}
+                value={shape.summary?.["they"]}
                 onChange={(e) => {
                   commit({
                     summary: {
                       ...shape.summary,
-                      ["who"]: e.target.value,
+                      ["they"]: e.target.value,
                     },
                   });
                 }}
@@ -269,7 +270,7 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
             </div>
           </div>
 
-          <div className="flex flex-row items-center gap-1">
+          {/* <div className="flex flex-row items-center gap-1">
             <h3
               className="text-3xl font-medium text-gray-300"
               style={{
@@ -312,9 +313,9 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
                 className="w-full border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-200 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
               />
             </div>
-          </div>
+          </div> */}
 
-          <div className="flex flex-row items-center gap-1">
+          {/* <div className="flex flex-row items-center gap-1">
             <h3
               className="text-3xl font-medium text-gray-300"
               style={{
@@ -357,7 +358,8 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
                 className="w-full border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-200 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
               />
             </div>
-          </div>
+          </div> */}
+
           <div className="flex flex-row items-center gap-1">
             <h3
               className="text-3xl font-medium text-gray-300"
@@ -369,19 +371,19 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
                 letterSpacing: "0%",
               }}
             >
-              (Unlike
+              which cause
             </h3>
             <div className="relative w-full flex flex-col gap-2">
               <Label className="text-gray-200 font-bold">
-                Competing Value Proposition
+                Consequences of action being insufficient or non existent
               </Label>
               <Textarea
-                value={shape.summary?.["unlike"]}
+                value={shape.summary?.["which cause"]}
                 onChange={(e) => {
                   commit({
                     summary: {
                       ...shape.summary,
-                      ["unlike"]: e.target.value,
+                      ["which cause"]: e.target.value,
                     },
                   });
                 }}

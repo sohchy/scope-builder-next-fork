@@ -43,13 +43,13 @@ export const BlockToolbar: React.FC<Props> = ({
         {/* Bubble */}
         <div className="flex items-center text-xs gap-1.5 px-2 py-1.5 rounded-2xl bg-white/98 backdrop-blur border border-gray-200 shadow-lg ring-1 ring-black/5 w-max">
           {/* Default set — TagPicker (icon trigger works too if you added it) */}
-          <TagPicker
+          {/* <TagPicker
             // trigger="icon" // uncomment if you implemented the icon trigger
             value={shape.tags ?? []}
             onChange={(names) => onChangeTags?.(shape.id, names)}
-          />
+          /> */}
 
-          <div className="w-px h-5 bg-gray-200" />
+          {/* <div className="w-px h-5 bg-gray-200" /> */}
 
           {/* <button
             className="p-1.5 rounded-lg hover:bg-gray-50"

@@ -367,7 +367,7 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
                 letterSpacing: "0%",
               }}
             >
-              (Unlike
+              Unlike
             </h3>
             <div className="relative w-full flex flex-col gap-2">
               <Label className="text-gray-200 font-bold">

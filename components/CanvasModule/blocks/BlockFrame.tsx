@@ -226,7 +226,7 @@ export const ShapeFrame: React.FC<ShapeFrameProps> = ({
       }}
     >
       {/* Floating toolbar (single select): Tag picker */}
-      {/* {showSingleSelectionUI && (
+      {showSingleSelectionUI && (
         <BlockToolbar
           shape={shape}
           flipBelow={flipBelow}
@@ -237,7 +237,7 @@ export const ShapeFrame: React.FC<ShapeFrameProps> = ({
           //onLockToggle={onLockToggle}
           locked={Boolean((shape as any).locked)}
         />
-      )} */}
+      )}
       {/* {showSingleSelectionUI && (
         <div
           className="absolute -top-9 left-0 z-50"
@@ -251,7 +251,7 @@ export const ShapeFrame: React.FC<ShapeFrameProps> = ({
             />
           </div>
         </div>
-      )} */}
+      )}  */}
 
       {/* Selection outline (single select) */}
       {renderSelectionOutline()}
