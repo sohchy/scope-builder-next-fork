@@ -11,6 +11,9 @@ import {
   CircleCheckIcon,
   ImageIcon,
   PlayIcon,
+  BookOpenTextIcon,
+  SquareDashedMousePointerIcon,
+  DumbbellIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { YouTubeEmbed } from "@next/third-parties/google";
@@ -170,8 +173,8 @@ export default function Topic({ topic }: TopicProps) {
       </div>
 
       {isOpen && (
-        <div className="grid grid-cols-3 w-[750px] col-span-5  font-semibold border border-gray-400 rounded-[10px] mb-[30px]">
-          <div className="border-r w-[250px] border-gray-400 p-4 h-[172px] grid grid-cols-4 gap-2 content-start">
+        <div className="grid grid-cols-3 w-[750px] col-span-5  font-semibold border border-gray-400 rounded-[10px] mb-[30px] h-min">
+          <div className="border-r w-[250px] border-gray-400 p-4 flex flex-col gap-2 ">
             {topicState.concept_tasks.map((task) => (
               <TaskItem
                 key={task.id}
@@ -184,7 +187,7 @@ export default function Topic({ topic }: TopicProps) {
               />
             ))}
           </div>
-          <div className="border-r w-[250px] border-gray-400  p-4 h-[172px] grid grid-cols-4 gap-8">
+          <div className="border-r w-[250px] border-gray-400 p-4  flex flex-col gap-2 ">
             {topicState.excercises_tasks.map((task) => (
               <TaskItem
                 key={task.id}
@@ -197,7 +200,7 @@ export default function Topic({ topic }: TopicProps) {
               />
             ))}
           </div>
-          <div className=" w-[250px] border-gray-400  p-4  h-[172px] grid grid-cols-4 gap-8">
+          <div className="w-[250px] border-gray-400 p-4  flex flex-col gap-2 ">
             {topicState.startup_tasks.map((task) => (
               <TaskItem
                 key={task.id}
@@ -321,16 +324,160 @@ const TaskItem = ({
         onComplete={onComplete}
       >
         <div>
-          <div className="w-full flex items-center justify-center">
+          <div className="w-full flex items-center justify-center h-[500px]">
             <img
               width={"100%"}
-              height={"100%"}
               src={url || ""}
               alt={title || "Image"}
+              className="object-contain h-full"
             />
           </div>
           <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
             Image
+          </span>
+          {/* <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3> */}
+          {/* <p className="text-[#697288] text-[16px] font-medium mb-1">
+            {description}
+          </p> */}
+          <div
+            data-todo-content
+            className={`text-[14px] font-medium text-[#2E3545] break-words overflow-wrap-anywhere `}
+            dangerouslySetInnerHTML={{
+              __html: description || "",
+            }}
+            style={
+              {
+                //maxHeight: !isExpanded && needsShowMore ? "4.5rem" : "none",
+                //overflow: !isExpanded && needsShowMore ? "hidden" : "visible",
+              }
+            }
+          />
+        </div>
+      </ProgressItem>
+    );
+  }
+
+  if (type === "book") {
+    return (
+      <ProgressItem
+        title={title}
+        isCompleted={completed}
+        triggerEl={
+          <div
+            className={`size-10 border ${completed ? "bg-[#28BF58] text-[#FFFFFF]" : "bg-[#EDF6F0] text-[#8F84AE] border-gray-400"} flex items-center justify-center rounded-[8px] `}
+          >
+            <BookOpenTextIcon size={20} />
+          </div>
+        }
+        onComplete={onComplete}
+      >
+        <div>
+          <div className="w-full flex items-center justify-center h-[500px]">
+            <img
+              width={"100%"}
+              src={url || ""}
+              alt={title || "Book"}
+              className="object-contain h-full"
+            />
+          </div>
+          <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
+            Book
+          </span>
+          {/* <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3> */}
+          {/* <p className="text-[#697288] text-[16px] font-medium mb-1">
+            {description}
+          </p> */}
+          <div
+            data-todo-content
+            className={`text-[14px] font-medium text-[#2E3545] break-words overflow-wrap-anywhere `}
+            dangerouslySetInnerHTML={{
+              __html: description || "",
+            }}
+            style={
+              {
+                //maxHeight: !isExpanded && needsShowMore ? "4.5rem" : "none",
+                //overflow: !isExpanded && needsShowMore ? "hidden" : "visible",
+              }
+            }
+          />
+        </div>
+      </ProgressItem>
+    );
+  }
+
+  if (type === "tool") {
+    return (
+      <ProgressItem
+        title={title}
+        isCompleted={completed}
+        triggerEl={
+          <div
+            className={`size-10 border ${completed ? "bg-[#28BF58] text-[#FFFFFF]" : "bg-[#EDF6F0] text-[#8F84AE] border-gray-400"} flex items-center justify-center rounded-[8px] `}
+          >
+            <SquareDashedMousePointerIcon size={20} />
+          </div>
+        }
+        onComplete={onComplete}
+      >
+        <div>
+          <div className="w-full flex items-center justify-center h-[500px]">
+            <img
+              width={"100%"}
+              src={url || ""}
+              alt={title || "Tool"}
+              className="object-contain h-full"
+            />
+          </div>
+          <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
+            Tool
+          </span>
+          {/* <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3> */}
+          {/* <p className="text-[#697288] text-[16px] font-medium mb-1">
+            {description}
+          </p> */}
+          <div
+            data-todo-content
+            className={`text-[14px] font-medium text-[#2E3545] break-words overflow-wrap-anywhere `}
+            dangerouslySetInnerHTML={{
+              __html: description || "",
+            }}
+            style={
+              {
+                //maxHeight: !isExpanded && needsShowMore ? "4.5rem" : "none",
+                //overflow: !isExpanded && needsShowMore ? "hidden" : "visible",
+              }
+            }
+          />
+        </div>
+      </ProgressItem>
+    );
+  }
+
+  if (type === "excercise") {
+    return (
+      <ProgressItem
+        title={title}
+        isCompleted={completed}
+        triggerEl={
+          <div
+            className={`size-10 border ${completed ? "bg-[#28BF58] text-[#FFFFFF]" : "bg-[#EDF6F0] text-[#8F84AE] border-gray-400"} flex items-center justify-center rounded-[8px] `}
+          >
+            <DumbbellIcon size={20} />
+          </div>
+        }
+        onComplete={onComplete}
+      >
+        <div>
+          <div className="w-full flex items-center justify-center h-[500px]">
+            <img
+              width={"100%"}
+              src={url || ""}
+              alt={title || "Excercise"}
+              className="object-contain h-full"
+            />
+          </div>
+          <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
+            Excercise
           </span>
           {/* <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3> */}
           {/* <p className="text-[#697288] text-[16px] font-medium mb-1">
@@ -466,10 +613,29 @@ const ProgressItem = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  function truncateString(value: string, maxLength: number): string {
+    if (!value) return "";
+    if (value.length <= maxLength) return value;
+
+    const truncated = value.slice(0, maxLength - 3);
+    const lastSpace = truncated.lastIndexOf(" ");
+
+    if (lastSpace > 0) {
+      return truncated.slice(0, lastSpace) + " ...";
+    }
+
+    return truncated + " ...";
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger className="cursor-pointer" asChild>
-        {triggerEl}
+        <div className="flex flex-row items-center gap-2">
+          {triggerEl}
+          <span className="text-[14px] flex-1">
+            {truncateString(title || "", 50)}
+          </span>
+        </div>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[890px] h-[700px]">
         <DialogHeader>

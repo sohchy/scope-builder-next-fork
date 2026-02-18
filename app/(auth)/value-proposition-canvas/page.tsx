@@ -7,7 +7,9 @@ import { QuestionsProvider } from "@/components/CanvasModule/questions/Questions
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
+  AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -47,17 +49,22 @@ export default async function ValuePropositionCanvasPage() {
                         maxWidth: "950px",
                         maxHeight: "650px",
                       }}
-                      className="flex flex-col items-center justify-center"
+                      className="flex flex-col justify-center"
                     >
                       {/* <AlertDialogHeader>
                         <AlertDialogTitle>Book Design</AlertDialogTitle>
                       </AlertDialogHeader> */}
-                      <Image
-                        width={825}
-                        height={550}
-                        alt="Book Design"
-                        src={"/value-prop.png"}
-                      />
+                      <div className="w-full h-full flex flex-col items-center justify-center">
+                        <Image
+                          width={825}
+                          height={550}
+                          alt="Book Design"
+                          src={"/value-prop.png"}
+                        />
+                      </div>
+                      <AlertDialogFooter className="flex justify-end">
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>

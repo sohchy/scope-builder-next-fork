@@ -399,7 +399,7 @@ export default function HypothesesCard({
                         <SelectValue placeholder="Select a type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Identify which Stakeholder role">
+                        <SelectItem value="Gather information">
                           Gather information
                         </SelectItem>
                         <SelectItem value="Identify which Stakeholder role">
@@ -414,16 +414,16 @@ export default function HypothesesCard({
                         <SelectItem value="Identify Pains">
                           Identify Pains
                         </SelectItem>
-                        <SelectItem value="Identify Pains">
+                        <SelectItem value="Identify Gains">
                           Identify Gains
                         </SelectItem>
-                        <SelectItem value="Identify Pains">
+                        <SelectItem value="Identify Market Size">
                           Identify Market Size
                         </SelectItem>
-                        <SelectItem value="Identify Pains">
+                        <SelectItem value="Identify Pains Severity">
                           Identify Pains Severity
                         </SelectItem>
-                        <SelectItem value="Identify Pains">
+                        <SelectItem value="Identify Gains Significance">
                           Identify Gains Significance
                         </SelectItem>
                       </SelectContent>

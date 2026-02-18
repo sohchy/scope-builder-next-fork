@@ -23,9 +23,13 @@ export default async function HypothesesPage() {
     order: hypothesis.order,
     priority: hypothesis.priority,
     description: hypothesis.description,
-    interviews: interviewResponsesData
-      .filter((response) => response.hypothesysId === hypothesis.id)
-      .map((response) => response.interviewee),
+    interviews: Array.from(
+      new Set(
+        interviewResponsesData
+          .filter((response) => response.hypothesysId === hypothesis.id)
+          .map((response) => response.interviewee),
+      ),
+    ),
     questions: hypothesis.questions.map((question) => ({
       id: question.id,
       title: question.title,

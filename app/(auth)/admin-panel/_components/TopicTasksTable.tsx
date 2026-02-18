@@ -238,7 +238,7 @@ export default function TopicTasksTable({
                             <SelectItem value="article">Article</SelectItem>
                             <SelectItem value="book">Book</SelectItem>
                             <SelectItem value="tool">Tool</SelectItem>
-                            <SelectItem value="comment">Comment</SelectItem>
+                            {/* <SelectItem value="comment">Comment</SelectItem> */}
                             <SelectItem value="excercise">Excercise</SelectItem>
                           </SelectContent>
                         </Select>
@@ -247,7 +247,14 @@ export default function TopicTasksTable({
                     )}
                   />
 
-                  {["image", "video", "youtube"].includes(subtype) && (
+                  {[
+                    "image",
+                    "video",
+                    "youtube",
+                    "book",
+                    "tool",
+                    "excercise",
+                  ].includes(subtype) && (
                     <>
                       <FormField
                         name="url"

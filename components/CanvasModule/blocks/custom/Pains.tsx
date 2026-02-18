@@ -33,7 +33,7 @@ type PainsProps = Omit<ShapeFrameProps, "children" | "shape"> & {
 // SSR-safe import (react-draft-wysiwyg touches window)
 const RteEditor = dynamic(
   () => import("react-draft-wysiwyg").then((m) => m.Editor),
-  { ssr: false }
+  { ssr: false },
 );
 
 export const Pains: React.FC<PainsProps> = (props) => {
@@ -99,12 +99,12 @@ export const Pains: React.FC<PainsProps> = (props) => {
 
   const fiQuestions = useMemo(
     () => questions.filter((q) => q.card_type === "card"),
-    [questions]
+    [questions],
   );
 
   const answeredCount = fiQuestions.reduce(
     (n, _q, i) => n + (tags[i] ? 1 : 0),
-    0
+    0,
   );
 
   const allAnswered =
@@ -365,7 +365,7 @@ export const Pains: React.FC<PainsProps> = (props) => {
               />
             )}
           </div>
-          <div className="pt-4">
+          {/* <div className="pt-4">
             <button
               type="button"
               onClick={(e) => {
@@ -385,9 +385,7 @@ export const Pains: React.FC<PainsProps> = (props) => {
                   }`}
                 />
               </span>
-              {/* <span className="text-gray-400">
-                ({answeredCount}/{fiQuestions.length})
-              </span> */}
+             
             </button>
 
             {!collapsed && (
@@ -539,7 +537,7 @@ export const Pains: React.FC<PainsProps> = (props) => {
                 ))}
               </div>
             )}
-          </div>
+          </div> */}
           {/* {tags.length > 0 && (
             <div className="mt-4 flex flex-row gap-2 items-center">
               <span className="text-sm text-gray-600">Significance Score:</span>

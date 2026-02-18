@@ -53,7 +53,7 @@ export default async function ProgressDashboardPage() {
           };
         }),
       excercises_tasks: topic.topic_tasks
-        .filter((t) => t.type === "exercise")
+        .filter((t) => t.type === "excercise")
         .map((t) => {
           const taskProgress = topicProgress.find((tp) => tp.task_id === t.id);
           return {
@@ -84,9 +84,11 @@ export default async function ProgressDashboardPage() {
   return (
     <div className="p-8 h-full bg-[#F0F1F5] flex justify-center">
       <div className="flex flex-col gap-5 max-w-[1182px] h-full">
-        <div className="grid grid-cols-7 pr-8 gap-8">
-          <h1 className="text-[#111827]  text-2xl font-semibold col-span-2"></h1>
-          <div className="grid grid-cols-3 h-[34px] col-span-5 bg-[#2E3545] text-white text-sm font-semibold border border-[#EFF0F4] rounded-[4px]">
+        <div className="grid grid-cols-7">
+          <div className=" col-span-2 w-[330px]">
+            <h1 className="text-[#111827] text-2xl font-semibold"></h1>
+          </div>
+          <div className="ml-[7px] w-[750px] grid grid-cols-3 h-[34px] col-span-5 bg-[#2E3545] text-white text-sm font-semibold border border-[#EFF0F4] rounded-[4px]">
             <div className="border-r border-[#F0F1F5] flex items-center px-4">
               Concept
             </div>

@@ -57,13 +57,15 @@ export default async function TeamsDashboardPage() {
     };
   };
 
-  const dashboardData = organizations.data.map((org) => ({
-    orgId: org.id,
-    orgName: org.name,
-    interviews: getInterviewsData(org.id),
-    hypothesisStatus: getHypothesisData(org.id),
-    hypothesis: hypothesis.filter((h) => h.org_id === org.id).length,
-  }));
+  const dashboardData = organizations.data
+    .map((org) => ({
+      orgId: org.id,
+      orgName: org.name,
+      interviews: getInterviewsData(org.id),
+      hypothesisStatus: getHypothesisData(org.id),
+      hypothesis: hypothesis.filter((h) => h.org_id === org.id).length,
+    }))
+    .sort((a, b) => a.orgName.localeCompare(b.orgName));
 
   return (
     <div className="p-8 h-full bg-white">
