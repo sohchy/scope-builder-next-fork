@@ -87,7 +87,9 @@ export default function AppHeader() {
       //alertDialogTitle = 'Quick tutorial on how to use the My Progress page:';
       content = (
         <>
-          Quick tutorial on how to use the My Progress page:
+          <b>Quick tutorial on how to use the My Progress page:</b>
+          <br/>
+          <i>Forgot to include in the tutorial video, you can also complete the main milestone itself once all tasks in that milestone are done.</i>
           <br/><br/>
           <video
             controls
@@ -103,7 +105,7 @@ export default function AppHeader() {
     if (pathname === "/idea-brainstorm") {
       content = (
         <>
-          Quick tutorial on how to use the Idea Brainstorm page:
+          <b>Quick tutorial on how to use the Idea Brainstorm page:</b>
           <br/><br/>
           <video
             controls
@@ -119,7 +121,7 @@ export default function AppHeader() {
     if (pathname === "/value-proposition-canvas") {
       content = (
         <>
-          Quick tutorial on how to use the Value Proposition Canvas page:
+          <b>Quick tutorial on how to use the Value Proposition Canvas page:</b>
           <br/><br/>
           <video
             controls
@@ -135,7 +137,7 @@ export default function AppHeader() {
     if (pathname.includes("/hypotheses")) {
       content = (
         <>
-          Quick tutorial on how to use the Participants page:
+          <b>Quick tutorial on how to use the Participants page:</b>
           <video
             controls
             className="w-full"
@@ -150,13 +152,29 @@ export default function AppHeader() {
      if (pathname === "/participants") {
       content = (
         <>
-          Quick tutorial on how to use the Participants page:
+          <b>Quick tutorial on how to use the Participants page:</b>
           <br/><br/>
           <video
             controls
             className="w-full"
             src={
               "https://zuazpraxvbtqlpkzayfj.supabase.co/storage/v1/object/public/attachments/videos/2026-02-19/Spring2026%20-%20Participants%20-%20Tutorial.mp4"
+            }
+          />
+        </>
+      );
+    }
+
+    if (pathname === "/teams-dashboard") {
+      content = (
+        <>
+          <b>Quick tutorial on how to use the Leaderboard page:</b>
+          <br/><br/>
+          <video
+            controls
+            className="w-full"
+            src={
+              "https://zuazpraxvbtqlpkzayfj.supabase.co/storage/v1/object/public/attachments/videos/2026-02-19/Spring2026%20-%20Leaderboard%20-%20Tutorial.mp4"
             }
           />
         </>
