@@ -138,6 +138,7 @@ export default function AppHeader() {
       content = (
         <>
           <b>Quick tutorial on how to use the Hypotheses page:</b>
+          <br/><br/>
           <video
             controls
             className="w-full"
