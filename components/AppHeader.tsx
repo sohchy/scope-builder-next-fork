@@ -137,7 +137,7 @@ export default function AppHeader() {
     if (pathname.includes("/hypotheses")) {
       content = (
         <>
-          <b>Quick tutorial on how to use the Hypothesis page:</b>
+          <b>Quick tutorial on how to use the Hypotheses page:</b>
           <video
             controls
             className="w-full"
@@ -152,7 +152,7 @@ export default function AppHeader() {
      if (pathname === "/participants") {
       content = (
         <>
-          <b>Quick tutorial on how to use the Participants page:</b>
+          <b>Quick tutorial on how to use the Interview Participants page:</b>
           <br/><br/>
           <video
             controls
