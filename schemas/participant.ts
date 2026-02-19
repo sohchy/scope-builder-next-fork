@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const participantFormSchema = z.object({
   name: z.string().min(1, "Name is required."),
+  job_title: z.string().optional(),
   role: z.string().optional(),
   contact_info: z.string().optional(),
   rationale: z.string().optional(),

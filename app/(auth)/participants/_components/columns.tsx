@@ -38,6 +38,15 @@ export const columns: (tags: string[]) => ColumnDef<any>[] = (tags) => [
     },
   },
   {
+    accessorKey: "job_title",
+    header: "Job Title",
+    cell: ({ row }) => (
+      <div className="capitalize whitespace-normal">
+        {row.getValue("job_title")}
+      </div>
+    ),
+  },
+  {
     accessorKey: "scheduled_date",
     header: "Schedule Date",
     cell: ({ row }) => {

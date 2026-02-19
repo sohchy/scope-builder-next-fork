@@ -85,6 +85,7 @@ export default function AddParticipant({
     resolver: zodResolver(participantFormSchema),
     defaultValues: {
       name: "",
+      job_title: "",
       role: "",
       contact_info: "",
       rationale: "",
@@ -134,6 +135,21 @@ export default function AddParticipant({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="job_title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Job Title</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>

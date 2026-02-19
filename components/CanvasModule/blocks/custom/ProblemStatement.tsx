@@ -172,8 +172,8 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
         className="mt-1 rounded-[8px] "
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex flex-col gap-6 p-4">
-          <div className="flex flex-row items-center gap-1 w-full">
+        <div className="flex flex-col gap-5 p-4">
+          <div className="flex flex-row items-center gap-5 w-full">
             <h3
               className="text-3xl font-medium text-gray-300"
               style={{
@@ -186,9 +186,11 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
             >
               For
             </h3>
-            <div className="relative w-full flex flex-col gap-2">
-              <Label className="text-gray-200 font-bold">Stakeholder</Label>
-              <Textarea
+            <div className="relative w-full flex flex-col ">
+              <Label className="text-gray-200 font-semibold text-[14px] pl-3">
+                stakeholder
+              </Label>
+              <Input
                 style={{}}
                 value={shape.summary?.["today"]}
                 onChange={(e) => {
@@ -199,13 +201,13 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
                     },
                   });
                 }}
-                className="w-full border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
+                className="w-full text-2xl border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
                 //placeholder="Products and Services"
               />
             </div>
           </div>
 
-          <div className="flex flex-row items-center gap-1">
+          <div className="flex flex-row items-center gap-5">
             <h3
               className="text-3xl font-medium text-gray-300"
               style={{
@@ -218,11 +220,11 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
             >
               when
             </h3>
-            <div className="relative w-full flex flex-col gap-2">
-              <Label className="text-gray-200 font-bold">
-                Job they do or want done
+            <div className="relative w-full flex flex-col ">
+              <Label className="text-gray-200 font-semibold text-[14px] pl-3">
+                job they do or want done
               </Label>
-              <Textarea
+              <Input
                 value={shape.summary?.["when"]}
                 onChange={(e) => {
                   commit({
@@ -237,7 +239,7 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
             </div>
           </div>
 
-          <div className="flex flex-row items-center gap-1">
+          <div className="flex flex-row items-center gap-5">
             <h3
               className="text-3xl font-medium text-gray-300"
               style={{
@@ -250,9 +252,9 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
             >
               they
             </h3>
-            <div className="relative w-full flex flex-col gap-2">
-              <Label className="text-gray-200 font-bold">
-                Action they take to get job done; either
+            <div className="relative w-full flex flex-col ">
+              <Label className="text-gray-200 font-semibold text-[14px] pl-3">
+                action they take to get job done; either
                 quantifiable/emotional/social
               </Label>
               <Textarea
@@ -373,9 +375,9 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
             >
               which cause
             </h3>
-            <div className="relative w-full flex flex-col gap-2">
-              <Label className="text-gray-200 font-bold">
-                Consequences of action being insufficient or non existent
+            <div className="relative w-full flex flex-col ">
+              <Label className="text-gray-200 font-semibold text-[14px] pl-3">
+                consequences of action being insufficient or non existent
               </Label>
               <Textarea
                 value={shape.summary?.["which cause"]}
@@ -387,7 +389,7 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
                     },
                   });
                 }}
-                className="w-full border-0 border-b-2 border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
+                className="w-full border-0 border-b-2 text-2xl border-gray-400 bg-transparent text-white font-bold placeholder:text-gray-400 focus:border-gray-400 focus:border-t-0 focus:border-x-0 focus:ring-0 focus:outline-none rounded-none"
               />
             </div>
             <h3
@@ -399,9 +401,7 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
                 lineHeight: "24px",
                 letterSpacing: "0%",
               }}
-            >
-              )
-            </h3>
+            ></h3>
           </div>
         </div>
       </div>

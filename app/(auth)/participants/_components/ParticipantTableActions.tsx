@@ -138,6 +138,7 @@ export default function ParticipantTableActions({
       scheduled_date: participant.scheduled_date || undefined,
       notes: participant.notes || "",
       tags: participant.tags || "",
+      job_title: participant.job_title || "",
     },
   });
 
@@ -225,6 +226,21 @@ export default function ParticipantTableActions({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="job_title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Job Title</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>

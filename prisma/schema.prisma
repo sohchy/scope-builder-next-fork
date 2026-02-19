@@ -38,6 +38,7 @@ enum ParticipantStatus {
 model Participant {
   id                     String              @id @default(uuid())
   name                   String
+  job_title              String?
   org_id                 String
   role                   String?
   market_segment         String?

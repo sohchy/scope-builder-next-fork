@@ -15,6 +15,8 @@ export default async function TeamsDashboardPage() {
     limit: 200,
   });
 
+  console.log(organizations);
+
   const getInterviewsData = (orgId: string) => {
     const scheduleInterviews = participants.filter(
       (p) => p.org_id === orgId && p.scheduled_date,
@@ -60,6 +62,7 @@ export default async function TeamsDashboardPage() {
   };
 
   const dashboardData = organizations.data
+    .filter((org) => org.publicMetadata?.cohort === "spring26")
     .map((org) => ({
       orgId: org.id,
       orgName: org.name,
