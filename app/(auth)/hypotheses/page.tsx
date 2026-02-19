@@ -49,6 +49,7 @@ export default async function HypothesesPage() {
         "Transportation - Passenger Vehicles - Drivers of luxury light-duty pickup trucks configured to tow recreational vehicles 7,500+ miles",
       priority: 1,
       description: "test",
+      type: "Identify Job to be Done",
       interviews: ["John Doe", "Jane Smith"],
       questions: [
         {

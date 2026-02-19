@@ -81,20 +81,82 @@ export default function AppHeader() {
 
   const renderInfo = (pathname: string) => {
     let content;
+    //let alertDialogTitle = '';
 
     if (pathname === "/") {
-      content = <>This is the home page info</>;
-    }
-
-    if (pathname.includes("/hypotheses")) {
+      //alertDialogTitle = 'Quick tutorial on how to use the My Progress page:';
       content = (
         <>
-          This is the hypothesis page info
+          Quick tutorial on how to use the My Progress page:
+          <br/><br/>
           <video
             controls
             className="w-full"
             src={
-              "https://orkbbwgueesgrxzpgjag.supabase.co/storage/v1/object/public/attachments/videos/2026-02-10/8101432f-0df5-497a-9165-e02677114156.mov"
+              "https://zuazpraxvbtqlpkzayfj.supabase.co/storage/v1/object/public/attachments/videos/2026-02-19/Spring2026%20-%20My%20Progress%20-%20Tutorial.mp4"
+            }
+          />
+        </>
+      );
+    }
+
+    if (pathname === "/idea-brainstorm") {
+      content = (
+        <>
+          Quick tutorial on how to use the Idea Brainstorm page:
+          <br/><br/>
+          <video
+            controls
+            className="w-full"
+            src={
+              "https://zuazpraxvbtqlpkzayfj.supabase.co/storage/v1/object/public/attachments/videos/2026-02-19/Spring2026%20-%20Idea%20Brainstorm%20-%20Tutorial.mp4"
+            }
+          />
+        </>
+      );
+    }
+
+    if (pathname === "/value-proposition-canvas") {
+      content = (
+        <>
+          Quick tutorial on how to use the Value Proposition Canvas page:
+          <br/><br/>
+          <video
+            controls
+            className="w-full"
+            src={
+              "https://zuazpraxvbtqlpkzayfj.supabase.co/storage/v1/object/public/attachments/videos/2026-02-19/Spring2026%20-%20ValuePropCanvas%20-%20Tutorial.mp4"
+            }
+          />
+        </>
+      );
+    }
+    
+    if (pathname.includes("/hypotheses")) {
+      content = (
+        <>
+          Quick tutorial on how to use the Participants page:
+          <video
+            controls
+            className="w-full"
+            src={
+              "https://zuazpraxvbtqlpkzayfj.supabase.co/storage/v1/object/public/attachments/videos/2026-02-19/Spring2026%20-%20Hypothesis%20-%20Tutorial.mp4"
+            }
+          />
+        </>
+      );
+    }
+
+     if (pathname === "/participants") {
+      content = (
+        <>
+          Quick tutorial on how to use the Participants page:
+          <br/><br/>
+          <video
+            controls
+            className="w-full"
+            src={
+              "https://zuazpraxvbtqlpkzayfj.supabase.co/storage/v1/object/public/attachments/videos/2026-02-19/Spring2026%20-%20Participants%20-%20Tutorial.mp4"
             }
           />
         </>
@@ -120,9 +182,9 @@ export default function AppHeader() {
         </AlertDialogTrigger>
         <AlertDialogContent className="w-[750px] min-w-[750px]">
           <AlertDialogHeader>
-            <AlertDialogTitle>This is the title</AlertDialogTitle>
+            {/* <AlertDialogTitle>{alertDialogTitle}</AlertDialogTitle> */}
+            <AlertDialogTitle></AlertDialogTitle>
             <AlertDialogDescription>
-              This is the description for this popup info.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div>{content}</div>
