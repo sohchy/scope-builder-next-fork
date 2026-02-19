@@ -165,7 +165,7 @@ export const ValuePropCard: React.FC<ValuePropCardProps> = (props) => {
   }, [editorState, editingBody]);
 
   return (
-    <div className="flex-1 overflow-auto bg-[#6A35FF]">
+    <div className="flex-1 overflow-auto bg-[#007547]">
       <div
         className="mt-1 rounded-[8px] "
         onMouseDown={(e) => e.stopPropagation()}

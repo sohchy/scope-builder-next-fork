@@ -144,7 +144,7 @@ export default function TeamsDashboardTable({ data }: { data: any[] }) {
   });
 
   return (
-    <div>
+    <div className="h-full overflow-y-auto">
       <Table>
         <TableHeader className="bg-muted sticky top-0 z-10 p-2">
           {table.getHeaderGroups().map((headerGroup) => (

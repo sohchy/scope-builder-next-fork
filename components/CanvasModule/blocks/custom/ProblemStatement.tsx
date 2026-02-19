@@ -184,7 +184,7 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
                 letterSpacing: "0%",
               }}
             >
-              Today
+              For
             </h3>
             <div className="relative w-full flex flex-col gap-2">
               <Label className="text-gray-200 font-bold">Stakeholder</Label>

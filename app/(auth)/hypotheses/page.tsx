@@ -45,10 +45,10 @@ export default async function HypothesesPage() {
     {
       id: 1,
       order: 0,
-      title: "This is an example hypothesis",
+      title: "Transportation - Passenger Vehicles - Drivers of luxury light-duty pickup trucks configured to tow recreational vehicles 7,500+ miles",
       priority: 1,
       description:
-        "This is an example description for the hypothesis. It should give more details about the hypothesis and what it entails.",
+        "test",
       interviews: ["John Doe", "Jane Smith"],
       questions: [
         {
@@ -66,22 +66,22 @@ export default async function HypothesesPage() {
         },
       ],
       conclusion_content:
-        "This is an example conclusion for the hypothesis. It should summarize the findings from the interviews and whether the hypothesis was validated or not.",
+        "This is an example of the conclusion for the hypothesis.",
       conclusion_status: "Validated",
     },
-    {
-      id: 2,
-      order: 1,
-      title: "This is an another example hypothesis",
-      priority: 0,
-      description:
-        "This is an example description for the hypothesis. It should give more details about the hypothesis and what it entails.",
-      interviews: ["John Doe", "Jane Smith"],
-      questions: [],
-      conclusion_content:
-        "This is an example conclusion for the hypothesis. It should summarize the findings from the interviews and whether the hypothesis was validated or not.",
-      conclusion_status: "Testing",
-    },
+    // {
+    //   id: 2,
+    //   order: 1,
+    //   title: "This is an another example hypothesis",
+    //   priority: 0,
+    //   description:
+    //     "This is an example description for the hypothesis. It should give more details about the hypothesis and what it entails.",
+    //   interviews: ["John Doe", "Jane Smith"],
+    //   questions: [],
+    //   conclusion_content:
+    //     "This is an example conclusion for the hypothesis. It should summarize the findings from the interviews and whether the hypothesis was validated or not.",
+    //   conclusion_status: "Testing",
+    // },
   ];
 
   const getMaxOrder = () => {

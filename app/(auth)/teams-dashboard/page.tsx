@@ -11,7 +11,9 @@ export default async function TeamsDashboardPage() {
   const hypothesis = await getAllHypothesis();
   const participants = await getAllParticipants();
   const interviewResponses = await getAllInterviewResponses();
-  const organizations = await client.organizations.getOrganizationList();
+  const organizations = await client.organizations.getOrganizationList({
+    limit: 200,
+  });
 
   const getInterviewsData = (orgId: string) => {
     const scheduleInterviews = participants.filter(

@@ -14,6 +14,7 @@ import {
   BookOpenTextIcon,
   SquareDashedMousePointerIcon,
   DumbbellIcon,
+  ChevronUpIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { YouTubeEmbed } from "@next/third-parties/google";
@@ -114,7 +115,7 @@ export default function Topic({ topic }: TopicProps) {
             className={`w-[26px] min-w-[26px] h-[26px] min-h-[26px]  rounded-full flex items-center justify-center cursor-pointer ${topicState.isDone ? "bg-[#E4F5E9]" : "bg-[#F4F0FF]"}`}
           >
             {isOpen ? (
-              <ChevronDownIcon
+              <ChevronUpIcon
                 className={` ${topicState.isDone ? "text-[#247C30]" : "text-[#6A35FF]"}`}
                 size={18}
               />
