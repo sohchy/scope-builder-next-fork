@@ -47,8 +47,7 @@ export default async function HypothesesPage() {
       order: 0,
       title: "Transportation - Passenger Vehicles - Drivers of luxury light-duty pickup trucks configured to tow recreational vehicles 7,500+ miles",
       priority: 1,
-      description:
-        "test",
+      description: "test",
       interviews: ["John Doe", "Jane Smith"],
       questions: [
         {
@@ -65,8 +64,7 @@ export default async function HypothesesPage() {
           ],
         },
       ],
-      conclusion_content:
-        "This is an example of the conclusion for the hypothesis.",
+      conclusion_content: "This is an example of the conclusion for the hypothesis.",
       conclusion_status: "Validated",
     },
     // {
