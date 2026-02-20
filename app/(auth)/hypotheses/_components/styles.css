@@ -1,0 +1,3 @@
+.tabs-header:has(#example[data-state="active"]) .create-hypothesis-btn {
+  display: none;
+}

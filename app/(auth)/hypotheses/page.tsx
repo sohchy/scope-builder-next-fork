@@ -1,8 +1,10 @@
-import { getHypothesis, getInterviewResponses } from "@/services/hypothesis";
+import "./_components/styles.css";
+
+import HypothesesList from "./_components/HypothesesList";
 import HypothesesCard from "./_components/HypothesesCard";
 import CreateHypothesisButton from "./_components/CreateHypothesisButton";
+import { getHypothesis, getInterviewResponses } from "@/services/hypothesis";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import HypothesesList from "./_components/HypothesesList";
 
 export default async function HypothesesPage() {
   const hypotheses = await getHypothesis();
@@ -92,20 +94,17 @@ export default async function HypothesesPage() {
 
   return (
     <div className="flex flex-col p-4 gap-4 ">
-      <Tabs defaultValue="hypothesis" className="h-full ">
+      <Tabs defaultValue="hypothesis" className="h-full tabs-header">
         <div className="flex flex-row justify-between">
           <TabsList className="bg-white">
             <TabsTrigger value="hypothesis">Hypothesis</TabsTrigger>
-            <TabsTrigger value="examples">Examples</TabsTrigger>
+            <TabsTrigger id="example" value="examples">
+              Examples
+            </TabsTrigger>
           </TabsList>
           <CreateHypothesisButton maxOrder={getMaxOrder()} />
         </div>
         <TabsContent value="hypothesis" className="h-full flex flex-col gap-4">
-          {/* <div className="flex flex-col gap-4">
-            {hypothesesData.map((hypothesis) => (
-              <HypothesesCard key={hypothesis.id} hypothesis={hypothesis} />
-            ))}
-          </div> */}
           <HypothesesList hypotheses={hypothesesData} />
         </TabsContent>
 

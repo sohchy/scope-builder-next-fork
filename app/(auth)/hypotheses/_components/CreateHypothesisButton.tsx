@@ -10,7 +10,7 @@ export default function CreateHypothesisButton({
 }) {
   return (
     <Button
-      className="ml-auto"
+      className="ml-auto create-hypothesis-btn"
       onClick={async () => {
         await createHypothesis(maxOrder + 1);
       }}

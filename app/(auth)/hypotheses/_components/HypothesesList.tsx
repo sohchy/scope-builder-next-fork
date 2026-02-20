@@ -48,8 +48,6 @@ export default function HypothesesList({ hypotheses }: HypothesesListProps) {
     }
   }
 
-  console.log("items", items);
-
   return (
     <DndContext onDragEnd={handleDragEnd}>
       {/* @ts-ignore */}
