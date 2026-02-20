@@ -263,6 +263,38 @@ const TaskItem = ({
     }
   }
 
+  function getVimeoVideoId(input: string): string {
+    try {
+      //const url = new URL(input);
+      const url = input;
+      // url https://vimeo.com/125172324?fl=pl&fe=cm
+      if (url.includes("vimeo.com")) {
+        const vimeoRegex =
+          /(?:vimeo\.com\/)(?:channels\/[\w|^\/]+\/|groups\/[\w|^\/]+\/|album\/\d+\/video\/|video\/|)(\d{9,11})(?:(?:\?|\/|)\S*)/;
+        const match = url.match(vimeoRegex);
+        const videoId = match ? match[1] : null;
+
+        return String(videoId);
+        // const v = url.searchParams.get("v");
+        // if (v && /^[A-Za-z0-9_-]{11}$/.test(v)) return v;
+
+        // https://www.youtube.com/embed/VIDEOID  | /shorts/VIDEOID | /v/VIDEOID
+        // const m = url.pathname.match(/\/(embed|shorts|v)\/([A-Za-z0-9_-]{11})/);
+        // if (m) return m[2];
+      }
+
+      // https://youtu.be/VIDEOID
+      // if (url.hostname === "youtu.be") {
+      //   const id = url.pathname.replace(/^\/+/, "");
+      //   if (/^[A-Za-z0-9_-]{11}$/.test(id)) return id;
+      // }
+
+      return "";
+    } catch {
+      return ""; // invalid URL
+    }
+  }
+
   if (type === "youtube")
     return (
       <ProgressItem
@@ -288,6 +320,57 @@ const TaskItem = ({
           </div>
           <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
             YouTube
+          </span>
+          {/* <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3> */}
+          {/* <p className="text-[#697288] text-[16px] font-medium mb-1">
+            {description}
+          </p> */}
+          <div
+            data-todo-content
+            className={`text-[14px] font-medium text-[#2E3545] break-words overflow-wrap-anywhere `}
+            dangerouslySetInnerHTML={{
+              __html: description || "",
+            }}
+            style={
+              {
+                //maxHeight: !isExpanded && needsShowMore ? "4.5rem" : "none",
+                //overflow: !isExpanded && needsShowMore ? "hidden" : "visible",
+              }
+            }
+          />
+        </div>
+      </ProgressItem>
+    );
+
+  if (type === "vimeo")
+    return (
+      <ProgressItem
+        title={title}
+        isCompleted={completed}
+        triggerEl={
+          <div
+            className={`size-10 border ${completed ? "bg-[#28BF58] text-[#FFFFFF] border-[#28BF58]" : "bg-[#EDF6F0] text-[#8F84AE] border-gray-400"} flex items-center justify-center rounded-[8px] `}
+          >
+            <YoutubeIcon size={20} />
+          </div>
+        }
+        onComplete={onComplete}
+      >
+        <div>
+          <div className="w-full flex items-center justify-center">
+            <iframe
+              src={"https://player.vimeo.com/video/125172324"}
+              title={title ?? "Vimeo video player"}
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+              width={600}
+              height={400}
+              // absolutely fill the wrapper
+              //className="absolute left-0 top-0 border-0"
+            />
+          </div>
+          <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
+            Vimeo
           </span>
           {/* <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3> */}
           {/* <p className="text-[#697288] text-[16px] font-medium mb-1">

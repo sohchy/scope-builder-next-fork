@@ -236,6 +236,7 @@ export default function TopicTasksTable({
                             <SelectItem value="image">Image</SelectItem>
                             <SelectItem value="video">Video</SelectItem>
                             <SelectItem value="youtube">Youtube</SelectItem>
+                            <SelectItem value="vimeo">Vimeo</SelectItem>
                             <SelectItem value="article">Article</SelectItem>
                             <SelectItem value="book">Book</SelectItem>
                             <SelectItem value="tool">Tool</SelectItem>
@@ -252,6 +253,7 @@ export default function TopicTasksTable({
                     "image",
                     "video",
                     "youtube",
+                    "vimeo",
                     "book",
                     "tool",
                     "excercise",
@@ -517,6 +519,7 @@ export default function TopicTasksTable({
                               <SelectItem value="image">Image</SelectItem>
                               <SelectItem value="video">Video</SelectItem>
                               <SelectItem value="youtube">Youtube</SelectItem>
+                              <SelectItem value="vimeo">Vimeo</SelectItem>
                               <SelectItem value="article">Article</SelectItem>
                               <SelectItem value="book">Book</SelectItem>
                               <SelectItem value="tool">Tool</SelectItem>
