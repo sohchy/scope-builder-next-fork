@@ -20,7 +20,8 @@ export default async function Layout({
     <>
       <SidebarProvider>
         <AppSidebar
-          isAdminOrMentor={isAdminOrMentor || isfounderOfMultipleStartups}
+          isAdminOrMentor={isAdminOrMentor}
+          isFounderOfMultipleStartups={isfounderOfMultipleStartups}
         />
         <SidebarInset className="flex flex-col h-screen overflow-hidden">
           <AppHeader />

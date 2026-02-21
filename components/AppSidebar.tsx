@@ -188,8 +188,12 @@ const data = {
 
 export function AppSidebar({
   isAdminOrMentor,
+  isFounderOfMultipleStartups,
   ...props
-}: React.ComponentProps<typeof Sidebar> & { isAdminOrMentor: boolean }) {
+}: React.ComponentProps<typeof Sidebar> & {
+  isAdminOrMentor: boolean;
+  isFounderOfMultipleStartups: boolean;
+}) {
   const { user } = useUser();
   const { organization } = useOrganization();
 
@@ -212,7 +216,7 @@ export function AppSidebar({
         </Link>
 
         <div className="h-8 rounded-[8px] flex flex-row gap-2.5 items-center px-2">
-          {isAdminOrMentor ? (
+          {isFounderOfMultipleStartups ? (
             <Link
               href={"/startups"}
               className="flex flex-row gap-2.5 items-center w-full"
