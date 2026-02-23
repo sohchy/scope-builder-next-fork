@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { checkRole } from "@/lib/auth";
+import { checkFounderOfMultipleStartups, checkRole } from "@/lib/auth";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import StartupsTable from "./_components/StartupsTable";
 import Startups from "./_components/Startups";
@@ -9,7 +9,9 @@ export default async function StartupsPage() {
   const isAdminOrMentor =
     (await checkRole("admin")) || (await checkRole("mentor"));
 
-  if (!isAdminOrMentor) {
+  const isfounderOfMultipleStartups = await checkFounderOfMultipleStartups();
+
+  if (!isAdminOrMentor && !isfounderOfMultipleStartups) {
     redirect("/");
   }
 
