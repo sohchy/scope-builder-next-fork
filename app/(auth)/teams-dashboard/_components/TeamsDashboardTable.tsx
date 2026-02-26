@@ -45,7 +45,11 @@ const columns: ColumnDef<any>[] = [
     header: ({ table }) => (
       <div className="flex flex-col">
         <span className="text-[#697288]">Interviews:</span>
-        <span>20 / conducted / scheduled</span>
+        <span>
+          <span className="text-[#697288]">20</span> /{" "}
+          <span className="text-[#58C184]">conducted</span> /{" "}
+          <span className="text-[#B87F5A]">scheduled</span>
+        </span>
       </div>
     ),
     cell: ({ row }) => {
@@ -61,7 +65,7 @@ const columns: ColumnDef<any>[] = [
               {row.original.interviews.conducted}
             </span>{" "}
             /{" "}
-            <span className="text-[#C66B8F]">
+            <span className="text-[#B87F5A]">
               {row.original.interviews.scheduled}
             </span>
           </span>
@@ -85,7 +89,7 @@ const columns: ColumnDef<any>[] = [
               },
               {
                 value: row.original.interviews.scheduled,
-                colorClass: "bg-[#C66B8F]",
+                colorClass: "bg-[#B87F5A]",
               },
               {
                 value: 20,
@@ -120,7 +124,11 @@ const columns: ColumnDef<any>[] = [
     header: ({ table }) => (
       <div className="flex flex-col">
         <span className="text-[#697288]">Hypothesis</span>
-        <span>validated / invalidated / testing</span>
+        <span>
+          <span className="text-[#58C184]">validated</span> /{" "}
+          <span className="text-[#C66B8F]">invalidated</span> /{" "}
+          <span className="text-[#697288]">testing</span>
+        </span>
       </div>
     ),
     cell: ({ row }) => {

@@ -26,13 +26,13 @@ import { toast } from "sonner";
 // }
 
 // const quizData: IndividualQuizData[]  = [
-//     {
-//         id: 1,
-//         question: "A value proposition should always be customer-centric and focus solely on the customer's needs and desires.",
-//         responseType: quizResponseTypes.trueFalse,
-//         options: {},
-//         correctResponse: ["true"]
-//     },
+// {
+//     id: 1,
+//     question: "A value proposition should always be customer-centric and focus solely on the customer's needs and desires.",
+//     responseType: quizResponseTypes.trueFalse,
+//     options: {},
+//     correctResponse: ["true"]
+// },
 //     {
 //         id: 2,
 //         question: "What is a checkbox value proposition?",
@@ -57,7 +57,7 @@ import { toast } from "sonner";
 //         },
 //         correctResponse: ["B"]
 //     },
-    
+
 // ];
 
 export type QuizResponse = {
@@ -74,9 +74,8 @@ const QUESTION_1_ANSWER = "Because customers dislike hearing about new ideas";
 const QUESTION_3_ANSWER = ["Interviewing customers is a key method"];
 
 // export const QuizCard2 = quizData.map((item: IndividualQuizData) => {
-//   return <div key={item.id}>{item.question}</div>; 
+//   return <div key={item.id}>{item.question}</div>;
 // });
-  
 
 export const QuizCard = ({ responses }: QuizCardProps) => {
   const [quizResponses, setQuizResponses] = useState<QuizResponse>({

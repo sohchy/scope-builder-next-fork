@@ -22,7 +22,12 @@ export default async function IdeaBrainstormPage() {
         <Tabs defaultValue="canvas" className="h-full">
           <TabsList>
             <TabsTrigger value="canvas">Canvas</TabsTrigger>
-            <TabsTrigger value="examples">Examples</TabsTrigger>
+            <TabsTrigger value="examples-problem">
+              Example: Problem & Value Prop Ad-Lib
+            </TabsTrigger>
+            <TabsTrigger value="examples-ecosystem">
+              Example: Ecosystem Map
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="canvas" className="h-full">
             <Room roomId={`brainstorm-${orgId}`}>
@@ -41,8 +46,44 @@ export default async function IdeaBrainstormPage() {
               />
             </Room>
           </TabsContent>
+          <TabsContent value="examples-problem" className="h-full">
+            <Room roomId={`brainstorm-examples`}>
+              <InfiniteCanvas
+                toolbarOptions={{
+                  text: false,
+                  card: false,
+                  table: false,
+                  answer: false,
+                  ellipse: false,
+                  feature: false,
+                  question: false,
+                  rectangle: false,
+                  interview: false,
+                }}
+                editable={false}
+              />
+            </Room>
+          </TabsContent>
+          <TabsContent value="examples-ecosystem" className="h-full">
+            <Room roomId={`brainstorm-ecosystem-examples`}>
+              <InfiniteCanvas
+                toolbarOptions={{
+                  text: false,
+                  card: false,
+                  table: false,
+                  answer: false,
+                  ellipse: false,
+                  feature: false,
+                  question: false,
+                  rectangle: false,
+                  interview: false,
+                }}
+                editable={true}
+              />
+            </Room>
+          </TabsContent>
 
-          <TabsContent value="examples" className="h-full">
+          {/* <TabsContent value="examples" className="h-full">
             <Tabs defaultValue="examples-problem" className="h-full">
               <TabsList>
                 <TabsTrigger value="examples-problem">
@@ -91,7 +132,7 @@ export default async function IdeaBrainstormPage() {
                 </Room>
               </TabsContent>
             </Tabs>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
         {/* <Room roomId={`brainstorm-${orgId}`}>
           <InfiniteCanvas
