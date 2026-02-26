@@ -22,22 +22,26 @@ export default async function TeamsDashboardPage() {
       (p) => p.org_id === orgId && p.scheduled_date,
     );
 
-    const conductedInterviews = interviewResponses.filter((ir) => {
-      const participant = participants.find((p) => p.id === ir.participant_id);
-      return participant?.org_id === orgId;
-    });
+    // const conductedInterviews = interviewResponses.filter((ir) => {
+    //   const participant = participants.find((p) => p.id === ir.participant_id);
+    //   return participant?.org_id === orgId;
+    // });
 
-    const conductedInterviewsIds: string[] = [];
+    const conductedInterviews = participants.filter(
+      (p) => p.org_id === orgId && p.status === "complete",
+    );
 
-    conductedInterviews.forEach((ir) => {
-      if (!conductedInterviewsIds.includes(ir.participant_id)) {
-        conductedInterviewsIds.push(ir.participant_id);
-      }
-    });
+    // const conductedInterviewsIds: string[] = [];
+
+    // conductedInterviews.forEach((ir) => {
+    //   if (!conductedInterviewsIds.includes(ir.participant_id)) {
+    //     conductedInterviewsIds.push(ir.participant_id);
+    //   }
+    // });
 
     return {
       scheduled: scheduleInterviews.length,
-      conducted: conductedInterviewsIds.length,
+      conducted: conductedInterviews.length,
     };
   };
 
