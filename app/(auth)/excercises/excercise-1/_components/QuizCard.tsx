@@ -11,6 +11,55 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { createExcerciseResponse } from "@/services/excercises";
 import { toast } from "sonner";
 
+// enum quizResponseTypes {
+//   trueFalse = "trueFalse",
+//   multipleChoiceCheckbox = "multipleChoiceCheckbox",
+//   multipleChoiceRadio = "multipleChoiceRadio"
+// }
+
+// interface IndividualQuizData {
+//   id: number,
+//   question: string,
+//   responseType: quizResponseTypes,
+//   options: {},
+//   correctResponse: string[]
+// }
+
+// const quizData: IndividualQuizData[]  = [
+//     {
+//         id: 1,
+//         question: "A value proposition should always be customer-centric and focus solely on the customer's needs and desires.",
+//         responseType: quizResponseTypes.trueFalse,
+//         options: {},
+//         correctResponse: ["true"]
+//     },
+//     {
+//         id: 2,
+//         question: "What is a checkbox value proposition?",
+//         responseType: quizResponseTypes.multipleChoiceCheckbox,
+//         options: {
+//           A: "Technical specification of a product",
+//           B: "Statement of the unique benefits a product or service provides to the customer",
+//           C: "Pricing strategy for a product",
+//           D: "List of competitors in the market",
+//         },
+//         correctResponse: ["A","C"]
+//     },
+//     {
+//         id: 3,
+//         question: "What is a radio value proposition?",
+//         responseType: quizResponseTypes.multipleChoiceRadio,
+//         options: {
+//           A: "Technical specification of a product",
+//           B: "Statement of the unique benefits a product or service provides to the customer",
+//           C: "Pricing strategy for a product",
+//           D: "List of competitors in the market",
+//         },
+//         correctResponse: ["B"]
+//     },
+    
+// ];
+
 export type QuizResponse = {
   ["question-1"]: string;
   ["question-2"]: string;
@@ -23,6 +72,11 @@ interface QuizCardProps {
 
 const QUESTION_1_ANSWER = "Because customers dislike hearing about new ideas";
 const QUESTION_3_ANSWER = ["Interviewing customers is a key method"];
+
+// export const QuizCard2 = quizData.map((item: IndividualQuizData) => {
+//   return <div key={item.id}>{item.question}</div>; 
+// });
+  
 
 export const QuizCard = ({ responses }: QuizCardProps) => {
   const [quizResponses, setQuizResponses] = useState<QuizResponse>({
