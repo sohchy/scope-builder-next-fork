@@ -1,10 +1,64 @@
 import Image from "next/image";
 
-import { QuizCard, QuizResponse } from "./_components/QuizCard";
+// import { QuizCard, QuizResponse } from "./_components/QuizCard";
+import {
+  QuizQuestion,
+  QuizResponse,
+  DynamicQuizCard,
+  QuizResponseType,
+} from "./_components/DynamicQuizCard";
 import { getExcerciseResponse } from "@/services/excercises";
 
 export default async function Excercise1Page() {
   const excerciseResponse = await getExcerciseResponse(1);
+
+  const quizData: QuizQuestion[] = [
+    {
+      id: 1,
+      question:
+        "Why should entrepreneurs avoid pitching their idea during customer discovery interviews?",
+      responseType: "multipleChoiceRadio",
+      options: {
+        A: "Because customers dislike hearing about new ideas",
+        B: "Because the goal is to listen and learn from customers, not to sell",
+      },
+      correctResponse: [
+        "Because the goal is to listen and learn from customers, not to sell",
+      ],
+    },
+    {
+      id: 2,
+      question:
+        "A value proposition should always be customer-centric and focus solely on the customer's needs and desires.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["True"],
+    },
+    {
+      id: 3,
+      question:
+        "What is the main goal of customer discovery according to the text?",
+      responseType: "text",
+    },
+    {
+      id: 4,
+      question:
+        "Which of the following statements are true about customer discovery? (Select all that apply)",
+      responseType: "multipleChoiceCheckbox",
+      options: {
+        A: "It helps identify real customer problems",
+        B: "Customer support equals willingness to pay",
+        C: "Interviewing customers is a key method",
+      },
+      correctResponse: [
+        "It helps identify real customer problems",
+        "Interviewing customers is a key method",
+      ],
+    },
+  ];
 
   return (
     <div className="p-8 w-full h-full grid grid-cols-3 gap-4">
@@ -12,7 +66,10 @@ export default async function Excercise1Page() {
         <ContentCard />
       </div>
       <div className="col-span-1">
-        <QuizCard responses={excerciseResponse?.responses as QuizResponse} />
+        <DynamicQuizCard
+          quizData={quizData}
+          responses={excerciseResponse?.responses as QuizResponse}
+        />
       </div>
     </div>
   );

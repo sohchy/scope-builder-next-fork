@@ -45,17 +45,31 @@ const columns: ColumnDef<any>[] = [
     header: ({ table }) => (
       <div className="flex flex-col">
         <span className="text-[#697288]">Interviews:</span>
-        <span>conducted / scheduled</span>
+        <span>
+          <span className="text-[#697288]">20</span> /{" "}
+          <span className="text-[#58C184]">conducted</span> /{" "}
+          <span className="text-[#B87F5A]">scheduled</span>
+        </span>
       </div>
     ),
     cell: ({ row }) => {
       return (
         <div className="flex flex-row items-center gap-2">
-          <span className="text-gray-500 font-semibold">
+          {/* <span className="text-gray-500 font-semibold">
             {row.original.interviews.conducted} /{" "}
             {row.original.interviews.scheduled}
+          </span> */}
+          <span className="font-semibold text-[#697288]">
+            <span className="text-[#697288] underline"> 20</span> /{" "}
+            <span className="text-[#58C184] underline">
+              {row.original.interviews.conducted}
+            </span>{" "}
+            /{" "}
+            <span className="text-[#B87F5A]">
+              {row.original.interviews.scheduled}
+            </span>
           </span>
-          <Progress
+          {/* <Progress
             className="w-[60%]"
             progressClassname="bg-purple-500"
             value={
@@ -63,6 +77,25 @@ const columns: ColumnDef<any>[] = [
                 row.original.interviews.scheduled) *
               100
             }
+          /> */}
+          <Progress
+            className="w-[60%]"
+            progressClassname="bg-[#6A35FF]"
+            total={20}
+            segments={[
+              {
+                value: row.original.interviews.conducted,
+                colorClass: "bg-[#58C184]",
+              },
+              {
+                value: row.original.interviews.scheduled,
+                colorClass: "bg-[#B87F5A]",
+              },
+              {
+                value: 20,
+                colorClass: "bg-[#DDD9E9]",
+              },
+            ]}
           />
         </div>
       );
@@ -91,7 +124,11 @@ const columns: ColumnDef<any>[] = [
     header: ({ table }) => (
       <div className="flex flex-col">
         <span className="text-[#697288]">Hypothesis</span>
-        <span>validated / invalidated / testing</span>
+        <span>
+          <span className="text-[#58C184]">validated</span> /{" "}
+          <span className="text-[#C66B8F]">invalidated</span> /{" "}
+          <span className="text-[#697288]">testing</span>
+        </span>
       </div>
     ),
     cell: ({ row }) => {

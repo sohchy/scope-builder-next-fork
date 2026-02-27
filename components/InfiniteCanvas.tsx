@@ -7,7 +7,7 @@ import {
   useHistory,
   useCanRedo,
 } from "@liveblocks/react";
-import { Hand, LayoutListIcon } from "lucide-react";
+import { Hand, LassoSelectIcon, LayoutListIcon } from "lucide-react";
 import { useRef, useState, useEffect, useMemo } from "react";
 import "./styles.css";
 
@@ -1304,6 +1304,25 @@ export default function InfiniteCanvas({
       {/* Toolbar */}
       {editable && (
         <div className="absolute top-1/2 -translate-y-1/2 left-4 z-20 p-2 bg-white rounded-2xl shadow flex flex-col gap-3 items-center">
+          <button
+            onClick={() => {
+              //setPanToolEnabled((v) => !v);
+              // If enabling pan, exit placement mode
+              setPlacementTool(null);
+              setOpenToolGroup(null);
+              setSelectedShapeIds([]);
+            }}
+            className={`w-13 h-13 flex flex-col items-center justify-center rounded-xl bg-transparent text-[#111827]
+       
+      `}
+            title="Deselect tool"
+          >
+            <LassoSelectIcon className="pointer-events-none" size={18} />
+            <span className="text-[10px] font-bold opacity-60 pointer-events-none">
+              Unselect All
+            </span>
+          </button>
+
           {/* Pan */}
           <button
             onClick={() => {

@@ -21,7 +21,7 @@ export const BlockToolbar: React.FC<Props> = ({
   shape,
   extras,
   flipBelow = false,
-  gap = 16,
+  gap = 36,
   onChangeTags,
   onDuplicate,
   onDelete,
