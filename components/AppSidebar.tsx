@@ -206,13 +206,12 @@ export function AppSidebar({
           <Image
             width={200}
             height={50}
-            src={"/nutech_logo.jpg"}
-            alt="Nutech Ventures"
+            src={"/uno-logo-black.png"}
+            alt="University of Nebraska Omaha"
           />
 
           <div className="h-[0.5px] bg-gray-300 w-full" />
 
-          <Image width={200} height={50} src={"/nsf_logo.jpg"} alt="NSF" />
         </Link>
 
         <div className="h-8 rounded-[8px] flex flex-row gap-2.5 items-center px-2">
