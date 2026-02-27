@@ -206,8 +206,8 @@ export function AppSidebar({
           <Image
             width={200}
             height={50}
-            src={"/uno-logo-black.png"}
-            alt="University of Nebraska Omaha"
+            src={"/UNO-CIEF-Logo.png"}
+            alt=" UNO Center for Innovation, Entrepreneurship & Franchising"
           />
 
           <div className="h-[0.5px] bg-gray-300 w-full" />
