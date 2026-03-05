@@ -22,7 +22,7 @@ export async function getHypothesis() {
     where: {
       org_id: orgId,
     },
-    orderBy: { order: "asc" },
+    orderBy: [{ order: "asc" }, { id: "asc" }],
     include: { questions: true },
   });
 
@@ -348,4 +348,30 @@ export async function upsertInterviewResponse(
   });
 
   revalidatePath(`/participants/${participantId}/interview`);
+}
+
+export async function updateHypothesis(
+  hypothesisId: number,
+  data: {
+    type?: string;
+    role?: string;
+    priority?: number;
+    conclusion_status?: string;
+    conclusion_content?: string;
+  },
+) {
+  const { orgId, userId } = await auth();
+
+  if (!userId) redirect("/sign-in");
+
+  if (!orgId) redirect("/pick-startup");
+
+  const question = await prisma.hypothesis.update({
+    where: { id: hypothesisId },
+    data: {
+      ...data,
+    },
+  });
+
+  revalidatePath("/hypotheses");
 }

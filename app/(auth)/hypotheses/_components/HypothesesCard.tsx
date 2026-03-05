@@ -52,6 +52,7 @@ import {
   deleteHypothesisQuestion,
   updateHypothesisPriority,
   updateHypothesisRole,
+  updateHypothesis,
 } from "@/services/hypothesis";
 import {
   Select,
@@ -149,15 +150,11 @@ export default function HypothesesCard({
   hypothesis,
 }: HypothesesCardProps) {
   const [open, setOpen] = useState(false);
-  const [openType, setOpenType] = useState(false);
-  const [openRole, setOpenRole] = useState(false);
-  const [openStatus, setOpenStatus] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [openQuestion, setOpenQuestion] = useState(false);
-  const [openPriority, setOpenPriority] = useState(false);
   const [showEditTitle, setShowEditTitle] = useState(false);
   const [showResponses, setShowResponses] = useState(false);
-  const [openConclusion, setOpenConclusion] = useState(false);
+  const [openHypothesis, setOpenHypothesis] = useState(false);
   const [conclusionContent, setConclusionContent] = useState(
     hypothesis.conclusion_content || "",
   );
@@ -227,31 +224,6 @@ export default function HypothesesCard({
     form.reset();
   }
 
-  async function onUpdateType() {
-    await updateHypothesisType(hypothesis.id, type);
-    setOpenType(false);
-  }
-
-  async function onUpdateStatus() {
-    await updateHypothesisStatus(hypothesis.id, status);
-    setOpenStatus(false);
-  }
-
-  async function onUpdateConclusion() {
-    await updateHypothesisConclusion(hypothesis.id, conclusionContent);
-    setOpenConclusion(false);
-  }
-
-  async function onUpdatePriority() {
-    await updateHypothesisPriority(hypothesis.id, priority);
-    setOpenPriority(false);
-  }
-
-  async function onUpdateRole() {
-    await updateHypothesisRole(hypothesis.id, role);
-    setOpenRole(false);
-  }
-
   async function onDeleteHypothesis() {
     await deleteHypothesis(hypothesis.id);
     setOpenDelete(false);
@@ -275,6 +247,17 @@ export default function HypothesesCard({
       setSelectedQuestion(null);
       setOpenQuestionDelete(false);
     }
+  }
+
+  async function onUpdateHypothesis() {
+    await updateHypothesis(hypothesis.id, {
+      type,
+      role,
+      priority,
+      conclusion_status: status,
+      conclusion_content: conclusionContent,
+    });
+    setOpenHypothesis(false);
   }
 
   return (
@@ -343,29 +326,9 @@ export default function HypothesesCard({
                   Create Question
                   {/* </SheetTrigger> */}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setOpenType(true)}>
+                <DropdownMenuItem onClick={() => setOpenHypothesis(true)}>
                   {/* <SheetTrigger className="w-full text-left"> */}
-                  Update Hypothesis Type
-                  {/* </SheetTrigger> */}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setOpenRole(true)}>
-                  {/* <SheetTrigger className="w-full text-left"> */}
-                  Update Role
-                  {/* </SheetTrigger> */}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setOpenPriority(true)}>
-                  {/* <SheetTrigger className="w-full text-left"> */}
-                  Update Hypothesis Priority
-                  {/* </SheetTrigger> */}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setOpenStatus(true)}>
-                  {/* <SheetTrigger className="w-full text-left"> */}
-                  Update Hypothesis Status
-                  {/* </SheetTrigger> */}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setOpenConclusion(true)}>
-                  {/* <SheetTrigger className="w-full text-left"> */}
-                  Update Conclusion
+                  Update Hypothesis
                   {/* </SheetTrigger> */}
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -423,20 +386,33 @@ export default function HypothesesCard({
           </Sheet>
 
           <Sheet
-            open={openType}
+            open={openHypothesis}
             onOpenChange={(open) => {
-              setOpenType(open);
+              setOpenHypothesis(open);
+              setType(hypothesis.type || "");
+              setRole(hypothesis.role || "");
               setStatus(hypothesis.type || "");
+              setPriority(hypothesis.priority || 0);
+              setConclusionContent(hypothesis.conclusion_content || "");
             }}
           >
             <SheetContent>
               <SheetHeader>
                 <SheetTitle className="text-[26px] font-medium text-[#162A4F]">
-                  Update type
+                  Update Hypothesis
                 </SheetTitle>
               </SheetHeader>
               <div className="h-full flex flex-col gap-8 overflow-auto">
                 <div className="space-y-8 p-4">
+                  <div className="flex flex-col gap-2">
+                    <Label>Conclusion</Label>
+
+                    <Textarea
+                      value={conclusionContent}
+                      onChange={(e) => setConclusionContent(e.target.value)}
+                    />
+                  </div>
+
                   <div className="flex flex-col gap-2">
                     <Label>Type</Label>
 
@@ -476,35 +452,6 @@ export default function HypothesesCard({
                     </Select>
                   </div>
 
-                  <div className="flex ">
-                    <Button
-                      type="button"
-                      onClick={onUpdateType}
-                      className="bg-[#162A4F] cursor-pointer ml-auto"
-                    >
-                      Update
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          <Sheet
-            open={openStatus}
-            onOpenChange={(open) => {
-              setOpenStatus(open);
-              setStatus(hypothesis.conclusion_status || "");
-            }}
-          >
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle className="text-[26px] font-medium text-[#162A4F]">
-                  Update status
-                </SheetTitle>
-              </SheetHeader>
-              <div className="h-full flex flex-col gap-8 overflow-auto">
-                <div className="space-y-8 p-4">
                   <div className="flex flex-col gap-2">
                     <Label>Status</Label>
 
@@ -520,73 +467,17 @@ export default function HypothesesCard({
                     </Select>
                   </div>
 
-                  <div className="flex ">
-                    <Button
-                      type="button"
-                      onClick={onUpdateStatus}
-                      className="bg-[#162A4F] cursor-pointer ml-auto"
-                    >
-                      Update
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          <Sheet
-            open={openConclusion}
-            onOpenChange={(open) => {
-              setOpenConclusion(open);
-              setStatus(hypothesis.conclusion_content || "");
-            }}
-          >
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle className="text-[26px] font-medium text-[#162A4F]">
-                  Update conclusion
-                </SheetTitle>
-              </SheetHeader>
-              <div className="h-full flex flex-col gap-8 overflow-auto">
-                <div className="space-y-8 p-4">
                   <div className="flex flex-col gap-2">
-                    <Label>Conclusion</Label>
+                    <Label>Role</Label>
 
-                    <Textarea
-                      value={conclusionContent}
-                      onChange={(e) => setConclusionContent(e.target.value)}
+                    <MultiSelect
+                      options={ROLE_OPTIONS}
+                      value={role}
+                      onChange={setRole}
+                      placeholder="Select a role"
                     />
                   </div>
 
-                  <div className="flex ">
-                    <Button
-                      type="button"
-                      onClick={onUpdateConclusion}
-                      className="bg-[#162A4F] cursor-pointer ml-auto"
-                    >
-                      Update
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          <Sheet
-            open={openPriority}
-            onOpenChange={(open) => {
-              setOpenPriority(open);
-              setPriority(hypothesis.priority || 0);
-            }}
-          >
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle className="text-[26px] font-medium text-[#162A4F]">
-                  Update priority
-                </SheetTitle>
-              </SheetHeader>
-              <div className="h-full flex flex-col gap-8 overflow-auto">
-                <div className="space-y-8 p-4">
                   <div className="flex flex-col gap-2">
                     <Label>Priority</Label>
 
@@ -615,7 +506,7 @@ export default function HypothesesCard({
                   <div className="flex ">
                     <Button
                       type="button"
-                      onClick={onUpdatePriority}
+                      onClick={onUpdateHypothesis}
                       className="bg-[#162A4F] cursor-pointer ml-auto"
                     >
                       Update
@@ -648,46 +539,6 @@ export default function HypothesesCard({
                     <Button
                       type="button"
                       onClick={onUpdateQuestionTitle}
-                      className="bg-[#162A4F] cursor-pointer ml-auto"
-                    >
-                      Update
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          <Sheet
-            open={openRole}
-            onOpenChange={(open) => {
-              setOpenRole(open);
-              setRole(hypothesis.role || "");
-            }}
-          >
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle className="text-[26px] font-medium text-[#162A4F]">
-                  Update role
-                </SheetTitle>
-              </SheetHeader>
-              <div className="h-full flex flex-col gap-8 overflow-auto">
-                <div className="space-y-8 p-4">
-                  <div className="flex flex-col gap-2">
-                    <Label>Role</Label>
-
-                    <MultiSelect
-                      options={ROLE_OPTIONS}
-                      value={role}
-                      onChange={setRole}
-                      placeholder="Select a role"
-                    />
-                  </div>
-
-                  <div className="flex ">
-                    <Button
-                      type="button"
-                      onClick={onUpdateRole}
                       className="bg-[#162A4F] cursor-pointer ml-auto"
                     >
                       Update
