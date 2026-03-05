@@ -218,12 +218,12 @@ model OrgTask {
 }
 
 model ExerciseResponse {
-  id               Int      @id @default(autoincrement())
-  org_id           String
-  excercise_number Int
-  responses        Json
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  org_id          String
+  exercise_number Int
+  responses       Json
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
   @@map("exercise_responses")
 }
@@ -287,6 +287,7 @@ model Hypothesis {
   org_id             String  @default("")
   title              String
   type               String?
+  role               String?
   description        String?
   priority           Int     @default(0)
   order              Int     @default(0)

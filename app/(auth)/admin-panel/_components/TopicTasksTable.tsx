@@ -203,7 +203,7 @@ export default function TopicTasksTable({
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="concept">Concept</SelectItem>
-                            <SelectItem value="excercise">Excercise</SelectItem>
+                            <SelectItem value="exercise">Exercise</SelectItem>
                             <SelectItem value="startup">Startup</SelectItem>
                           </SelectContent>
                         </Select>
@@ -241,7 +241,7 @@ export default function TopicTasksTable({
                             <SelectItem value="book">Book</SelectItem>
                             <SelectItem value="tool">Tool</SelectItem>
                             {/* <SelectItem value="comment">Comment</SelectItem> */}
-                            <SelectItem value="excercise">Excercise</SelectItem>
+                            <SelectItem value="exercise">Exercise</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -256,7 +256,7 @@ export default function TopicTasksTable({
                     "vimeo",
                     "book",
                     "tool",
-                    "excercise",
+                    "exercise",
                   ].includes(subtype) && (
                     <>
                       <FormField
@@ -484,8 +484,8 @@ export default function TopicTasksTable({
                             </FormControl>
                             <SelectContent>
                               <SelectItem value="concept">Concept</SelectItem>
-                              <SelectItem value="excercise">
-                                Excercise
+                              <SelectItem value="exercise">
+                                Exercise
                               </SelectItem>
                               <SelectItem value="startup">Startup</SelectItem>
                             </SelectContent>
@@ -524,8 +524,8 @@ export default function TopicTasksTable({
                               <SelectItem value="book">Book</SelectItem>
                               <SelectItem value="tool">Tool</SelectItem>
                               <SelectItem value="comment">Comment</SelectItem>
-                              <SelectItem value="excercise">
-                                Excercise
+                              <SelectItem value="exercise">
+                                Exercise
                               </SelectItem>
                             </SelectContent>
                           </Select>
@@ -540,7 +540,7 @@ export default function TopicTasksTable({
                       "youtube",
                       "book",
                       "tool",
-                      "excercise",
+                      "exercise",
                     ].includes(subtype) && (
                       <>
                         <FormField

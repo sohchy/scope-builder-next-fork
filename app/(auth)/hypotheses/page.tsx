@@ -14,34 +14,43 @@ export default async function HypothesesPage() {
     id: response.id,
     questionId: response.question_id,
     content: response.response_content,
-    interviewee: response.participant.name,
     hypothesysId: response.question.hypothesis_id,
+    interviewee: {
+      id: response.participant_id,
+      name: response.participant.name,
+    },
   }));
 
   const hypothesesData = hypotheses.map((hypothesis) => ({
     id: hypothesis.id,
     type: hypothesis.type,
+    role: hypothesis.role,
     title: hypothesis.title,
     order: hypothesis.order,
     priority: hypothesis.priority,
     description: hypothesis.description,
     interviews: Array.from(
-      new Set(
+      new Map(
         interviewResponsesData
           .filter((response) => response.hypothesysId === hypothesis.id)
-          .map((response) => response.interviewee),
-      ),
+          .map((response) => [response.interviewee.id, response.interviewee]),
+      ).values(),
     ),
     questions: hypothesis.questions.map((question) => ({
       id: question.id,
       title: question.title,
       responses: interviewResponsesData
         .filter((response) => response.questionId === question.id)
-        .map((response) => response),
+        .map((response) => ({
+          ...response,
+          interviewee: response.interviewee.name,
+        })),
     })),
     conclusion_content: hypothesis.conclusion_content,
     conclusion_status: hypothesis.conclusion_status,
   }));
+
+  console.log("hypothesesData", hypothesesData);
 
   const hypothesesExampleData = [
     {
@@ -52,7 +61,10 @@ export default async function HypothesesPage() {
       priority: 1,
       description: "test",
       type: "Identify Job to be Done",
-      interviews: ["John Doe", "Jane Smith"],
+      interviews: [
+        { id: "1", name: "John Doe" },
+        { id: "2", name: "Jane Smith" },
+      ],
       questions: [
         {
           id: 1,

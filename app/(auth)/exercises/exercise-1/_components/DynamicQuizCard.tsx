@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { createExcerciseResponse } from "@/services/excercises";
+import { createExerciseResponse } from "@/services/exercises";
 
 export type QuizResponseType =
   | "trueFalse"
@@ -128,7 +128,7 @@ export const DynamicQuizCard = ({ responses, quizData }: QuizCardProps) => {
 
   const onSubmit = async () => {
     try {
-      await createExcerciseResponse(1, quizResponses);
+      await createExerciseResponse(1, quizResponses);
       toast.success("Quiz submitted successfully!");
     } catch (error) {
       toast.error("Failed to submit the quiz. Please try again.");

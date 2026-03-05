@@ -134,19 +134,19 @@ const data = {
         },
       ],
     },
-    // {
-    //   title: "Excercises",
-    //   items: [
-    //     {
-    //       title: "Excercise 1",
-    //       url: "/excercises/excercise-1",
-    //     },
-    //     {
-    //       title: "Excercise 2",
-    //       url: "/excercises/excercise-2",
-    //     },
-    //   ],
-    // },
+    {
+      title: "Exercises",
+      items: [
+        // {
+        //   title: "Exercise 1",
+        //   url: "/exercises/exercise-1",
+        // },
+        {
+          title: "Exercise 2",
+          url: "/exercises/exercise-2",
+        },
+      ],
+    },
     // {
     //   title: "Examples",
     //   items: [

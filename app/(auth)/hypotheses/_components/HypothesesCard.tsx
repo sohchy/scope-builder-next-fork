@@ -51,6 +51,7 @@ import {
   updateHypothesisQuestion,
   deleteHypothesisQuestion,
   updateHypothesisPriority,
+  updateHypothesisRole,
 } from "@/services/hypothesis";
 import {
   Select,
@@ -71,6 +72,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { MultiSelect } from "@/components/ui/multiselect";
+import Link from "next/link";
 
 /*
   Hypotheses Table
@@ -114,12 +117,13 @@ export type Hypotheses = {
   title: string;
   order: number;
   priority: number;
-  interviews: string[];
+  role?: string | null;
   type?: string | null;
   questions: Question[];
   conclusion_status: string;
   description: string | null;
   conclusion_content?: string | null;
+  interviews: { id: string; name: string }[];
 };
 
 interface HypothesesCardProps {
@@ -127,12 +131,26 @@ interface HypothesesCardProps {
   hypothesis: Hypotheses;
 }
 
+const ROLE_OPTIONS = [
+  //{ value: "Customer", label: "Customer" },
+  { value: "End-User", label: "End-User" },
+  //{ value: "Both Customer & End-User", label: "Both Customer & End-User" },
+  { value: "Buyer-Decision-Maker", label: "Buyer/Decision Maker" },
+  { value: "Payer", label: "Payer" },
+  { value: "Influencer", label: "Influencer" },
+  { value: "Recommender", label: "Recommender" },
+  { value: "Saboteur", label: "Saboteur" },
+  //{ value: "Additional Decision Maker", label: "Additional Decision Maker" },
+  //{ value: "Additional Stakeholder", label: "Additional Stakeholder" },
+];
+
 export default function HypothesesCard({
   example,
   hypothesis,
 }: HypothesesCardProps) {
   const [open, setOpen] = useState(false);
   const [openType, setOpenType] = useState(false);
+  const [openRole, setOpenRole] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [openQuestion, setOpenQuestion] = useState(false);
@@ -143,8 +161,9 @@ export default function HypothesesCard({
   const [conclusionContent, setConclusionContent] = useState(
     hypothesis.conclusion_content || "",
   );
-  const [priority, setPriority] = useState(hypothesis.priority || 0);
   const [type, setType] = useState(hypothesis.type || "");
+  const [role, setRole] = useState(hypothesis.role || "");
+  const [priority, setPriority] = useState(hypothesis.priority || 0);
   const [openQuestionDelete, setOpenQuestionDelete] = useState(false);
   const [editableTitle, setEditableTitle] = useState(hypothesis.title);
   const [status, setStatus] = useState(hypothesis.conclusion_status || "");
@@ -228,6 +247,11 @@ export default function HypothesesCard({
     setOpenPriority(false);
   }
 
+  async function onUpdateRole() {
+    await updateHypothesisRole(hypothesis.id, role);
+    setOpenRole(false);
+  }
+
   async function onDeleteHypothesis() {
     await deleteHypothesis(hypothesis.id);
     setOpenDelete(false);
@@ -284,9 +308,26 @@ export default function HypothesesCard({
               </div>
             </div>
           ) : (
-            <span onDoubleClick={() => setShowEditTitle(true)}>
-              {hypothesis.title}
-            </span>
+            <div className="flex flex-col gap-2 items-start">
+              <span onDoubleClick={() => setShowEditTitle(true)}>
+                {hypothesis.title}
+              </span>
+              <div className="flex flex-row gap-2 items-start">
+                <div className="flex flex-row gap-2 items-center">
+                  <label className="text-sm">Hypothesis Type</label>
+                  <div className="bg-[#F3F0FD]  text-xs rounded-full text-[#6E6588] font-semibold px-2 py-0.5">
+                    {hypothesis.type || "No type selected"}
+                  </div>
+                </div>
+
+                <div className="flex flex-row gap-2 items-center">
+                  <label className="text-sm">Stakeholder Role</label>
+                  <div className="bg-[#F3F0FD]  text-xs rounded-full text-[#6E6588] font-semibold px-2 py-0.5">
+                    {hypothesis.role ? hypothesis.role : "No roles selected"}
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
           {/* <Sheet open={open} onOpenChange={setOpen}> */}
           <DropdownMenu>
@@ -305,6 +346,11 @@ export default function HypothesesCard({
                 <DropdownMenuItem onClick={() => setOpenType(true)}>
                   {/* <SheetTrigger className="w-full text-left"> */}
                   Update Hypothesis Type
+                  {/* </SheetTrigger> */}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setOpenRole(true)}>
+                  {/* <SheetTrigger className="w-full text-left"> */}
+                  Update Role
                   {/* </SheetTrigger> */}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setOpenPriority(true)}>
@@ -612,6 +658,46 @@ export default function HypothesesCard({
             </SheetContent>
           </Sheet>
 
+          <Sheet
+            open={openRole}
+            onOpenChange={(open) => {
+              setOpenRole(open);
+              setRole(hypothesis.role || "");
+            }}
+          >
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle className="text-[26px] font-medium text-[#162A4F]">
+                  Update role
+                </SheetTitle>
+              </SheetHeader>
+              <div className="h-full flex flex-col gap-8 overflow-auto">
+                <div className="space-y-8 p-4">
+                  <div className="flex flex-col gap-2">
+                    <Label>Role</Label>
+
+                    <MultiSelect
+                      options={ROLE_OPTIONS}
+                      value={role}
+                      onChange={setRole}
+                      placeholder="Select a role"
+                    />
+                  </div>
+
+                  <div className="flex ">
+                    <Button
+                      type="button"
+                      onClick={onUpdateRole}
+                      className="bg-[#162A4F] cursor-pointer ml-auto"
+                    >
+                      Update
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+
           <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -671,9 +757,14 @@ export default function HypothesesCard({
                 {hypothesis.interviews.map((interview, index) => {
                   return (
                     <div key={index}>
-                      <span className="text-xs text-[#697288] font-semibold underline decoration-dotted">
-                        {interview}
-                      </span>
+                      <Link
+                        href={`/participants/${interview.id}/interview`}
+                        target="_blank"
+                      >
+                        <span className="text-xs text-[#697288] font-semibold underline decoration-dotted">
+                          {interview.name}
+                        </span>
+                      </Link>
                       {index < hypothesis.interviews.length - 1 && (
                         <span className="text-xs text-[#697288] font-semibold">
                           ,{" "}
@@ -772,9 +863,9 @@ export default function HypothesesCard({
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-row items-center justify-between">
-          <div className="bg-[#F3F0FD] text-xs rounded-full text-[#6E6588] font-semibold px-2 py-0.5">
+          {/* <div className="bg-[#F3F0FD] text-xs rounded-full text-[#6E6588] font-semibold px-2 py-0.5">
             {hypothesis.type || "No type"}
-          </div>
+          </div> */}
           <div className="flex flex-col items-center gap-2.5">
             {hypothesis.priority > 0 && (
               <div className="flex flex-row items-center">

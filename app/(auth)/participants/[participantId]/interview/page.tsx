@@ -21,7 +21,18 @@ export default async function InterviewPage({
     await getParticipantInterviewResponses(participantId);
   const participant = await getParticipant(participantId);
 
-  const formattedHypotheses = hypothesis.map((h) => ({
+  const participantRoles = participant?.role
+    ?.split(",")
+    .map((r) => r.trim())
+    .filter(Boolean) ?? [];
+
+  const filteredHypothesis = hypothesis.filter((h) => {
+    if (!h.role) return true;
+    const hypothesisRoles = h.role.split(",").map((r) => r.trim()).filter(Boolean);
+    return hypothesisRoles.some((role) => participantRoles.includes(role));
+  });
+
+  const formattedHypotheses = filteredHypothesis.map((h) => ({
     id: h.id,
     title: h.title,
     description: h.description,

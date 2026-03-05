@@ -6,25 +6,25 @@ import { prisma } from "@/lib/prisma";
 import { ExerciseResponse } from "@/lib/generated/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function getExcerciseResponse(excerciseNumber: number) {
+export async function getExerciseResponse(exerciseNumber: number) {
   const { orgId, userId } = await auth();
 
   if (!userId) redirect("/sign-in");
 
   if (!orgId) redirect("/pick-startup");
 
-  const excerciseResponse = await prisma.exerciseResponse.findFirst({
+  const exerciseResponse = await prisma.exerciseResponse.findFirst({
     where: {
       org_id: orgId,
-      excercise_number: excerciseNumber,
+      exercise_number: exerciseNumber,
     },
   });
 
-  return serializeExcerciseReponse(excerciseResponse);
+  return serializeExerciseReponse(exerciseResponse);
 }
 
-export async function createExcerciseResponse(
-  excerciseNumber: number,
+export async function createExerciseResponse(
+  exerciseNumber: number,
   responses: Record<string, any>,
 ) {
   const { orgId, userId } = await auth();
@@ -36,15 +36,15 @@ export async function createExcerciseResponse(
   const createdResponse = await prisma.exerciseResponse.create({
     data: {
       org_id: orgId,
-      excercise_number: excerciseNumber,
+      exercise_number: exerciseNumber,
       responses: responses,
     },
   });
 
-  revalidatePath(`/excercises/excercise-${excerciseNumber}`);
+  revalidatePath(`/exercises/exercise-${exerciseNumber}`);
 }
 
-function serializeExcerciseReponse(prismaRecord: ExerciseResponse | null) {
+function serializeExerciseReponse(prismaRecord: ExerciseResponse | null) {
   if (!prismaRecord) return null;
 
   console.log("json", prismaRecord.responses!.toString());
@@ -52,7 +52,7 @@ function serializeExcerciseReponse(prismaRecord: ExerciseResponse | null) {
   return {
     id: prismaRecord.id,
     org_id: prismaRecord.org_id,
-    excercise_number: prismaRecord.excercise_number,
+    exercise_number: prismaRecord.exercise_number,
     responses: prismaRecord.responses,
   };
 }

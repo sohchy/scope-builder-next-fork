@@ -61,7 +61,7 @@ type Topic = {
     title?: string;
     description?: string;
   }[];
-  excercises_tasks: {
+  exercises_tasks: {
     id: number;
     subtype: string;
     completed: boolean;
@@ -91,7 +91,7 @@ export default function Topic({ topic }: TopicProps) {
       concept_tasks: topicState.concept_tasks.map((t) =>
         t.id === taskId ? { ...t, completed: true } : t,
       ),
-      excercises_tasks: topicState.excercises_tasks.map((t) =>
+      exercises_tasks: topicState.exercises_tasks.map((t) =>
         t.id === taskId ? { ...t, completed: true } : t,
       ),
       startup_tasks: topicState.startup_tasks.map((t) =>
@@ -189,7 +189,7 @@ export default function Topic({ topic }: TopicProps) {
             ))}
           </div>
           <div className="border-r w-[250px] border-gray-400 p-4  flex flex-col gap-2 ">
-            {topicState.excercises_tasks.map((task) => (
+            {topicState.exercises_tasks.map((task) => (
               <TaskItem
                 key={task.id}
                 url={task.url}
@@ -537,7 +537,7 @@ const TaskItem = ({
     );
   }
 
-  if (type === "excercise") {
+  if (type === "exercise") {
     return (
       <ProgressItem
         title={title}
@@ -556,12 +556,12 @@ const TaskItem = ({
             <img
               width={"100%"}
               src={url || ""}
-              alt={title || "Excercise"}
+              alt={title || "Exercise"}
               className="object-contain h-full"
             />
           </div>
           <span className="text-[#697288] text-xs font-medium mt-4 mb-1 block">
-            Excercise
+            Exercise
           </span>
           {/* <h3 className="text-[#111827] text-sm font-semibold mb-3">{title}</h3> */}
           {/* <p className="text-[#697288] text-[16px] font-medium mb-1">

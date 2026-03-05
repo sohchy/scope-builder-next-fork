@@ -52,8 +52,8 @@ export default async function ProgressDashboardPage() {
             completed: !!taskProgress?.completed,
           };
         }),
-      excercises_tasks: topic.topic_tasks
-        .filter((t) => t.type === "excercise")
+      exercises_tasks: topic.topic_tasks
+        .filter((t) => t.type === "exercise")
         .map((t) => {
           const taskProgress = topicProgress.find((tp) => tp.task_id === t.id);
           return {

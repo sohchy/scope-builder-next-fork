@@ -54,8 +54,8 @@ export default function AppHeader() {
     if (pathname.includes("/admin-panel")) title = "Admin Panel";
     if (pathname.includes("/todos")) title = "Tasks & Todos";
     if (pathname.includes("/teams-dashboard")) title = "Leaderboard";
-    if (pathname.includes("/excercises/excercise-1")) title = "Excercise 1";
-    if (pathname.includes("/excercises/excercise-2")) title = "Excercise 2";
+    if (pathname.includes("/exercises/exercise-1")) title = "Exercise 1";
+    if (pathname.includes("/exercises/exercise-2")) title = "Exercise 2";
 
     // if (
     //   pathname.includes("/participants/") ||

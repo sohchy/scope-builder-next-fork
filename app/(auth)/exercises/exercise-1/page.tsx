@@ -1,15 +1,139 @@
 import Image from "next/image";
 
-import { getExcerciseResponse } from "@/services/excercises";
-import { QuizCard, QuizResponse } from "../excercise-1/_components/QuizCard";
+// import { QuizCard, QuizResponse } from "./_components/QuizCard";
+import {
+  QuizQuestion,
+  QuizResponse,
+  DynamicQuizCard,
+  QuizResponseType,
+} from "./_components/DynamicQuizCard";
+import { getExerciseResponse } from "@/services/exercises";
 
-export default async function Excercise2Page() {
-  const excerciseResponse = await getExcerciseResponse(1);
+export default async function Exercise1Page() {
+  const exerciseResponse = await getExerciseResponse(1);
+
+  const quizData: QuizQuestion[] = [    
+    {
+      id: 1,
+      question:
+        "A value proposition should always be customer-centric and focus solely on the customer's needs and desires.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["True"],
+    },
+    {
+      id: 2,
+      question:
+        "A value proposition should remain static and unchanging throughout a product's lifecycle.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["False"],
+    },
+    {
+      id: 3,
+      question:
+        "A value proposition is primarily about explaining what a product or service does.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["False"],
+    },
+    {
+      id: 4,
+      question:
+        "A value proposition can be effective even if it does not address the unique pain points of the target customer segment.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["False"],
+    },
+    {
+      id: 5,
+      question:
+        "A value proposition can be expressed solely through a product's price and cost-effectiveness.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["False"],
+    },
+    {
+      id: 6,
+      question: "A value proposition is more about marketing and promotion than guiding product development.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["False"],
+    },
+    {
+      id: 7,
+      question:
+        "A strong value proposition can compensate for a lack of quality in a product or service.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["True"],
+    },
+    {
+      id: 8,
+      question:
+        "The value proposition is primarily the responsibility of the marketing department, not the product development team.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["False"],
+    },
+    {
+      id: 9,
+      question:
+        "Value propositions are only relevant in business-to-consumer (B2C) markets and not as crucial in business-to-business (B2B) markets.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["False"],
+    },
+    {
+      id: 10,
+      question:
+        "A value proposition can include a statement of what a product does not offer to manage customer expectations effectively.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["True"],
+    },
+  ];
 
   return (
-    <div className="p-8 w-full h-full grid grid-cols-4 gap-4">
-      <div className="col-start-2 col-end-4">
-        <QuizCard responses={excerciseResponse?.responses as QuizResponse} />
+    <div className="p-8 w-full h-full grid grid-cols-3 gap-4">
+      <div className="col-span-2">
+        <ContentCard />
+      </div>
+      <div className="col-span-1">
+        <DynamicQuizCard
+          quizData={quizData}
+          responses={exerciseResponse?.responses as QuizResponse}
+        />
       </div>
     </div>
   );
@@ -31,8 +155,8 @@ const ContentCard = () => {
           <Image
             width={318}
             height={264}
-            alt="Excercise 1"
-            src={"/excercise1.png"}
+            alt="Exercise 1"
+            src={"/exercise1.png"}
           />
           <p className="text-sm">
             When talking to your customers, it can be extremely tempting to
