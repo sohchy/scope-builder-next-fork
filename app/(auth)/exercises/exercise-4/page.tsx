@@ -58,13 +58,13 @@ export default async function Exercise4Page() {
         A: "Identifying the right customers",
         B: "Validating customer segments",
         C: "Ensuring your solution addresses a real problem",
-        D: "An agreement with potential customers",
+        D: "Assessing market demand",
       },
       correctResponse: [
         "Identifying the right customers",
         "Validating customer segments",
         "Ensuring your solution addresses a real problem",
-        "An agreement with potential customers",
+        "Assessing market demand",
       ],
     },
     {
