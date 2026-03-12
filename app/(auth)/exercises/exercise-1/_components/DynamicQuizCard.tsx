@@ -49,6 +49,7 @@ interface TextQuizQuestion extends BaseQuizQuestion {
 export type QuizQuestion = OptionsQuizQuestion | TextQuizQuestion;
 
 interface QuizCardProps {
+  excerciseNumber: number;
   quizData: QuizQuestion[];
   responses?: QuizResponse;
 }
@@ -103,7 +104,11 @@ interface QuizCardProps {
 
 const makeKeyForIndex = (index: number) => `question-${index + 1}`;
 
-export const DynamicQuizCard = ({ responses, quizData }: QuizCardProps) => {
+export const DynamicQuizCard = ({
+  responses,
+  quizData,
+  excerciseNumber,
+}: QuizCardProps) => {
   const initialState: QuizResponse = useMemo(() => {
     const state: QuizResponse = {};
 
@@ -128,7 +133,7 @@ export const DynamicQuizCard = ({ responses, quizData }: QuizCardProps) => {
 
   const onSubmit = async () => {
     try {
-      await createExerciseResponse(1, quizResponses);
+      await createExerciseResponse(excerciseNumber, quizResponses);
       toast.success("Quiz submitted successfully!");
     } catch (error) {
       toast.error("Failed to submit the quiz. Please try again.");

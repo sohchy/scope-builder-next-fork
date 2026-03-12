@@ -1,12 +1,17 @@
 import Image from "next/image";
 
 import { getExerciseResponse } from "@/services/exercises";
-import { QuizQuestion, QuizResponseType, DynamicQuizCard, QuizResponse } from "../exercise-1/_components/DynamicQuizCard";
+import {
+  QuizQuestion,
+  QuizResponseType,
+  DynamicQuizCard,
+  QuizResponse,
+} from "../exercise-1/_components/DynamicQuizCard";
 
 export default async function Exercise2Page() {
   const exerciseResponse = await getExerciseResponse(2);
 
-  const quizData: QuizQuestion[] = [    
+  const quizData: QuizQuestion[] = [
     {
       id: 1,
       question:
@@ -64,7 +69,8 @@ export default async function Exercise2Page() {
     },
     {
       id: 6,
-      question: "A value proposition is more about marketing and promotion than guiding product development.",
+      question:
+        "A value proposition is more about marketing and promotion than guiding product development.",
       responseType: "trueFalse",
       options: {
         T: "True",
@@ -121,8 +127,9 @@ export default async function Exercise2Page() {
   return (
     <div className="p-8 w-full h-full grid grid-cols-4 gap-4">
       <div className="col-start-2 col-end-4">
-         <DynamicQuizCard
+        <DynamicQuizCard
           quizData={quizData}
+          excerciseNumber={2}
           responses={exerciseResponse?.responses as QuizResponse}
         />
       </div>

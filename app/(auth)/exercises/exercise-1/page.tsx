@@ -12,7 +12,7 @@ import { getExerciseResponse } from "@/services/exercises";
 export default async function Exercise1Page() {
   const exerciseResponse = await getExerciseResponse(1);
 
-  const quizData: QuizQuestion[] = [    
+  const quizData: QuizQuestion[] = [
     {
       id: 1,
       question:
@@ -70,7 +70,8 @@ export default async function Exercise1Page() {
     },
     {
       id: 6,
-      question: "A value proposition is more about marketing and promotion than guiding product development.",
+      question:
+        "A value proposition is more about marketing and promotion than guiding product development.",
       responseType: "trueFalse",
       options: {
         T: "True",
@@ -131,6 +132,7 @@ export default async function Exercise1Page() {
       </div>
       <div className="col-span-1">
         <DynamicQuizCard
+          excerciseNumber={1}
           quizData={quizData}
           responses={exerciseResponse?.responses as QuizResponse}
         />
