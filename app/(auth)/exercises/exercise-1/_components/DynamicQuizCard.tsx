@@ -104,6 +104,37 @@ interface QuizCardProps {
 
 const makeKeyForIndex = (index: number) => `question-${index + 1}`;
 
+function calculateScore(
+  quizData: QuizQuestion[],
+  responses: QuizResponse,
+): { score: number; maxScore: number } {
+  let score = 0;
+  let maxScore = 0;
+
+  quizData.forEach((question, index) => {
+    if (!("correctResponse" in question) || !question.correctResponse) return;
+    const key = makeKeyForIndex(index);
+    const userAnswer = responses[key];
+    const correct = question.correctResponse;
+
+    maxScore += 1;
+
+    if (question.responseType === "multipleChoiceCheckbox") {
+      const selected = Array.isArray(userAnswer) ? userAnswer : [];
+      const correctlySelected = selected.filter((v) =>
+        correct.includes(v),
+      ).length;
+      score += correctlySelected / correct.length;
+    } else {
+      if (typeof userAnswer === "string" && correct.includes(userAnswer)) {
+        score += 1;
+      }
+    }
+  });
+
+  return { score, maxScore };
+}
+
 export const DynamicQuizCard = ({
   responses,
   quizData,
@@ -204,6 +235,12 @@ export const DynamicQuizCard = ({
 
   const isSubmitted = Boolean(responses);
 
+  const { score, maxScore } = useMemo(() => {
+    if (!isSubmitted) return { score: 0, maxScore: 0 };
+    return calculateScore(quizData, quizResponses);
+  }, [isSubmitted, quizData, quizResponses]);
+  // const isSubmitted = false; // for testing purposes, set to false to allow interaction
+
   return (
     <div className="h-full rounded-2xl flex flex-col bg-white">
       {/* Header */}
@@ -213,16 +250,20 @@ export const DynamicQuizCard = ({
             <BadgeQuestionMarkIcon className="text-[#6A35FF]" size={20} />
           </div>
           <div className="flex flex-row items-center justify-between w-full">
-            <div>Quiz</div>
+            <div>Excercise</div>
             <div className="flex flex-row gap-6">
               <span className="text-[#697288] text-sm flex flex-row items-center gap-1.5">
                 {/* <StarIcon size={16} className="text-[#03BB6E] fill-[#D1E9D7]" /> */}
-                <SplitStar filled={0.6} />
-                <span>4.5</span>
+                {isSubmitted && (
+                  <>
+                    <SplitStar filled={maxScore > 0 ? score / maxScore : 0} />
+                    <span>{score.toFixed(1)} / {maxScore}</span>
+                  </>
+                )}
               </span>
               <span className="flex flex-row items-center text-[#697288] text-sm gap-1.5">
                 <HourglassIcon size={16} />
-                15 min
+                10 min
               </span>
             </div>
           </div>
@@ -235,8 +276,6 @@ export const DynamicQuizCard = ({
           const questionNumber = index + 1;
           const key = makeKeyForIndex(index);
           const currentAnswer = quizResponses[key];
-
-          console.log("question", question);
 
           // TEXT question
           if (question.responseType === "text") {

@@ -137,13 +137,25 @@ const data = {
     {
       title: "Exercises",
       items: [
-        // {
-        //   title: "Exercise 1",
-        //   url: "/exercises/exercise-1",
-        // },
+        {
+          title: "Exercise 1",
+          url: "/exercises/exercise-1",
+        },
         {
           title: "Exercise 2",
           url: "/exercises/exercise-2",
+        },
+        {
+          title: "Exercise 3",
+          url: "/exercises/exercise-3",
+        },
+        {
+          title: "Exercise 4",
+          url: "/exercises/exercise-4",
+        },
+        {
+          title: "Exercise 5",
+          url: "/exercises/exercise-5",
         },
       ],
     },

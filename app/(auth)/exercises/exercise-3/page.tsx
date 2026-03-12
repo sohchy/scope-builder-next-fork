@@ -1,126 +1,112 @@
 import Image from "next/image";
 
-// import { QuizCard, QuizResponse } from "./_components/QuizCard";
+import { getExerciseResponse } from "@/services/exercises";
 import {
   QuizQuestion,
-  QuizResponse,
-  DynamicQuizCard,
   QuizResponseType,
-} from "./_components/DynamicQuizCard";
-import { getExerciseResponse } from "@/services/exercises";
+  DynamicQuizCard,
+  QuizResponse,
+} from "../exercise-1/_components/DynamicQuizCard";
 
-export default async function Exercise1Page() {
-  const exerciseResponse = await getExerciseResponse(1);
+export default async function Exercise3Page() {
+  const exerciseResponse = await getExerciseResponse(3);
 
   const quizData: QuizQuestion[] = [
     {
       id: 1,
-      question: "What is a value proposition?",
-      responseType: "multipleChoiceCheckbox",
+      question:
+        "It is acceptable to ignore customer feedback that contradicts your initial assumptions, as they may not truly understand your product.",
+      responseType: "trueFalse",
       options: {
-        A: "Technical specification of a product",
-        B: "Statement of the unique benefits a product or service provides to the customer",
-        C: "Pricing strategy for a product",
-        D: "List of competitors in the market",
+        T: "True",
+        F: "False",
       },
-      correctResponse: [
-        "Statement of the unique benefits a product or service provides to the customer",
-      ],
+      correctResponse: ["False"],
     },
     {
       id: 2,
       question:
-        "Which of the following best describes the primary focus of a value proposition?",
-      responseType: "multipleChoiceCheckbox",
+        "If a potential customer expresses interest in your product during customer discovery, it is a strong indicator that they will eventually buy it.",
+      responseType: "trueFalse",
       options: {
-        A: "The features of a product",
-        B: "The emotions of the customer",
-        C: "The unique benefits a product offers",
-        D: "The cost of production",
+        T: "True",
+        F: "False",
       },
-      correctResponse: ["The unique benefits a product offers"],
+      correctResponse: ["False"],
     },
     {
       id: 3,
-      question: "Why is it important to have a strong value proposition?",
-      responseType: "multipleChoiceCheckbox",
+      question:
+        "Asking hypothetical questions about what customers might do in the future is a valuable part of the customer discovery process.",
+      responseType: "trueFalse",
       options: {
-        A: "It helps with product manufacturing",
-        B: "It attracts venture capital funding",
-        C: "It communicates the product's unique value to customers",
-        D: "It increases the number of employees in a company",
+        T: "True",
+        F: "False",
       },
-      correctResponse: [
-        "It communicates the product's unique value to customers",
-      ],
+      correctResponse: ["False"],
     },
     {
       id: 4,
       question:
-        "Which of the following is NOT a typical component of a value proposition?",
-      responseType: "multipleChoiceCheckbox",
+        "The success of customer discovery is measured by how many people you have spoken to, rather than the quality of insights gained.",
+      responseType: "trueFalse",
       options: {
-        A: "Customer testimonials",
-        B: "A description of the problem the product solves",
-        C: "A statement of the product's unique selling points",
-        D: "A list of technical specifications",
+        T: "True",
+        F: "False",
       },
-      correctResponse: ["A list of technical specifications"],
+      correctResponse: ["False"],
     },
     {
       id: 5,
       question:
-        "When crafting a value proposition, who is the primary audience in mind?",
-      responseType: "multipleChoiceCheckbox",
+        "When conducting customer discovery, it is acceptable to lead potential customers to a specific solution you have in mind.",
+      responseType: "trueFalse",
       options: {
-        A: "Competitors",
-        B: "Investors",
-        C: "Employees",
-        D: "Customers",
+        T: "True",
+        F: "False",
       },
-      correctResponse: ["Customers"],
+      correctResponse: ["False"],
     },
     {
       id: 6,
       question:
-        "Which statement best reflects the relationship between features and value propositions?",
-      responseType: "multipleChoiceCheckbox",
+        "Only startups seeking external funding need to prioritize customer discovery.",
+      responseType: "trueFalse",
       options: {
-        A: "Features and value propositions are the same thing",
-        B: "Features explain how a product works, while a value proposition explains why a customer should choose it",
-        C: "Features are more important than value propositions in marketing",
-        D: "Value propositions are specific to product development, while features are for marketing",
+        T: "True",
+        F: "False",
       },
-      correctResponse: [
-        "Features explain how a product works, while a value proposition explains why a customer should choose it",
-      ],
+      correctResponse: ["False"],
     },
     {
       id: 7,
-      question:
-        "When developing a value proposition, what is the primary goal?",
-      responseType: "multipleChoiceCheckbox",
+      question: "Customer discovery is primarily about collecting data.",
+      responseType: "trueFalse",
       options: {
-        A: "To be more cost-effective than competitors",
-        B: "To list as many product features as possible",
-        C: "To communicate the product's unique value to customers",
-        D: "To maintain the same value proposition throughout the product's lifecycle",
+        T: "True",
+        F: "False",
       },
-      correctResponse: [
-        "To communicate the product's unique value to customers",
-      ],
+      correctResponse: ["True"],
+    },
+    {
+      id: 8,
+      question:
+        "Customer discovery is a one-time activity that can be completed in a few weeks.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["False"],
     },
   ];
 
   return (
-    <div className="p-8 w-full h-full grid grid-cols-3 gap-4">
-      <div className="col-span-2">
-        <ContentCard />
-      </div>
-      <div className="col-span-1">
+    <div className="p-8 w-full h-full grid grid-cols-4 gap-4">
+      <div className="col-start-2 col-end-4">
         <DynamicQuizCard
-          excerciseNumber={1}
           quizData={quizData}
+          excerciseNumber={3}
           responses={exerciseResponse?.responses as QuizResponse}
         />
       </div>

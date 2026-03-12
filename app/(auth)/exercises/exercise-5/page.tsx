@@ -1,126 +1,135 @@
 import Image from "next/image";
 
-// import { QuizCard, QuizResponse } from "./_components/QuizCard";
+import { getExerciseResponse } from "@/services/exercises";
 import {
   QuizQuestion,
-  QuizResponse,
-  DynamicQuizCard,
   QuizResponseType,
-} from "./_components/DynamicQuizCard";
-import { getExerciseResponse } from "@/services/exercises";
+  DynamicQuizCard,
+  QuizResponse,
+} from "../exercise-1/_components/DynamicQuizCard";
 
-export default async function Exercise1Page() {
-  const exerciseResponse = await getExerciseResponse(1);
+export default async function Exercise5Page() {
+  const exerciseResponse = await getExerciseResponse(5);
 
   const quizData: QuizQuestion[] = [
     {
       id: 1,
-      question: "What is a value proposition?",
-      responseType: "multipleChoiceCheckbox",
+      question:
+        "An ecosystem map is simply a list of all the people and organizations that have a stake in your innovation.",
+      responseType: "trueFalse",
       options: {
-        A: "Technical specification of a product",
-        B: "Statement of the unique benefits a product or service provides to the customer",
-        C: "Pricing strategy for a product",
-        D: "List of competitors in the market",
+        T: "True",
+        F: "False",
       },
-      correctResponse: [
-        "Statement of the unique benefits a product or service provides to the customer",
-      ],
+      correctResponse: ["False"],
     },
     {
       id: 2,
       question:
-        "Which of the following best describes the primary focus of a value proposition?",
-      responseType: "multipleChoiceCheckbox",
+        "It is important to understand the decision processes of your stakeholders.",
+      responseType: "trueFalse",
       options: {
-        A: "The features of a product",
-        B: "The emotions of the customer",
-        C: "The unique benefits a product offers",
-        D: "The cost of production",
+        T: "True",
+        F: "False",
       },
-      correctResponse: ["The unique benefits a product offers"],
+      correctResponse: ["True"],
     },
     {
       id: 3,
-      question: "Why is it important to have a strong value proposition?",
-      responseType: "multipleChoiceCheckbox",
+      question:
+        "You can use an ecosystem map to identify potential partners and customers.",
+      responseType: "trueFalse",
       options: {
-        A: "It helps with product manufacturing",
-        B: "It attracts venture capital funding",
-        C: "It communicates the product's unique value to customers",
-        D: "It increases the number of employees in a company",
+        T: "True",
+        F: "False",
       },
-      correctResponse: [
-        "It communicates the product's unique value to customers",
-      ],
+      correctResponse: ["True"],
     },
     {
       id: 4,
       question:
-        "Which of the following is NOT a typical component of a value proposition?",
-      responseType: "multipleChoiceCheckbox",
+        "An ecosystem map is a static document that should never be updated.",
+      responseType: "trueFalse",
       options: {
-        A: "Customer testimonials",
-        B: "A description of the problem the product solves",
-        C: "A statement of the product's unique selling points",
-        D: "A list of technical specifications",
+        T: "True",
+        F: "False",
       },
-      correctResponse: ["A list of technical specifications"],
+      correctResponse: ["False"],
     },
     {
       id: 5,
       question:
-        "When crafting a value proposition, who is the primary audience in mind?",
-      responseType: "multipleChoiceCheckbox",
+        "Stakeholder mapping is an ongoing process that should be regularly updated to reflect changes in the business environment.",
+      responseType: "trueFalse",
       options: {
-        A: "Competitors",
-        B: "Investors",
-        C: "Employees",
-        D: "Customers",
+        T: "True",
+        F: "False",
       },
-      correctResponse: ["Customers"],
+      correctResponse: ["True"],
     },
     {
       id: 6,
       question:
-        "Which statement best reflects the relationship between features and value propositions?",
-      responseType: "multipleChoiceCheckbox",
+        "Primary stakeholders are not defined solely by financial interest; they are typically those who have a direct interest in the organization's activities and are directly affected by its actions.",
+      responseType: "trueFalse",
       options: {
-        A: "Features and value propositions are the same thing",
-        B: "Features explain how a product works, while a value proposition explains why a customer should choose it",
-        C: "Features are more important than value propositions in marketing",
-        D: "Value propositions are specific to product development, while features are for marketing",
+        T: "True",
+        F: "False",
       },
-      correctResponse: [
-        "Features explain how a product works, while a value proposition explains why a customer should choose it",
-      ],
+      correctResponse: ["True"],
     },
     {
       id: 7,
       question:
-        "When developing a value proposition, what is the primary goal?",
-      responseType: "multipleChoiceCheckbox",
+        "Ecosystem mapping is just about identifying competitors and threats.",
+      responseType: "trueFalse",
       options: {
-        A: "To be more cost-effective than competitors",
-        B: "To list as many product features as possible",
-        C: "To communicate the product's unique value to customers",
-        D: "To maintain the same value proposition throughout the product's lifecycle",
+        T: "True",
+        F: "False",
       },
-      correctResponse: [
-        "To communicate the product's unique value to customers",
-      ],
+      correctResponse: ["False"],
+    },
+    {
+      id: 8,
+      question:
+        "Stakeholder mapping is relevant to organizations of all sizes, including small businesses and startups.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["True"],
+    },
+    {
+      id: 9,
+      question:
+        "All customers are stakeholders, but not all stakeholders are customers.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["True"],
+    },
+    {
+      id: 10,
+      question:
+        "A stakeholder/customer ecosystem map can reveal hidden opportunities for collaboration and innovation.",
+      responseType: "trueFalse",
+      options: {
+        T: "True",
+        F: "False",
+      },
+      correctResponse: ["True"],
     },
   ];
 
   return (
-    <div className="p-8 w-full h-full grid grid-cols-3 gap-4">
-      <div className="col-span-2">
-        <ContentCard />
-      </div>
-      <div className="col-span-1">
+    <div className="p-8 w-full h-full grid grid-cols-4 gap-4">
+      <div className="col-start-2 col-end-4">
         <DynamicQuizCard
-          excerciseNumber={1}
           quizData={quizData}
+          excerciseNumber={5}
           responses={exerciseResponse?.responses as QuizResponse}
         />
       </div>
