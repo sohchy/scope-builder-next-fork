@@ -113,11 +113,12 @@ export default async function Exercise1Page() {
   ];
 
   return (
-    <div className="p-8 w-full h-full grid grid-cols-3 gap-4">
-      <div className="col-span-2">
+    <div className="p-8 w-full h-full grid grid-cols-4 gap-4">
+      {/* <div className="col-span-2">
         <ContentCard />
-      </div>
-      <div className="col-span-1">
+      </div> */}
+      {/* <div className="col-span-1"> */}
+      <div className="col-start-2 col-end-4">
         <DynamicQuizCard
           excerciseNumber={1}
           quizData={quizData}
