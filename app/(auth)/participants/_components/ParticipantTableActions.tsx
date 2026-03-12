@@ -285,15 +285,15 @@ export default function ParticipantTableActions({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {/* <SelectItem value="complete">Complete</SelectItem> */}
                           <SelectItem value="need_to_schedule">
                             Need to Schedule
                           </SelectItem>
                           <SelectItem value="scheduled">Scheduled</SelectItem>
+                          <SelectItem value="complete">Complete</SelectItem>
                           {/* <SelectItem value="incomplete">Incomplete</SelectItem> */}
-                          <SelectItem value="interviewed">
+                          {/* <SelectItem value="interviewed">
                             Interviewed
-                          </SelectItem>
+                          </SelectItem> */}
                           <SelectItem value="not_available">
                             Not Available
                           </SelectItem>
