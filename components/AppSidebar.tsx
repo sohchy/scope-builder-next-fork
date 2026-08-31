@@ -134,7 +134,7 @@ const data = {
     //   ],
     // },
     {
-      title: "Eg #1 AgAppraisePro",
+      title: "Eg #1 Elite Tackle",
       items: [
         {
           title: "User Journey",
