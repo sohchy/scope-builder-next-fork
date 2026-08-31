@@ -1,0 +1,1 @@
+Ask me clarifying questions about the current task until you are at least 90% confident you understand what I want. Do not write or edit any code until you reach that confidence level. Summarize your understanding before proceeding.

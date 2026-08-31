@@ -28,6 +28,8 @@ export function Room({ roomId, children }: RoomProps) {
           shapes: new LiveList([]),
           comments: new LiveList([]),
           connections: new LiveList([]),
+          journeyNodes: new LiveList([]),
+          journeyEdges: new LiveList([]),
         }}
       >
         <ClientSideSuspense fallback={

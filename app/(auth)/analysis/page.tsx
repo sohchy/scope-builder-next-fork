@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 
 import { Room } from "@/components/Room";
-import InfiniteCanvas from "@/components/InfiniteCanvas";
+import InfiniteCanvas from "@/components/InfiniteCanvasV2";
 import { generateAnalysisRoom } from "@/services/analysis";
 import { getValuePropData } from "@/services/questions";
 import { ValuePropProvider } from "../questions/_components/ValuePropProvider";

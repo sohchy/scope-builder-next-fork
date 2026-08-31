@@ -17,18 +17,42 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import useStartups from "./useStartups";
-import { format } from "date-fns";
+import { useMemo } from "react";
 import { useOrganizationList } from "@clerk/nextjs";
 import { Badge } from "@/components/ui/badge";
 import { DataTableFacetedFilter } from "@/components/DataTableFacetedFilter";
+import MilestoneAccessCell from "./MilestoneAccessCell";
+import {
+  MILESTONE_NUMBERS,
+  defaultMilestoneAccess,
+  type MilestoneAccessState,
+  type MilestoneReviewInput,
+} from "@/lib/milestones";
 
 export default function StartupsTable({
   data,
   onSelectOrganization,
+  onToggleMilestone,
+  onReviewMilestone,
 }: {
   data: any[];
   onSelectOrganization: (organization: any) => void;
+  onToggleMilestone: (
+    orgId: string,
+    milestone: number,
+    available: boolean,
+  ) => void;
+  onReviewMilestone: (
+    orgId: string,
+    milestone: number,
+    values: MilestoneReviewInput,
+  ) => void;
 }) {
+  const columns = useMemo(
+    () => getColumns(onToggleMilestone, onReviewMilestone),
+    [onToggleMilestone, onReviewMilestone],
+  );
+
   const table = useReactTable({
     data,
     columns,
@@ -123,7 +147,18 @@ export default function StartupsTable({
   );
 }
 
-const columns: ColumnDef<any>[] = [
+const getColumns = (
+  onToggleMilestone: (
+    orgId: string,
+    milestone: number,
+    available: boolean,
+  ) => void,
+  onReviewMilestone: (
+    orgId: string,
+    milestone: number,
+    values: MilestoneReviewInput,
+  ) => void,
+): ColumnDef<any>[] => [
   {
     accessorKey: "name",
     header: "Startup Name",
@@ -174,15 +209,37 @@ const columns: ColumnDef<any>[] = [
       return true;
     },
   },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
+  ...MILESTONE_NUMBERS.map<ColumnDef<any>>((milestone) => ({
+    id: `milestone-${milestone}`,
+    header: () => (
+      <span className="block text-center" title={`Milestone ${milestone}`}>
+        M{milestone}
+      </span>
+    ),
+    size: 84,
     cell: ({ row }) => {
-      const createdAt = format(row.getValue("createdAt"), "MMM d, k:mm");
+      const access: MilestoneAccessState[] =
+        row.original.milestones ?? defaultMilestoneAccess();
+      // Slots come from MILESTONE_NUMBERS, so the index is the milestone number.
+      const state = access[milestone];
 
-      return <div className="capitalize">{createdAt}</div>;
+      return (
+        <MilestoneAccessCell
+          milestone={milestone}
+          startupName={row.original.name}
+          available={state?.available ?? false}
+          submittedAt={state?.submittedAt ?? null}
+          reviewedAt={state?.reviewedAt ?? null}
+          onToggle={(available) =>
+            onToggleMilestone(row.original.org_id, milestone, available)
+          }
+          onReview={(values) =>
+            onReviewMilestone(row.original.org_id, milestone, values)
+          }
+        />
+      );
     },
-  },
+  })),
   // {
   //   id: "actions",
   //   cell: ({ row }) => {

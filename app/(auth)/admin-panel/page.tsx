@@ -1,20 +1,16 @@
-import { getTopics, getTopicTasks } from "@/services/topics";
-import TopicsTable from "./_components/TopicsTable";
-import TopicTasksTable from "./_components/TopicTasksTable";
+import { getAllGetStartedCards } from "@/services/getStarted";
+import GetStartedCardsTable from "./_components/GetStartedCardsTable";
+
+// The Topics / TopicTasks tables (./_components/TopicsTable, ./_components/
+// TopicTasksTable + services/topics.ts) are parked, not deleted — they're just
+// not rendered while the Instructions cards are the admin surface.
 
 export default async function AdminPanelPage() {
-  const topics = await getTopics();
-  const topicTasks = await getTopicTasks();
-
-  const topicTasksWithTopicName = topicTasks.map((task) => ({
-    ...task,
-    topic_name: task.topic.name,
-  }));
+  const getStartedCards = await getAllGetStartedCards();
 
   return (
     <div className="p-8 h-full flex flex-col gap-3">
-      <TopicsTable data={topics} />
-      <TopicTasksTable data={topicTasksWithTopicName} topics={topics} />
+      <GetStartedCardsTable data={getStartedCards} />
     </div>
   );
 }

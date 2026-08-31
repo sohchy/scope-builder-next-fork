@@ -38,6 +38,12 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-progress-done: var(--progress-done);
+  --color-progress-scheduled: var(--progress-scheduled);
+  --color-progress-conducted: var(--progress-conducted);
+  --color-progress-track: var(--progress-track);
+  --color-check-empty: var(--check-empty);
+  --color-label-muted: var(--label-muted);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -61,9 +67,22 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  /* One notch darker than the shadcn default (0.922) — table lines and card edges
+   * were reading as almost-white. Everything bordered in the app moves with this. */
+  --border: oklch(0.87 0 0);
+  --input: oklch(0.87 0 0);
   --ring: oklch(0.708 0 0);
+  /* Status palette. Stronger than the pastels these replace so a checkmark or a
+   * filled bar segment carries at a glance. Used app-wide, not just the grid.
+   * The three interview stages are darkened versions of the Interviews board's
+   * kanban column tints (#F5DFC6 / #E6DEFA / #D2EAD9) — same hue, enough contrast
+   * to survive an 8px bar. `--progress-done` doubles as the reviewed checkmark. */
+  --progress-scheduled: #a66a45;
+  --progress-conducted: #6d4bc4;
+  --progress-done: #2f9e63;
+  --progress-track: #cfc9de;
+  --check-empty: #9ca3af;
+  --label-muted: #4b5563;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -75,7 +94,7 @@
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-border: oklch(0.87 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
 
@@ -151,5 +170,14 @@
   
   .rdw-editor-wrapper .rdw-editor-toolbar + .rdw-editor-main {
     margin-top: 0 !important;
+  }
+}
+
+/* Scrollable without a visible scrollbar — for strips where the bar would sit
+   across a border and read as a rendering artifact. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }

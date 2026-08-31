@@ -33,14 +33,27 @@ enum ParticipantStatus {
   interviewed
   not_available
   need_to_schedule
+  documented
+}
+
+// Drives the columns of the Relationship board on /participants/interviews.
+enum ParticipantRelationship {
+  family_friends_colleagues
+  friend_of_friend
+  cold_connections
+  networking_event
 }
 
 model Participant {
-  id                     String              @id @default(uuid())
+  id                     String                   @id @default(uuid())
   name                   String
+  // Where the participant works. Distinct from `org_id`, which is the founder's own
+  // Clerk organization that owns this row.
+  organization           String?
   job_title              String?
   org_id                 String
   role                   String?
+  relationship           ParticipantRelationship?
   market_segment         String?
   contact_info           String?
   rationale              String?
@@ -49,24 +62,45 @@ model Participant {
   learnings              String?
   notes                  String?
   tags                   String?
-  status                 ParticipantStatus   @default(need_to_schedule)
+  status                 ParticipantStatus        @default(need_to_schedule)
+  // Orthogonal to `status`: a conducted interview whose documentation has been
+  // submitted for review. Surfaced as a badge on the Conducted card, not a column.
+  pending_review         Boolean                  @default(false)
   scheduled_date         DateTime?
-  created_at             DateTime            @default(now())
+  example_number         Int? // NULL = real data, N = example set N
+  created_at             DateTime                 @default(now())
   ParticipantRoom        ParticipantRoom?
   interview_responses    InterviewResponse[]
 
+  problem_interview_answers ProblemInterviewAnswer[]
+
+  @@index([example_number])
   @@map("participants")
 }
 
 model ParticipantTag {
-  id     Int    @id @default(autoincrement())
-  name   String
-  org_id String
+  id             Int    @id @default(autoincrement())
+  name           String
+  org_id         String
+  example_number Int? // NULL = real data, N = example set N
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("participant_tags")
+}
+
+model StakeholderJobTitles {
+  id             Int     @id @default(autoincrement())
+  name           String
+  role           String?
+  org_id         String
+  example_number Int? // NULL = real data, N = example set N
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("stakeholder_job_titles")
 }
 
 model ParticipantRoom {
@@ -282,6 +316,87 @@ model TopicProgress {
   @@map("topic_progress")
 }
 
+// Per-startup unlock flag for the 6 milestones. The milestones themselves stay
+// hardcoded in lib/milestones.ts; this table only says which ones a startup can
+// reach, plus a slot for the (future) submission flow.
+model MilestoneAccess {
+  id           Int       @id @default(autoincrement())
+  org_id       String
+  milestone    Int // 0..5, the milestone number in lib/milestones.ts
+  available    Boolean   @default(false)
+  submitted_at DateTime? // NULL = not submitted yet
+  reviewed_at  DateTime? // NULL = no instructor sign-off yet. One-way, never cleared.
+  review_notes String? // What the instructor wrote when signing off. NULL = none given.
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([org_id, milestone])
+  @@map("milestone_access")
+}
+
+model GetStartedCard {
+  id        Int     @id @default(autoincrement())
+  milestone Int // 0..5, the milestone number in lib/milestones.ts
+  type      String // "steps" | "paragraph" | "image" | "video"
+  title     String
+  body      String? // extra text shown on every non-"steps" card
+  // Image src or video url (youtube/vimeo/direct file, detected at render time
+  // by lib/video.ts). NULL on "paragraph" and "steps" cards.
+  url       String?
+  order     Int     @default(0)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  items   GetStartedItem[]
+  reviews GetStartedReview[]
+
+  @@map("get_started_cards")
+}
+
+model GetStartedItem {
+  id      Int     @id @default(autoincrement())
+  card_id Int
+  title   String
+  url     String? // NULL on text-only items (the "steps" card)
+  // Shown when a sub-step is expanded on the steps card. Seeded from
+  // lib/milestones.ts by prisma/seedSteps.ts — edit it there, not here.
+  description String?
+  order       Int     @default(0)
+  // Set only on "steps" cards: 1-based position of the sub-step inside the
+  // card's milestone. `${card.milestone}.${sub_step}` is the sub-step key the
+  // MilestoneHeader matches on (see lib/milestones.ts).
+  sub_step Int?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  card    GetStartedCard     @relation(fields: [card_id], references: [id], onDelete: Cascade)
+  reviews GetStartedReview[]
+
+  @@map("get_started_items")
+}
+
+model GetStartedReview {
+  id             Int     @id @default(autoincrement())
+  org_id         String
+  card_id        Int? // set for text cards (whole-card review)
+  item_id        Int? // set for link/video subitems
+  reviewed       Boolean @default(false)
+  example_number Int? // NULL = real data, N = example set N
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  card GetStartedCard? @relation(fields: [card_id], references: [id], onDelete: Cascade)
+  item GetStartedItem? @relation(fields: [item_id], references: [id], onDelete: Cascade)
+
+  @@unique([org_id, card_id])
+  @@unique([org_id, item_id])
+  @@map("get_started_reviews")
+}
+
 model Hypothesis {
   id                 Int     @id @default(autoincrement())
   org_id             String  @default("")
@@ -357,4 +472,219 @@ model Note {
   updated_at DateTime @updatedAt
 
   @@map("notes")
+}
+
+model InterviewMilestone {
+  id              Int      @id @default(autoincrement())
+  org_id          String
+  title           String
+  date            DateTime
+  documented_goal Int
+  example_number  Int? // NULL = real data, N = example set N
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("interview_milestones")
+}
+
+model OfficeHourSlot {
+  id          String              @id @default(uuid())
+  user_id     String
+  mentor_name String
+  date        DateTime
+  start_time  String
+  end_time    String
+  created_at  DateTime            @default(now())
+  updated_at  DateTime            @updatedAt
+  subSlots    OfficeHourSubSlot[]
+
+  @@index([user_id, date])
+  @@map("office_hour_slots")
+}
+
+model OfficeHourSubSlot {
+  id         String             @id @default(uuid())
+  slot_id    String
+  start_time String
+  end_time   String
+  created_at DateTime           @default(now())
+  updated_at DateTime           @updatedAt
+  slot       OfficeHourSlot     @relation(fields: [slot_id], references: [id], onDelete: Cascade)
+  booking    OfficeHourBooking?
+
+  @@index([slot_id])
+  @@map("office_hour_sub_slots")
+}
+
+model OfficeHourBooking {
+  id           String            @id @default(uuid())
+  sub_slot_id  String            @unique
+  user_id      String
+  org_id       String? // Clerk org (startup) active at booking time; drives who gets the invite
+  user_name    String?
+  user_email   String?
+  meeting_link String?
+  ics_sequence Int               @default(0) // iCalendar SEQUENCE, bumped so updates replace the event
+  created_at   DateTime          @default(now())
+  updated_at   DateTime          @updatedAt
+  subSlot      OfficeHourSubSlot @relation(fields: [sub_slot_id], references: [id], onDelete: Cascade)
+
+  @@map("office_hour_bookings")
+}
+
+model StakeholderRow {
+  id               Int    @id @default(autoincrement())
+  org_id           String
+  stakeholder_type String // "end_user" | "buyer_decision_maker" | "payer" | "influencer" | "recommender" | "saboteur"
+  value            String
+  order            Int    @default(0)
+  example_number   Int? // NULL = real data, N = example set N
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("stakeholder_rows")
+}
+
+model MarketSegment {
+  id             Int     @id @default(autoincrement())
+  org_id         String
+  name           String  @default("")
+  notes          String  @default("") // the per-row "Notes" column
+  beachhead      Boolean @default(false)
+  order          Int     @default(0)
+  example_number Int? // NULL = real data, N = example set N
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("market_segments")
+}
+
+model MarketSegmentNote {
+  id             Int    @id @default(autoincrement())
+  org_id         String @unique // one section-level note per startup (sentinel org for examples keeps this unique)
+  content        String @default("")
+  example_number Int? // NULL = real data, N = example set N
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("market_segment_notes")
+}
+
+enum InterviewResponseType {
+  text
+  scale
+  dropdown
+}
+
+// The Interview Prep tab's own ordering of one problem's hypotheses. The hypotheses
+// themselves live in Liveblocks canvas storage, which has no order field and is never
+// written to from here — so this table is an overlay, and the canvas action sheet's own
+// numbering is deliberately independent of it. Addressed like ProblemInterviewQuestion,
+// but a separate table because a hypothesis with no questions has no row there and
+// still needs a position. A reorder rewrites every row of the problem at once, so a
+// problem is either fully ordered or not ordered at all.
+model ProblemHypothesisOrder {
+  id               String @id @default(cuid())
+  org_id           String
+  node_id          String
+  problem_id       String
+  bank_question_id String
+  sort_order       Int
+  example_number   Int? // NULL = real data, N = example set N
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([org_id, node_id, problem_id, bank_question_id])
+  @@index([org_id])
+  @@index([example_number])
+  @@map("problem_hypothesis_orders")
+}
+
+// One of the interview questions a user writes against a hypothesis-marked question of
+// a journey-map problem. The problem itself lives in Liveblocks storage, so the columns
+// below address it by id rather than by relation. A hypothesis can carry several of
+// these, so `bank_question_id` groups rows by hypothesis rather than identifying one —
+// rows are addressed by their own `id`, and ordered within a group by `sort_order`.
+model ProblemInterviewQuestion {
+  id               String                @id @default(cuid())
+  org_id           String
+  node_id          String
+  problem_id       String
+  bank_question_id String
+  title            String                @default("")
+  response_type    InterviewResponseType @default(text)
+  options          Json[] // [{ id, label }], only meaningful for response_type=dropdown
+  sort_order       Int                   @default(0) // position within one hypothesis
+  example_number   Int? // NULL = real data, N = example set N
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  answers ProblemInterviewAnswer[]
+
+  @@index([org_id, node_id, problem_id, bank_question_id])
+  @@index([org_id])
+  @@index([example_number])
+  @@map("problem_interview_questions")
+}
+
+// One participant's answer to one authored interview question. Unlike the question
+// itself — whose problem lives in Liveblocks and is addressed by id — both sides of
+// this row are real records, so both are real relations.
+model ProblemInterviewAnswer {
+  id             String @id @default(cuid())
+  org_id         String
+  question_id    String
+  participant_id String
+
+  // The answer, serialized: text -> the text; scale -> "1".."5"; dropdown -> the
+  // option id. A value that no longer fits the question's response_type (because the
+  // type was changed after answering) is kept but renders as unanswered.
+  value          String @default("")
+  example_number Int? // NULL = real data, N = example set N
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  question    ProblemInterviewQuestion @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  participant Participant              @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+
+  @@unique([question_id, participant_id])
+  @@index([org_id])
+  @@index([participant_id])
+  @@index([example_number])
+  @@map("problem_interview_answers")
+}
+
+// What a team concluded about one hypothesis once its interviews were conducted: the
+// write-up of every interviewee's answers, and how strongly the hypothesis came out
+// validated. Addressed by the same node/problem/bank triple as ProblemHypothesisOrder —
+// the hypothesis lives in Liveblocks storage, so there is nothing here to relate to.
+// One row per hypothesis, created on the first edit; a hypothesis never written about
+// simply has no row and reads as empty + unrated.
+model ProblemHypothesisSummary {
+  id               String @id @default(cuid())
+  org_id           String
+  node_id          String
+  problem_id       String
+  bank_question_id String
+
+  // Free text, written on the Interview Summary tab.
+  summary          String @default("")
+  // 1..5, low to high. 0 = never rated, which is also what clearing the rating writes.
+  validation_level Int    @default(0)
+  example_number   Int? // NULL = real data, N = example set N
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([org_id, node_id, problem_id, bank_question_id])
+  @@index([org_id])
+  @@index([example_number])
+  @@map("problem_hypothesis_summaries")
 }

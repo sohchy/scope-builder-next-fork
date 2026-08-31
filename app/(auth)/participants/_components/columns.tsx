@@ -5,7 +5,10 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
-export const columns: (tags: string[]) => ColumnDef<any>[] = (tags) => [
+export const columns: (
+  tags: string[],
+  jobTitles: string[],
+) => ColumnDef<any>[] = (tags, jobTitles) => [
   {
     id: "actions",
     cell: ({ row }) => {
@@ -14,6 +17,7 @@ export const columns: (tags: string[]) => ColumnDef<any>[] = (tags) => [
       return (
         <ParticipantTableActions
           tags={tags}
+          jobTitles={jobTitles}
           participant={participant as Participant}
         />
       );

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 import { cn } from "@/lib/utils";
@@ -32,61 +33,65 @@ import { Calendar } from "@/components/ui/calendar";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
 } from "@/components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
-import { EditorState, convertFromRaw } from "draft-js";
-import { participantFormSchema } from "@/schemas/participant";
+import {
+  participantFormSchema,
+  ROLE_OPTIONS,
+  RELATIONSHIP_OPTIONS,
+} from "@/schemas/participant";
 import {
   createParticipant,
   createParticipantTag,
 } from "@/services/participants";
+import { createJobTitle } from "@/services/jobTitles";
+import {
+  createMarketSegment,
+  getMarketSegments,
+  type MarketSegment,
+} from "@/services/market";
 import { MultiSelect } from "@/components/ui/multiselect";
-import { useState } from "react";
+import { Combobox } from "@/components/ui/combobox";
+import { useEffect, useState } from "react";
 
 interface AddParticipantProps {
-  //marketSegments: any[];
   tags: string[];
+  jobTitles: string[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-const ROLE_OPTIONS = [
-  //{ value: "Customer", label: "Customer" },
-  { value: "End-User", label: "End-User" },
-  //{ value: "Both Customer & End-User", label: "Both Customer & End-User" },
-  { value: "Buyer-Decision-Maker", label: "Buyer/Decision Maker" },
-  { value: "Payer", label: "Payer" },
-  { value: "Influencer", label: "Influencer" },
-  { value: "Recommender", label: "Recommender" },
-  { value: "Saboteur", label: "Saboteur" },
-  //{ value: "Additional Decision Maker", label: "Additional Decision Maker" },
-  //{ value: "Additional Stakeholder", label: "Additional Stakeholder" },
-];
-
 export default function AddParticipant({
-  //marketSegments,
   tags,
+  jobTitles,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  onSuccess,
 }: AddParticipantProps) {
-  const [open, setOpen] = useState(false);
-  // const marketSegmentOptions = marketSegments
-  //   ?.filter((s: any) => s.draftRaw)
-  //   .map((segment: any) => {
-  //     const draftRaw = segment.draftRaw;
-  //     const raw = JSON.parse(draftRaw);
-  //     const editor = EditorState.createWithContent(convertFromRaw(raw));
-  //     const text = editor.getCurrentContent().getPlainText();
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? controlledOnOpenChange! : setInternalOpen;
 
-  //     return text;
-  //   });
+  // Market segments are the same org-wide rows edited on the Market tab of the
+  // User Journey page.
+  const [marketSegments, setMarketSegments] = useState<MarketSegment[]>([]);
+
+  useEffect(() => {
+    getMarketSegments().then(setMarketSegments);
+  }, []);
 
   const form = useForm<z.infer<typeof participantFormSchema>>({
     resolver: zodResolver(participantFormSchema),
     defaultValues: {
       name: "",
+      organization: "",
       job_title: "",
       role: "",
+      relationship: "",
       contact_info: "",
       rationale: "",
       blocking_issues: "",
@@ -95,31 +100,54 @@ export default function AddParticipant({
       market_segment: "",
       status: "need_to_schedule",
       scheduled_date: undefined,
+      conducted: false,
+      pending_review: false,
       notes: "",
       tags: "",
     },
   });
 
+  // Drives the "Conducted" checkbox, which only makes sense for a scheduled
+  // interview — watched so picking a date reveals it right away.
+  const scheduledDate = form.watch("scheduled_date");
+  // Submitting documentation for review only makes sense once it's conducted.
+  const conducted = form.watch("conducted");
+
   async function onSubmit(values: z.infer<typeof participantFormSchema>) {
     await createParticipant(values);
     form.reset();
     setOpen(false);
+    onSuccess?.();
   }
 
   async function onCreateTagOption(opt: string) {
     await createParticipantTag(opt);
   }
 
+  async function onCreateJobTitleOption(opt: string) {
+    await createJobTitle(opt);
+  }
+
+  async function onCreateMarketSegmentOption(name: string) {
+    const created = await createMarketSegment({
+      name,
+      order: marketSegments.length,
+    });
+    setMarketSegments((prev) => [...prev, created]);
+  }
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button className="rounded-full text-sm font-bold">
-          + Add Participant
-        </Button>
-      </SheetTrigger>
+      {!isControlled && (
+        <SheetTrigger asChild>
+          <Button className="rounded-full text-sm font-bold">
+            + Add Participant
+          </Button>
+        </SheetTrigger>
+      )}
       <SheetContent>
-        <SheetHeader className="border-b">
-          <SheetTitle className="text-[26px] font-medium text-[#162A4F]">
+        <SheetHeader className="border-b p-3">
+          <SheetTitle className="text-[20px] font-medium text-[#111827]">
             New Participant
           </SheetTitle>
         </SheetHeader>
@@ -129,240 +157,50 @@ export default function AddParticipant({
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-8 p-4"
             >
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="job_title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Job Title</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <FormControl>
-                      <MultiSelect
-                        creatable={false}
-                        options={ROLE_OPTIONS}
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Select a role"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+              {/* Only offer "Conducted" once there's something to have conducted. */}
+              {scheduledDate && (
+                <FormField
+                  control={form.control}
+                  name="conducted"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center gap-2">
                       <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a status" />
-                        </SelectTrigger>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={(value) =>
+                            field.onChange(value === true)
+                          }
+                        />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="need_to_schedule">
-                          Need to Schedule
-                        </SelectItem>
-                        <SelectItem value="scheduled">Scheduled</SelectItem>
-                        {/* <SelectItem value="incomplete">Incomplete</SelectItem> */}
-                        <SelectItem value="complete">Complete</SelectItem>
-                        {/* <SelectItem value="interviewed">Interviewed</SelectItem> */}
-                        <SelectItem value="not_available">
-                          Not Available
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormLabel className="font-normal">Conducted</FormLabel>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
-              {/* <FormField
-                control={form.control}
-                name="market_segment"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Market Segment</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+              {scheduledDate && conducted && (
+                <FormField
+                  control={form.control}
+                  name="pending_review"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center gap-2">
                       <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a market segment" />
-                        </SelectTrigger>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={(value) =>
+                            field.onChange(value === true)
+                          }
+                        />
                       </FormControl>
-                      <SelectContent>
-                        {marketSegments.length === 0 ? (
-                          <div className="py-2 px-3 text-sm text-gray-500">
-                            No segments available
-                          </div>
-                        ) : (
-                          marketSegments.map((segment) => {
-                            return (
-                              <SelectGroup key={segment.title}>
-                                <SelectLabel>{segment.title}</SelectLabel>
-                                {segment.data
-                                  .filter(
-                                    (s: any) => s.cardTitle?.trim().length > 0,
-                                  )
-                                  .map((s: any) => (
-                                    <SelectItem key={s.id} value={s.cardTitle}>
-                                      {s.cardTitle}
-                                    </SelectItem>
-                                  ))}
-                              </SelectGroup>
-                            );
-                          })
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-
-              <FormField
-                control={form.control}
-                name="contact_info"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Contact Info</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* <FormField
-                control={form.control}
-                name="rationale"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Rationale</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-
-              {/* <FormField
-                control={form.control}
-                name="blocking_issues"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Blocking Issues</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-
-              {/* <FormField
-                control={form.control}
-                name="hypothesis_to_validate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hypothesis to Validate</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-
-              {/* <FormField
-                control={form.control}
-                name="learnings"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Learnings</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notes</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tags</FormLabel>
-                    <FormControl>
-                      <MultiSelect
-                        value={field.value}
-                        onChange={field.onChange}
-                        options={tags.map((tag) => ({
-                          value: tag,
-                          label: tag,
-                        }))}
-                        placeholder="Select or create a tag"
-                        onCreateOption={(opt) => onCreateTagOption(opt.value)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormLabel className="font-normal">
+                        Submit Interview Documentation for Review
+                      </FormLabel>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}
@@ -402,6 +240,248 @@ export default function AddParticipant({
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="shadow-none" />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="organization"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Organization</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Where they work" className="shadow-none" />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="job_title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Job Title</FormLabel>
+                    <FormControl>
+                      <Combobox
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={jobTitles.map((jobTitle) => ({
+                          value: jobTitle,
+                          label: jobTitle,
+                        }))}
+                        placeholder="Select or create a job title"
+                        onCreateOption={(opt) =>
+                          onCreateJobTitleOption(opt.value)
+                        }
+                      />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stakeholder</FormLabel>
+                    <FormControl>
+                      <MultiSelect
+                        creatable={false}
+                        options={ROLE_OPTIONS}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Select a stakeholder"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="relationship"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Relationship</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="w-full shadow-none">
+                          <SelectValue placeholder="Select a relationship" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {RELATIONSHIP_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="market_segment"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Market Segment</FormLabel>
+                    <FormControl>
+                      <Combobox
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={marketSegments
+                          .filter((segment) => segment.name.trim().length > 0)
+                          .map((segment) => ({
+                            value: segment.name,
+                            label: segment.name,
+                          }))}
+                        placeholder="Select or create a market segment"
+                        onCreateOption={(opt) =>
+                          onCreateMarketSegmentOption(opt.value)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="contact_info"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contact Info</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} className="shadow-none" />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* <FormField
+                control={form.control}
+                name="rationale"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Rationale</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} className="shadow-none" />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              /> */}
+
+              {/* <FormField
+                control={form.control}
+                name="blocking_issues"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Blocking Issues</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} className="shadow-none" />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              /> */}
+
+              {/* <FormField
+                control={form.control}
+                name="hypothesis_to_validate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hypothesis to Validate</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} className="shadow-none" />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              /> */}
+
+              {/* <FormField
+                control={form.control}
+                name="learnings"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Learnings</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} className="shadow-none" />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              /> */}
+
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} className="shadow-none" />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tags</FormLabel>
+                    <FormControl>
+                      <MultiSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={tags.map((tag) => ({
+                          value: tag,
+                          label: tag,
+                        }))}
+                        placeholder="Select or create a tag"
+                        onCreateOption={(opt) => onCreateTagOption(opt.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <div className="flex ">
                 <Button
                   type="submit"

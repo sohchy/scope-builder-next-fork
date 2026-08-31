@@ -56,6 +56,7 @@ export default function AppHeader() {
     if (pathname.includes("/teams-dashboard")) title = "Leaderboard";
     if (pathname.includes("/exercises/exercise-1")) title = "Exercise 1";
     if (pathname.includes("/exercises/exercise-2")) title = "Exercise 2";
+    if (pathname.includes("/user-journey-map")) title = "Milestones";
 
     // if (
     //   pathname.includes("/participants/") ||
@@ -88,9 +89,13 @@ export default function AppHeader() {
       content = (
         <>
           <b>Quick tutorial on how to use the My Progress page:</b>
-          <br/>
-          <i>Forgot to include in the tutorial video, you can also complete the main milestone itself once all tasks in that milestone are done.</i>
-          <br/><br/>
+          <br />
+          <i>
+            Forgot to include in the tutorial video, you can also complete the
+            main milestone itself once all tasks in that milestone are done.
+          </i>
+          <br />
+          <br />
           <video
             controls
             className="w-full"
@@ -106,7 +111,8 @@ export default function AppHeader() {
       content = (
         <>
           <b>Quick tutorial on how to use the Idea Brainstorm page:</b>
-          <br/><br/>
+          <br />
+          <br />
           <video
             controls
             className="w-full"
@@ -122,7 +128,8 @@ export default function AppHeader() {
       content = (
         <>
           <b>Quick tutorial on how to use the Value Proposition Canvas page:</b>
-          <br/><br/>
+          <br />
+          <br />
           <video
             controls
             className="w-full"
@@ -133,12 +140,13 @@ export default function AppHeader() {
         </>
       );
     }
-    
+
     if (pathname.includes("/hypotheses")) {
       content = (
         <>
           <b>Quick tutorial on how to use the Hypotheses page:</b>
-          <br/><br/>
+          <br />
+          <br />
           <video
             controls
             className="w-full"
@@ -150,11 +158,12 @@ export default function AppHeader() {
       );
     }
 
-     if (pathname === "/participants") {
+    if (pathname === "/participants") {
       content = (
         <>
           <b>Quick tutorial on how to use the Interview Participants page:</b>
-          <br/><br/>
+          <br />
+          <br />
           <video
             controls
             className="w-full"
@@ -170,7 +179,8 @@ export default function AppHeader() {
       content = (
         <>
           <b>Quick tutorial on how to use the Leaderboard page:</b>
-          <br/><br/>
+          <br />
+          <br />
           <video
             controls
             className="w-full"
@@ -193,6 +203,8 @@ export default function AppHeader() {
   return (
     <header className="flex items-center px-4 h-[46px] bg-white border-b-[0.5px] border-b-[#E4E5ED] justify-between font-semibold text-lg text-[#111827]">
       {header}
+      {/* 
+       
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button variant="outline" size="icon" className="ml-4">
@@ -201,10 +213,9 @@ export default function AppHeader() {
         </AlertDialogTrigger>
         <AlertDialogContent className="w-[750px] min-w-[750px]">
           <AlertDialogHeader>
-            {/* <AlertDialogTitle>{alertDialogTitle}</AlertDialogTitle> */}
+            // {/* <AlertDialogTitle>{alertDialogTitle}</AlertDialogTitle> 
             <AlertDialogTitle></AlertDialogTitle>
-            <AlertDialogDescription>
-            </AlertDialogDescription>
+            <AlertDialogDescription></AlertDialogDescription>
           </AlertDialogHeader>
           <div>{content}</div>
           <AlertDialogFooter>
@@ -212,6 +223,8 @@ export default function AppHeader() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      */}
 
       <div className="flex items-center flex-row gap-2.5 ml-auto">
         <Notes />

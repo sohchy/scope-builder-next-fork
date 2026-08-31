@@ -30,7 +30,9 @@ type MultiSelectProps = {
   placeholder?: string;
   className?: string;
   showSearch?: boolean;
-  maxBadges?: number; // collapse after N badges
+  /** Optional hard cap. Left unset, the trigger shows as many badges as
+   *  actually fit on one line and collapses the rest into "+N". */
+  maxBadges?: number;
 
   /** Creatable behavior */
   creatable?: boolean;
@@ -82,6 +84,11 @@ function cryptoRandom() {
   }
 }
 
+// `useLayoutEffect` warns when React renders this on the server, and the
+// measurement it guards only means anything in a browser anyway.
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect;
+
 function dedupeOptionsByValue(opts: Option[]) {
   const seen = new Set<string>();
   const out: Option[] = [];
@@ -100,7 +107,7 @@ export function MultiSelect({
   placeholder = "Select roles...",
   className,
   showSearch = true,
-  maxBadges = 3,
+  maxBadges,
 
   creatable = true,
   onCreateOption,
@@ -123,6 +130,58 @@ export function MultiSelect({
     const map = new Map(mergedOptions.map((o) => [o.value, o]));
     return valueArr.map((v) => map.get(v) ?? { value: v, label: v });
   }, [mergedOptions, valueArr]);
+
+  // ── Badge strip sizing ────────────────────────────────────────────────────
+  // How many badges fit is a measurement, not a constant — "Payer" and
+  // "Buyer/Decision Maker" take very different widths. Every badge is laid out
+  // in a hidden max-content twin so its natural width stays readable even while
+  // the visible row is showing only a subset.
+  const stripRef = React.useRef<HTMLDivElement>(null);
+  const measureRef = React.useRef<HTMLDivElement>(null);
+  const [visibleCount, setVisibleCount] = React.useState(selected.length);
+
+  useIsomorphicLayoutEffect(() => {
+    const strip = stripRef.current;
+    const measure = measureRef.current;
+    if (!strip || !measure) return;
+
+    const GAP = 4; // gap-1
+
+    const fit = () => {
+      const available = strip.clientWidth;
+      const nodes = Array.from(measure.children) as HTMLElement[];
+      const widths = nodes.slice(0, selected.length).map((n) => n.offsetWidth);
+      // The twin renders "+N" at the largest N it could ever show, so the
+      // reserved slot is never narrower than the chip that lands in it.
+      const overflowWidth = nodes[selected.length]?.offsetWidth ?? 0;
+
+      // Longest run of badges that fits on its own,
+      let used = 0;
+      let count = 0;
+      for (let i = 0; i < widths.length; i++) {
+        const next = used + widths[i] + (i > 0 ? GAP : 0);
+        if (next > available) break;
+        used = next;
+        count++;
+      }
+      // then give badges back until the "+N" chip fits beside them. Dropping to
+      // zero is a valid answer: a lone long label yields just the count.
+      while (count > 0 && count < selected.length) {
+        const run =
+          widths.slice(0, count).reduce((a, b) => a + b, 0) + GAP * (count - 1);
+        if (run + GAP + overflowWidth <= available) break;
+        count--;
+      }
+
+      setVisibleCount(maxBadges == null ? count : Math.min(count, maxBadges));
+    };
+
+    fit();
+    // The trigger is full-width, so it resizes with the sheet and the viewport.
+    const observer = new ResizeObserver(fit);
+    observer.observe(strip);
+    return () => observer.disconnect();
+  }, [selected, maxBadges]);
 
   function commit(arr: string[]) {
     onChange(arrayToCsv(arr));
@@ -193,24 +252,50 @@ export function MultiSelect({
           aria-expanded={open}
           className={cn("w-full justify-between", className)}
         >
-          <div className="flex flex-wrap gap-1 items-center overflow-hidden whitespace-nowrap">
+          {/* One line, never wrapping — the count adapts instead of the height. */}
+          <div
+            ref={stripRef}
+            className="relative flex min-w-0 flex-1 items-center gap-1 overflow-hidden"
+          >
             {selected.length === 0 && (
               <span className="text-muted-foreground">{placeholder}</span>
             )}
-            {selected.slice(0, maxBadges).map((opt) => (
+            {selected.slice(0, visibleCount).map((opt) => (
               <Badge
                 key={opt.value}
                 variant="secondary"
-                className="mr-1 max-w-[11rem] truncate"
+                className="max-w-[11rem] shrink-0 truncate bg-[#111827] text-white"
               >
                 {opt.label}
               </Badge>
             ))}
-            {selected.length > maxBadges && (
+            {selected.length > visibleCount && (
               <Badge variant="outline" className="shrink-0">
-                +{selected.length - maxBadges}
+                +{selected.length - visibleCount}
               </Badge>
             )}
+
+            {/* Measurement twin: the full strip at natural width, never painted.
+                Absolute so it stays out of the flow, `w-max` so nothing here
+                wraps or shrinks and the widths read true. */}
+            <div
+              ref={measureRef}
+              aria-hidden
+              className="pointer-events-none absolute top-0 left-0 flex w-max gap-1 opacity-0"
+            >
+              {selected.map((opt) => (
+                <Badge
+                  key={opt.value}
+                  variant="secondary"
+                  className="max-w-[11rem] shrink-0 truncate"
+                >
+                  {opt.label}
+                </Badge>
+              ))}
+              <Badge variant="outline" className="shrink-0">
+                +{selected.length}
+              </Badge>
+            </div>
           </div>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>

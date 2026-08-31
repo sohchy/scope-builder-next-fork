@@ -1,5 +1,5 @@
 import { Room } from "@/components/Room";
-import InfiniteCanvas from "@/components/InfiniteCanvas";
+import InfiniteCanvasV2 from "@/components/InfiniteCanvasV2";
 import { auth } from "@clerk/nextjs/server";
 import {
   createBrainstormExampleCards,
@@ -31,7 +31,7 @@ export default async function IdeaBrainstormPage() {
           </TabsList>
           <TabsContent value="canvas" className="h-full">
             <Room roomId={`brainstorm-${orgId}`}>
-              <InfiniteCanvas
+              <InfiniteCanvasV2
                 toolbarOptions={{
                   text: true,
                   card: false,
@@ -48,7 +48,7 @@ export default async function IdeaBrainstormPage() {
           </TabsContent>
           <TabsContent value="examples-problem" className="h-full">
             <Room roomId={`brainstorm-examples`}>
-              <InfiniteCanvas
+              <InfiniteCanvasV2
                 toolbarOptions={{
                   text: false,
                   card: false,
@@ -66,7 +66,7 @@ export default async function IdeaBrainstormPage() {
           </TabsContent>
           <TabsContent value="examples-ecosystem" className="h-full">
             <Room roomId={`brainstorm-ecosystem-examples`}>
-              <InfiniteCanvas
+              <InfiniteCanvasV2
                 toolbarOptions={{
                   text: false,
                   card: false,
@@ -96,7 +96,7 @@ export default async function IdeaBrainstormPage() {
 
               <TabsContent value="examples-problem" className="h-full">
                 <Room roomId={`brainstorm-problem-examples`}>
-                  <InfiniteCanvas
+                  <InfiniteCanvasV2
                     toolbarOptions={{
                       text: false,
                       card: false,
@@ -115,7 +115,7 @@ export default async function IdeaBrainstormPage() {
 
               <TabsContent value="examples-ecosystem" className="h-full">
                 <Room roomId={`brainstorm-ecosystem-examples`}>
-                  <InfiniteCanvas
+                  <InfiniteCanvasV2
                     toolbarOptions={{
                       text: false,
                       card: false,
@@ -135,7 +135,7 @@ export default async function IdeaBrainstormPage() {
           </TabsContent> */}
         </Tabs>
         {/* <Room roomId={`brainstorm-${orgId}`}>
-          <InfiniteCanvas
+          <InfiniteCanvasV2
             toolbarOptions={{
               text: true,
               card: false,

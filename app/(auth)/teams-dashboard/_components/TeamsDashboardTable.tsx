@@ -82,20 +82,16 @@ const columns: ColumnDef<any>[] = [
             className="w-[60%]"
             progressClassname="bg-[#6A35FF]"
             total={20}
-            segments={[
-              {
-                value: row.original.interviews.conducted,
-                colorClass: "bg-[#58C184]",
-              },
-              {
-                value: row.original.interviews.scheduled,
-                colorClass: "bg-[#B87F5A]",
-              },
-              {
-                value: 20,
-                colorClass: "bg-[#DDD9E9]",
-              },
-            ]}
+            segments={(() => {
+              const green = Math.min(row.original.interviews.conducted, 20);
+              const orange = Math.min(row.original.interviews.scheduled, Math.max(0, 20 - green));
+              const gray = Math.max(0, 20 - green - orange);
+              return [
+                { value: green, colorClass: "bg-[#58C184]" },
+                { value: orange, colorClass: "bg-[#B87F5A]" },
+                { value: gray, colorClass: "bg-[#DDD9E9]" },
+              ];
+            })()}
           />
         </div>
       );

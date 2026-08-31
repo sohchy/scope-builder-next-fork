@@ -2,6 +2,59 @@
 
 import { LiveList, LiveObject } from "@liveblocks/client";
 
+export interface JourneyNodeStorage {
+  id: string;
+  type: 'trigger' | 'action' | 'split_route';
+  content: string;
+  stakeholderIds: number[];
+  problems: Array<{
+    id: string;
+    description: string;
+    type: string;
+    painOrGain: "pain" | "gain";
+    questions: Array<{
+      bankQuestionId: string;
+      answer: string | string[];
+      source: string;
+      confidence: number;
+      isHypothesis: boolean;
+    }>;
+  }>;
+  solutions: Array<{
+    id: string;
+    // The problem this solution belongs to. Legacy rooms wrote node-scoped
+    // solutions without this field; readers treat those as the first problem's.
+    problemId?: string;
+    description: string;
+    type: string;
+    relieverOrCreator: "reliever" | "creator";
+    questions: Array<{
+      bankQuestionId: string;
+      answer: string | string[];
+      source: string;
+      confidence: number;
+    }>;
+  }>;
+  conclusions: Array<{
+    id: string;
+    status: "testing" | "validated" | "invalidated";
+    content: string;
+  }>;
+  /** Logical delete marker (ISO timestamp). Set = the node and the edge that
+   * connects it are hidden everywhere; the data itself is never removed. */
+  deletedAt?: string | null;
+}
+
+export interface JourneyEdgeStorage {
+  id: string;
+  source: string;
+  target: string;
+  sourceHandle: string;
+  targetHandle: string;
+  /** User-set branch label. Absent or empty falls back to the derived "Option n". */
+  label?: string;
+}
+
 // https://liveblocks.io/docs/api-reference/liveblocks-react#Typing-your-data
 declare global {
   interface Liveblocks {
@@ -18,6 +71,8 @@ declare global {
       shapes: LiveList<LiveObject<any>>;
       comments: LiveList<LiveObject<any>>;
       connections: LiveList<LiveObject<any>>;
+      journeyNodes: LiveList<LiveObject<any>>;
+      journeyEdges: LiveList<LiveObject<any>>;
     };
 
     // Custom user info set when authenticating with a secret key

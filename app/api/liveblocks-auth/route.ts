@@ -1,6 +1,8 @@
 import { Liveblocks } from "@liveblocks/node";
 import { auth, currentUser } from "@clerk/nextjs/server";
 
+import { isExampleRoomId } from "@/lib/examples";
+
 export async function POST(req: Request) {
   const { sessionClaims } = await auth();
   if (!sessionClaims) {
@@ -24,7 +26,13 @@ export async function POST(req: Request) {
       avatar: user.imageUrl,
     },
   });
-  session.allow(room, session.FULL_ACCESS);
+  // Example rooms back the read-only /examples pages. Storage is pre-created
+  // server-side, so read-only clients never need write/init access — grant
+  // READ_ACCESS so the shared example content can't be mutated over the wire.
+  session.allow(
+    room,
+    isExampleRoomId(room) ? session.READ_ACCESS : session.FULL_ACCESS,
+  );
   const { body, status } = await session.authorize();
 
   // Return the response

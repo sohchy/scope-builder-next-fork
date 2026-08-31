@@ -41,36 +41,52 @@ const data = {
       //icon: Frame,
       conditionalMenu: true,
     },
+    // {
+    //   name: "My Progress",
+    //   //url: "/teams-dashboard",
+    //   url: "/",
+    //   //icon: Frame,
+    //   conditionalMenu: false,
+    // },
+    // {
+    //   name: "Brainstorm",
+    //   url: "/idea-brainstorm",
+    //   //icon: PieChart,
+    //   conditionalMenu: false,
+    // },
+    // {
+    //   name: "Value Prop Canvas",
+    //   url: "/value-proposition-canvas",
+    //   //icon: PieChart,
+    //   conditionalMenu: false,
+    // },
     {
-      name: "My Progress",
-      //url: "/teams-dashboard",
-      url: "/",
-      //icon: Frame,
+      name: "User Journey",
+      url: "/user-journey-map",
+      conditionalMenu: false,
+    },
+    // {
+    //   name: "Hypothesis",
+    //   url: "/hypotheses",
+    //   //icon: PieChart,
+    //   conditionalMenu: true,
+    // },
+    // {
+    //   name: "Participants & Interviews",
+    //   url: "/participants",
+    //   //icon: PieChart,
+    //   conditionalMenu: true,
+    // },
+    {
+      name: "Interviews",
+      url: "/participants/interviews",
+      //icon: PieChart,
       conditionalMenu: false,
     },
     {
-      name: "Brainstorm",
-      url: "/idea-brainstorm",
-      //icon: PieChart,
+      name: "Office Hours",
+      url: "/office-hours",
       conditionalMenu: false,
-    },
-    {
-      name: "Value Prop Canvas",
-      url: "/value-proposition-canvas",
-      //icon: PieChart,
-      conditionalMenu: false,
-    },
-    {
-      name: "Hypothesis",
-      url: "/hypotheses",
-      //icon: PieChart,
-      conditionalMenu: true,
-    },
-    {
-      name: "Participants & Interviews",
-      url: "/participants",
-      //icon: PieChart,
-      conditionalMenu: true,
     },
   ],
   navMain: [
@@ -117,6 +133,19 @@ const data = {
     //     },
     //   ],
     // },
+    {
+      title: "Eg #1 AgAppraisePro",
+      items: [
+        {
+          title: "User Journey",
+          url: "/examples/user-journey",
+        },
+        {
+          title: "Interviews",
+          url: "/examples/interviews",
+        },
+      ],
+    },
     {
       title: "Resources",
       items: [

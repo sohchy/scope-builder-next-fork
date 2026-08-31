@@ -41,13 +41,15 @@ import { columns } from "./columns";
 export default function ParticipantsTable({
   data,
   tags,
+  jobTitles,
 }: {
   data: any[];
   tags: string[];
+  jobTitles: string[];
 }) {
   const table = useReactTable({
     data,
-    columns: columns(tags),
+    columns: columns(tags, jobTitles),
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
   });
