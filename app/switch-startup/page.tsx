@@ -4,6 +4,11 @@ import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useOrganizationList } from "@clerk/nextjs";
 
+// Picking a startup means "take me into this startup's work", so the switch
+// lands on the User Journey. `/` would bounce an admin or mentor straight back
+// to the `/startups` list they just clicked from (see middleware.ts).
+const AFTER_SWITCH_URL = "/user-journey-map";
+
 /**
  * Interstitial used when opening a startup in a new tab from `/startups`.
  * The active organization lives on the Clerk session, so the new tab has to set
@@ -25,7 +30,7 @@ function SwitchStartup() {
       return;
     }
 
-    setActive({ organization: orgId, redirectUrl: "/" });
+    setActive({ organization: orgId, redirectUrl: AFTER_SWITCH_URL });
   }, [isLoaded, setActive, orgId, router]);
 
   return (
