@@ -228,7 +228,7 @@ function KanbanBoard({
               // Fixed, not `min-w`: a flex item sizes to its content above the
               // floor, so the fullest column — usually Documented — used to
               // outgrow its neighbours.
-              className="flex flex-col w-[340px] shrink-0 bg-[#FFFFFF] rounded-xl border-2 border-[#FFFFFF] overflow-hidden h-full"
+              className="flex flex-col w-[340px] shrink-0 bg-[#FFFFFF] rounded-xl border-2 border-[#B9BDC9] overflow-hidden h-full"
             >
               <div
                 style={{ backgroundColor: colors.header }}

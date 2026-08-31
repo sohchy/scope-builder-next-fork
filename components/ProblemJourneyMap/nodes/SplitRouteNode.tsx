@@ -45,7 +45,7 @@ function SplitRouteNodeInner({ id }: NodeProps) {
   const canDeleteNode = !readOnly && canDelete(id);
 
   return (
-    <div className="group/card nopan nodrag pointer-events-auto w-[180px] bg-[#F5DFC6] border-2 border-[#CFD3E0] rounded-xl p-4 relative shadow-[0_1px_3px_0_rgba(16,24,40,0.06),0_6px_14px_-2px_rgba(16,24,40,0.12)] flex items-center gap-3">
+    <div className="group/card nopan nodrag pointer-events-auto w-[180px] bg-[#F5DFC6] border-2 border-[#B9BDC9] rounded-xl p-4 relative shadow-[0_1px_3px_0_rgba(16,24,40,0.06),0_6px_14px_-2px_rgba(16,24,40,0.12)] flex items-center gap-3">
       <Handle
         id="left"
         type="target"
