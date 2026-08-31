@@ -7,6 +7,7 @@ import { getAllSubStepProgress } from "@/services/getStarted";
 import { getAllInterviewCounts } from "@/services/participants";
 import { getAllMilestoneAccess } from "@/services/milestoneAccess";
 import { defaultMilestoneAccess } from "@/lib/milestones";
+import { isInCurrentCohort } from "@/lib/cohort";
 
 // The interviews / hypothesis-status view is parked while the milestone progress
 // grid takes over this page. `_components/TeamsDashboardTable.tsx` is still on disk
@@ -33,7 +34,7 @@ export default async function TeamsDashboardPage() {
     ]);
 
   const rows: MilestoneProgressRow[] = organizations.data
-    .filter((org) => org.publicMetadata?.cohort === "spring26")
+    .filter((org) => isInCurrentCohort(org.publicMetadata))
     .map((org) => ({
       orgId: org.id,
       orgName: org.name,

@@ -83,6 +83,11 @@ export function isAfter(a: string, b: string): boolean {
 
 /**
  * Generates one Week object per Mon–Sun week that overlaps the [startDate, endDate] range.
+ *
+ * When the range crosses a New Year, every week label carries its year so the
+ * columns can't be misread — a week that straddles the boundary shows both
+ * ("Dec 29, 2025 — Jan 4, 2026"), one that doesn't shows a single trailing year
+ * ("Jan 5 — Jan 11, 2026"). Ranges inside one year keep the shorter form.
  */
 export function generateWeeks(startDate: Date, endDate: Date): Week[] {
   const weekStarts = eachWeekOfInterval(
@@ -90,16 +95,28 @@ export function generateWeeks(startDate: Date, endDate: Date): Week[] {
     { weekStartsOn: 1 } // Monday
   );
 
-  return weekStarts.map((ws) => {
-    const we = endOfWeek(ws, { weekStartsOn: 1 });
+  const weekEnds = weekStarts.map((ws) => endOfWeek(ws, { weekStartsOn: 1 }));
+  const years = new Set(
+    [...weekStarts, ...weekEnds].map((d) => d.getFullYear())
+  );
+  const showYear = years.size > 1;
+
+  return weekStarts.map((ws, i) => {
+    const we = weekEnds[i];
+    const crossesYear = ws.getFullYear() !== we.getFullYear();
+
+    // Only the straddling week needs per-day years; elsewhere the header
+    // already pins the year for all seven rows.
     const days = eachDayOfInterval({ start: ws, end: we }).map((d) => ({
       date: d,
       dayName: format(d, "EEEE"), // "Monday"
-      dayDate: format(d, "MMM d"), // "May 19"
+      dayDate: crossesYear
+        ? format(d, "MMM d, yyyy") // "Dec 29, 2025"
+        : format(d, "MMM d"), // "May 19"
     }));
 
-    const startLabel = format(ws, "MMM d");
-    const endLabel = format(we, "MMM d");
+    const startLabel = format(ws, crossesYear ? "MMM d, yyyy" : "MMM d");
+    const endLabel = format(we, showYear ? "MMM d, yyyy" : "MMM d");
     return {
       weekStart: ws,
       weekEnd: we,

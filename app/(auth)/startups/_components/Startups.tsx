@@ -15,6 +15,7 @@ import {
   reviewMilestone,
   setMilestoneAvailability,
 } from "@/services/milestoneAccess";
+import { isInCurrentCohort } from "@/lib/cohort";
 
 /**
  * The row as it looks after a review: the milestone stamped reviewed, and — when
@@ -65,7 +66,7 @@ export default function Startups() {
         (membership) => membership.role === "org:mentor",
       );
 
-      if (startup.publicMetadata?.cohort === "spring26") {
+      if (isInCurrentCohort(startup.publicMetadata)) {
         data.push({
           org_id: startup.id,
           name: startup.name,
