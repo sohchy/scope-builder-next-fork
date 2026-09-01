@@ -66,8 +66,7 @@ export function DeleteNodeDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete this {typeLabel} card?</AlertDialogTitle>
           <AlertDialogDescription>
-            The card is removed from your journey map, together with everything
-            captured on it.
+            The card will be deleted from your journey map along with everything else on it. For example, if you have selected any market questions and answered any meta questions, etc.
             {childCount > 0 && (
               <>
                 {" "}
