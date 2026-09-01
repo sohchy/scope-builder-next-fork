@@ -3,7 +3,7 @@
  * curriculum. `MilestoneHeader.tsx` renders from here, and the seeded "steps"
  * Get Started card mirrors it (one item per sub-step, linked by position).
  *
- * Milestones are numbered from 0 ("Program Onboarding", the pre-program week),
+ * Milestones are numbered from 0 ("Program Orientation", the pre-program week),
  * which is why the arrays here are indexed by the milestone number itself rather
  * than `number - 1`. Same for `MilestoneAccessState[]` everywhere else.
  *
@@ -143,7 +143,7 @@ export function defaultMilestoneAccess(): MilestoneAccessState[] {
 
 /** Milestone titles, indexed by milestone number (milestone 0 is first). */
 export const MILESTONE_LABELS = [
-  "Program Onboarding",
+  "Program Orientation",
   "User, their Journey & Market",
   "Deep Dive into Journey",
   "Interview Preparation",
@@ -186,31 +186,31 @@ export function subStepKey(milestone: number, position: number) {
 const SUB_STEP_CONTENT: { label: string; description: string }[][] = [
   [
     {
-      label: "Educational Content",
+      label: "Preparation Content",
       description:
-        "Work through the program's intro material before the first session, so the vocabulary and the method are familiar when the cohort starts.",
+        "Please read through the book and watch these short videos.",
     },
     {
-      label: "Visualize User Journey",
+      label: "Visualize the Journey",
       description:
-        "Take a first rough pass at the steps your user goes through today. It will be wrong in places — Milestone 1 is where you rebuild it properly.",
+        "On the canvas tab, you can sketch out the current journey of what people are doing today to solve the problem. You can sketch multiple journeys if you'd like and for different people too: those who pay for the solution vs those who are direct users of the solution (in case they're different people). This step will be covered in more detail in Session #1 so don't worry too much if it feels uncomfortable. Take a first pass at it.",
     },
     {
-      label: "Schedule Interviews",
+      label: "Start Scheduling Interviews",
       description:
-        "Line up your first conversations now. Aim for three booked before the program starts; booking always takes longer than you expect.",
+        "In the Interviews page in the left navigation, you can start to add people you'd like to interview. It is recommended that while you can initially start with people you know, you should eventually be interviewing people who are 'cold connections' so you can get as unbiased of information from them as possible.",
     },
     {
       label: "Schedule Instructor Check-In",
       description:
-        "Book your first check-in with your instructor so you begin the program with a slot already on the calendar.",
+        "In the Office Hours page in the left navigation, you can schedule time with the instructor(s). You can stay with one instructor throughout the program or meet with other instructors too.",
     },
   ],
   [
     {
       label: "Jobs to be Done",
       description:
-        "For the journey you sketched in onboarding, name the job your user is actually hiring a solution to do at each step. Keep it to jobs you can observe today.",
+        "For the journey you sketched in orientation, name the job your user is actually hiring a solution to do at each step. Keep it to jobs you can observe today.",
     },
     {
       label: "Stakeholders",

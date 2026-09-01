@@ -26,7 +26,7 @@ interface MilestoneHeaderProps {
   milestones?: Milestone[];
   payerInterviews?: number;
   currentNumber?: number;
-  /** Milestone numbers (0-based — milestone 0 is Program Onboarding) an
+  /** Milestone numbers (0-based — milestone 0 is Program Orientation) an
    *  instructor has signed off. These paint green instead of indigo when
    *  selected, and a lighter green instead of gray when not — so completed
    *  milestones are recognisable across the whole strip at a glance. */

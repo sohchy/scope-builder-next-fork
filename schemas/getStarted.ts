@@ -25,7 +25,7 @@ export const GET_STARTED_CARD_TYPE_LABELS: Record<GetStartedCardType, string> =
 
 export const getStartedCardFormSchema = z
   .object({
-    // 0 is Program Onboarding and a valid choice, so neither bound can carry a
+    // 0 is Program Orientation and a valid choice, so neither bound can carry a
     // "required" message — an unset field would read as milestone 0.
     milestone: z
       .number()
