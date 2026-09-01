@@ -20,6 +20,7 @@ import useStartups from "./useStartups";
 import { useMemo } from "react";
 import { useOrganizationList } from "@clerk/nextjs";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DataTableFacetedFilter } from "@/components/DataTableFacetedFilter";
 import MilestoneAccessCell from "./MilestoneAccessCell";
 import {
@@ -29,13 +30,17 @@ import {
   type MilestoneReviewInput,
 } from "@/lib/milestones";
 
+const LOADING_ROW_COUNT = 5;
+
 export default function StartupsTable({
   data,
+  isLoading,
   onSelectOrganization,
   onToggleMilestone,
   onReviewMilestone,
 }: {
   data: any[];
+  isLoading: boolean;
   onSelectOrganization: (organization: any) => void;
   onToggleMilestone: (
     orgId: string,
@@ -107,7 +112,17 @@ export default function StartupsTable({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              Array.from({ length: LOADING_ROW_COUNT }).map((_, rowIndex) => (
+                <TableRow key={`loading-${rowIndex}`}>
+                  {columns.map((column, columnIndex) => (
+                    <TableCell key={column.id ?? columnIndex}>
+                      <Skeleton className="h-5 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}

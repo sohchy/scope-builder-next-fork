@@ -38,6 +38,7 @@ function withReview(
 
 export default function Startups() {
   const [data, setData] = useState<any[]>([]);
+  const [isLoadingStartups, setIsLoadingStartups] = useState(true);
   const [accessByOrg, setAccessByOrg] = useState<
     Record<string, MilestoneAccessState[]>
   >({});
@@ -49,6 +50,11 @@ export default function Startups() {
   });
 
   const getData = async () => {
+    // `isLoaded` only means Clerk itself is ready — the paginated membership
+    // fetch has its own `isLoading` that lags behind it. Bail on either one so
+    // we don't briefly render an empty table before the real list arrives.
+    if (!isLoaded || userMemberships.isLoading) return;
+
     const startups =
       userMemberships.data?.map((membership) => membership.organization) || [];
 
@@ -97,11 +103,12 @@ export default function Startups() {
     }
 
     setData(data);
+    setIsLoadingStartups(false);
   };
 
   useEffect(() => {
     getData();
-  }, [userMemberships.data?.length]);
+  }, [isLoaded, userMemberships.isLoading, userMemberships.data?.length]);
 
   useEffect(() => {
     getAllMilestoneAccess().then(setAccessByOrg);
@@ -189,6 +196,7 @@ export default function Startups() {
   return (
     <StartupsTable
       data={rows}
+      isLoading={isLoadingStartups}
       onToggleMilestone={onToggleMilestone}
       onReviewMilestone={onReviewMilestone}
       onSelectOrganization={(organization: any) => {
