@@ -244,7 +244,7 @@ export function MarketSegmentsSection({
 
           <div>
             <p className="mb-1.5 text-base font-medium text-[#1F2430]">
-              Explain why you chose this as your beachead
+              Explain why you chose this as your beachhead
             </p>
             <Textarea
               value={noteValue}

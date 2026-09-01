@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState } from "react";
 
 interface MilestoneSelectionValue {
   /** The selected milestone *number* (0..5). Milestones start at 0 ("Program
-   *  Onboarding"), so this doubles as the index into MILESTONE_LABELS. */
+   *  Orientation"), so this doubles as the index into MILESTONE_LABELS. */
   selectedMilestone: number;
   setSelectedMilestone: (milestone: number) => void;
 }
@@ -16,7 +16,7 @@ export function useMilestoneSelection() {
 }
 
 export function MilestoneSelectionProvider({
-  // Milestone 0 — the onboarding week, and the only milestone every startup can
+  // Milestone 0 — the orientation week, and the only milestone every startup can
   // reach on day one.
   defaultSelected = 0,
   children,

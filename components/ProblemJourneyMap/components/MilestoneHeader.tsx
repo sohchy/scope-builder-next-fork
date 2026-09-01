@@ -88,7 +88,7 @@ const GREEN_BLOCK_LABEL = "#178E55"; // its title text
 
 const INDIGO_TINT = "#F1ECFF"; // sub-step cells of the selected milestone
 const GREEN_TINT = "#E7F7EC"; // completed sub-step cells
-const GREEN_TEXT = "#178E55"; // "Completed" check + label — one notch under --progress-done
+const GREEN_TEXT = "#0D5231"; // "Completed" check + label — one notch under --progress-done
 const BLOCK_GRAY = "#EFF0F4"; // unselected milestone blocks
 const GRAY_LABEL = "#4E5566"; // "#N" caption on unselected blocks
 
