@@ -14,6 +14,7 @@ import {
   bookingCancelledEmail,
   bookingConfirmationEmail,
   bookingUpdatedEmail,
+  bookingWithdrawnEmail,
   type OfficeHourEmailParams,
   type RenderedEmail,
 } from "@/lib/emails/officeHourBookingEmail";
@@ -227,6 +228,20 @@ export async function sendBookingCancellation(
       // The row is gone, so bump the stored sequence here.
       sequence: snapshot.sequence + 1,
       render: bookingCancelledEmail,
+    });
+  });
+}
+
+/** The mentor deleted or retimed the slot out from under the booking. */
+export async function sendBookingWithdrawn(
+  snapshot: BookingEmailSnapshot,
+): Promise<void> {
+  await safely(`withdrawal for ${snapshot.bookingId}`, async () => {
+    await deliver({
+      snapshot,
+      method: "CANCEL",
+      sequence: snapshot.sequence + 1,
+      render: bookingWithdrawnEmail,
     });
   });
 }

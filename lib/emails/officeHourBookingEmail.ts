@@ -212,6 +212,26 @@ export function bookingUpdatedEmail(
   };
 }
 
+/** The mentor removed the availability — the participant did not cancel. */
+export function bookingWithdrawnEmail(
+  params: OfficeHourEmailParams
+): RenderedEmail {
+  const options = {
+    heading: "Office hours cancelled by your mentor",
+    intro: `${params.mentorName} is no longer available at this time, so the session with ${params.attendeeName} has been cancelled.`,
+    params,
+    cancelled: true,
+    footer:
+      "You can book another time from the Office Hours page. The attached update removes this event from your calendar.",
+  };
+
+  return {
+    subject: `Cancelled: ${params.eventTitle}`,
+    html: renderHtml(options),
+    text: renderText(options),
+  };
+}
+
 export function bookingCancelledEmail(
   params: OfficeHourEmailParams
 ): RenderedEmail {

@@ -13,6 +13,7 @@
  *   --tz <IANA>          overrides OFFICE_HOURS_TIMEZONE
  *   --startup <name>     startup name in the title (pass "" for the fallback)
  *   --method <REQUEST|CANCEL>
+ *   --template <confirmation|cancelled|withdrawn>  defaults from --method
  *   --send <email>       actually deliver through Mailjet
  */
 import {
@@ -26,6 +27,7 @@ import {
 import {
   bookingCancelledEmail,
   bookingConfirmationEmail,
+  bookingWithdrawnEmail,
 } from "../lib/emails/officeHourBookingEmail";
 import { sendEmail } from "../lib/mailjet";
 
@@ -86,11 +88,6 @@ async function main() {
   console.log(ics.replace(/\r\n/g, "\n"));
   console.log("--- end ---\n");
 
-  if (!sendTo) {
-    console.log("Dry run. Pass --send <email> to deliver through Mailjet.");
-    return;
-  }
-
   const params = {
     eventTitle,
     mentorName,
@@ -100,10 +97,34 @@ async function main() {
     timeZone,
     meetingLink,
   };
-  const { subject, html, text } =
-    method === "CANCEL"
-      ? bookingCancelledEmail(params)
-      : bookingConfirmationEmail(params);
+  const renderers = {
+    confirmation: bookingConfirmationEmail,
+    cancelled: bookingCancelledEmail,
+    withdrawn: bookingWithdrawnEmail,
+  };
+  const template = (flag("template") ??
+    (method === "CANCEL" ? "cancelled" : "confirmation")) as keyof typeof renderers;
+  const render = renderers[template];
+  if (!render) {
+    console.error(
+      `Unknown --template ${template}. Use ${Object.keys(renderers).join(", ")}.`
+    );
+    process.exitCode = 1;
+    return;
+  }
+  const { subject, html, text } = render(params);
+
+  // Printed on a dry run too, so the copy can be read without delivering anything.
+  console.log(`template : ${template}`);
+  console.log(`subject  : ${subject}`);
+  console.log("\n--- text part ---");
+  console.log(text);
+  console.log("--- end ---\n");
+
+  if (!sendTo) {
+    console.log("Dry run. Pass --send <email> to deliver through Mailjet.");
+    return;
+  }
 
   const result = await sendEmail({
     to: [{ Email: sendTo, Name: attendeeName }],

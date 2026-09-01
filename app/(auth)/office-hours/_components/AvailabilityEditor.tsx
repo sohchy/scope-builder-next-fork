@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { parseISO } from "date-fns";
-import { OfficeHourSlot } from "@/lib/generated/prisma";
 import {
   generateWeeks,
   generateTimeOptions,
@@ -13,20 +12,38 @@ import {
   createOfficeHourSlot,
   updateOfficeHourSlot,
   deleteOfficeHourSlot,
+  getSlotImpact,
+  type AdminSlot,
+  type AffectedBooking,
 } from "@/services/officeHours";
 import WeekColumn from "./WeekColumn";
+import SlotImpactDialog, { type SlotImpactMode } from "./SlotImpactDialog";
 
 const WEEKS_PER_PAGE = 4;
 
 interface AvailabilityEditorProps {
-  initialSlots: OfficeHourSlot[];
+  initialSlots: AdminSlot[];
 }
+
+/** A destructive edit held back until the mentor confirms it in the dialog. */
+interface PendingImpact {
+  mode: SlotImpactMode;
+  bookings: AffectedBooking[];
+  run: () => void;
+}
+
+const bookingCount = (slot: AdminSlot) =>
+  slot.subSlots.filter((s) => s.booking).length;
 
 export default function AvailabilityEditor({
   initialSlots,
 }: AvailabilityEditorProps) {
-  const [slots, setSlots] = useState<OfficeHourSlot[]>(initialSlots);
+  const [slots, setSlots] = useState<AdminSlot[]>(initialSlots);
   const [pageIndex, setPageIndex] = useState(0);
+  const [pending, setPending] = useState<PendingImpact | null>(null);
+  // The impact lookup hits Clerk for startup names, so it is slow enough to need
+  // a visible pending state on the row that was clicked.
+  const [checkingId, setCheckingId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
   const programStart = parseISO(
@@ -53,7 +70,7 @@ export default function AvailabilityEditor({
 
     // Optimistic update with a temporary id
     const tempId = `temp-${Date.now()}`;
-    const optimistic: OfficeHourSlot = {
+    const optimistic: AdminSlot = {
       id: tempId,
       user_id: "",
       mentor_name: "",
@@ -62,6 +79,7 @@ export default function AvailabilityEditor({
       end_time: defaultEnd,
       created_at: new Date(),
       updated_at: new Date(),
+      subSlots: [],
     };
     setSlots((prev) => [...prev, optimistic]);
 
@@ -77,11 +95,7 @@ export default function AvailabilityEditor({
     });
   }
 
-  async function handleUpdateSlot(
-    id: string,
-    startTime: string,
-    endTime: string
-  ) {
+  function commitUpdate(id: string, startTime: string, endTime: string) {
     // Optimistic update
     setSlots((prev) =>
       prev.map((s) =>
@@ -91,14 +105,18 @@ export default function AvailabilityEditor({
 
     startTransition(async () => {
       try {
-        await updateOfficeHourSlot(id, startTime, endTime);
+        const saved = await updateOfficeHourSlot(id, startTime, endTime);
+        // Bookings may have been dropped — resync so the marker stays honest.
+        setSlots((prev) =>
+          prev.map((s) => (s.id === id ? { ...s, ...saved } : s))
+        );
       } catch {
         // Revert on error — re-fetch would be ideal but keep simple for now
       }
     });
   }
 
-  async function handleDeleteSlot(id: string) {
+  function commitDelete(id: string) {
     const removed = slots.find((s) => s.id === id);
     setSlots((prev) => prev.filter((s) => s.id !== id));
 
@@ -109,6 +127,60 @@ export default function AvailabilityEditor({
         if (removed) setSlots((prev) => [...prev, removed]);
       }
     });
+  }
+
+  async function handleUpdateSlot(
+    id: string,
+    startTime: string,
+    endTime: string
+  ) {
+    const slot = slots.find((s) => s.id === id);
+    if (!slot || bookingCount(slot) === 0) {
+      commitUpdate(id, startTime, endTime);
+      return;
+    }
+
+    // Nothing is applied yet: the pickers keep showing the committed time until
+    // the mentor confirms, and snap back if they cancel.
+    setCheckingId(id);
+    let bookings: AffectedBooking[];
+    try {
+      bookings = await getSlotImpact(id, startTime, endTime);
+    } finally {
+      setCheckingId(null);
+    }
+
+    if (bookings.length === 0) {
+      commitUpdate(id, startTime, endTime);
+      return;
+    }
+    setPending({
+      mode: "retime",
+      bookings,
+      run: () => commitUpdate(id, startTime, endTime),
+    });
+  }
+
+  async function handleDeleteSlot(id: string) {
+    const slot = slots.find((s) => s.id === id);
+    if (!slot || bookingCount(slot) === 0) {
+      commitDelete(id);
+      return;
+    }
+
+    setCheckingId(id);
+    let bookings: AffectedBooking[];
+    try {
+      bookings = await getSlotImpact(id);
+    } finally {
+      setCheckingId(null);
+    }
+
+    if (bookings.length === 0) {
+      commitDelete(id);
+      return;
+    }
+    setPending({ mode: "delete", bookings, run: () => commitDelete(id) });
   }
 
   return (
@@ -148,9 +220,23 @@ export default function AvailabilityEditor({
             onAddSlot={handleAddSlot}
             onUpdateSlot={handleUpdateSlot}
             onDeleteSlot={handleDeleteSlot}
+            busySlotId={checkingId}
           />
         ))}
       </div>
+
+      <SlotImpactDialog
+        open={pending !== null}
+        onOpenChange={(open) => {
+          if (!open) setPending(null);
+        }}
+        mode={pending?.mode ?? "delete"}
+        bookings={pending?.bookings ?? []}
+        onConfirm={() => {
+          pending?.run();
+          setPending(null);
+        }}
+      />
     </div>
   );
 }

@@ -230,14 +230,16 @@ export function MarketSegmentsSection({
 
         {/* Beachhead chart + section-level notes */}
         <div className="flex flex-col gap-4 col-span-2 rounded-lg bg-[#EFF0F4] p-5 justify-between">
-          <div className="flex flex-row items-center justify-between">
+          <div className="flex flex-row items-center justify-between gap-6">
             <p>
-              Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptas
-              fuga amet enim harum, reiciendis quo repellendus vel facilis,
-              dignissimos eaque ut reprehenderit, earum neque ex deserunt
-              veritatis corporis autem minima?
+              The Beachhead Market is the first and best market to generate
+              traction for a given innovation. It should be a stepping stone for
+              additional success in your overall Target Market. The ideal
+              beachhead is rarely the biggest or most lucrative market, instead
+              beachheads should be those markets with highest margins, biggest
+              need, fastest time to market, offer immediate access, etc.
             </p>
-            <BeachheadChart className="" />
+            <BeachheadChart className="h-auto w-[500px] shrink-0" />
           </div>
 
           <div>

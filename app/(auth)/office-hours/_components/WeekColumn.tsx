@@ -1,17 +1,18 @@
 "use client";
 
-import { OfficeHourSlot } from "@/lib/generated/prisma";
 import { Week, TimeOption } from "@/lib/officeHoursUtils";
+import type { AdminSlot } from "@/services/officeHours";
 import DayRow from "./DayRow";
 import { isSameDay } from "date-fns";
 
 interface WeekColumnProps {
   week: Week;
-  slots: OfficeHourSlot[];
+  slots: AdminSlot[];
   allOptions: TimeOption[];
   onAddSlot: (date: Date) => void;
   onUpdateSlot: (id: string, startTime: string, endTime: string) => void;
   onDeleteSlot: (id: string) => void;
+  busySlotId: string | null;
 }
 
 export default function WeekColumn({
@@ -21,6 +22,7 @@ export default function WeekColumn({
   onAddSlot,
   onUpdateSlot,
   onDeleteSlot,
+  busySlotId,
 }: WeekColumnProps) {
   return (
     <div className="bg-white border-2 border-[#B9BDC9] rounded-2xl overflow-hidden">
@@ -44,6 +46,7 @@ export default function WeekColumn({
               onAddSlot={onAddSlot}
               onUpdateSlot={onUpdateSlot}
               onDeleteSlot={onDeleteSlot}
+              busySlotId={busySlotId}
             />
           );
         })}
