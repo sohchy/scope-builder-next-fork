@@ -304,17 +304,17 @@ export default function BookingView({
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-4 flex-1 overflow-hidden">
+      <div className="grid grid-cols-4 grid-rows-1 gap-4 flex-1 min-h-0">
         {visibleWeeks.map((week) => (
           <div
             key={week.weekStart.toISOString()}
-            className="bg-white border-2 border-[#B9BDC9] rounded-2xl overflow-hidden"
+            className="bg-white border-2 border-[#B9BDC9] rounded-2xl overflow-hidden flex flex-col min-h-0"
           >
-            <div className="bg-[#F4F0FF] px-4 py-3">
+            <div className="bg-[#F4F0FF] px-4 py-3 shrink-0">
               <p className="text-sm font-bold text-gray-800">{week.label}</p>
             </div>
 
-            <div className="px-4 py-2 overflow-y-auto">
+            <div className="px-4 py-2 flex-1 min-h-0 overflow-y-auto overscroll-contain">
               {week.days.map((day) => {
                 const blocks = getDayTimeBlocks(day.date);
                 return (
