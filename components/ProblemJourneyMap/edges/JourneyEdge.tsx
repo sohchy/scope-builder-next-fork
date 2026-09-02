@@ -72,8 +72,15 @@ export function JourneyEdge({
   // the label read as sitting low. At 1.3 the glyphs fit and, because Geist puts
   // exactly `descent` between its ascent and cap height, the cap block lands
   // dead centre.
+  // The label centre sits 50px from the target card (75% of the 200px
+  // HORIZONTAL_GAP), so 100px is the widest the pill can be without sliding
+  // underneath it. `rounded-xl` rather than `rounded-full` because a full radius
+  // clamps to half the height: on a wrapped two-line pill that grows 21px
+  // half-circle caps that eat into the text. At the single-line height
+  // (14px × 1.3 + 2px padding + 1px border, both sides ≈ 24.2px) the clamped
+  // full radius is 12.1px, so `rounded-xl`'s 12px looks the same as today.
   const pillClasses =
-    "text-sm leading-[1.3] font-medium text-[#111827] bg-white px-1.5 py-0.5 rounded-full border border-gray-300";
+    "max-w-[100px] text-sm leading-[1.3] font-medium text-[#111827] bg-white px-1.5 py-0.5 rounded-xl border border-gray-300";
 
   return (
     <>
@@ -123,8 +130,18 @@ export function JourneyEdge({
             ) : (
               <span
                 onDoubleClick={startEdit}
-                title={readOnly ? undefined : "Double-click to rename"}
-                className={`${pillClasses} ${readOnly ? "" : "cursor-text"}`}
+                // The pill clamps at two lines, so the tooltip is where the rest
+                // of a long label stays reachable.
+                title={
+                  readOnly
+                    ? displayLabel
+                    : `${displayLabel} — double-click to rename`
+                }
+                // `break-words` so one long unbroken word breaks across the two
+                // lines instead of being clipped mid-glyph with no ellipsis.
+                className={`${pillClasses} line-clamp-2 break-words text-center ${
+                  readOnly ? "" : "cursor-text"
+                }`}
               >
                 {displayLabel}
               </span>
