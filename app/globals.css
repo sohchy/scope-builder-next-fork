@@ -171,6 +171,19 @@
   .rdw-editor-wrapper .rdw-editor-toolbar + .rdw-editor-main {
     margin-top: 0 !important;
   }
+
+  /* Notes composer only: react-draft-wysiwyg ships #F1F1F1 rules, which read as
+     almost-white. Landed on #B9BDC9 — a notch past the app's #CDD1DC inputs, so
+     the frame carries at the small size and matches the checkbox beside it.
+     Scoped to .notes-rte so the canvas cards' editors keep the lighter default.
+     `!important` is load-bearing: react-draft-wysiwyg.css is unlayered, so it
+     outranks anything in @layer base no matter how specific the selector. */
+  .notes-rte.rdw-editor-wrapper,
+  .notes-rte .rdw-editor-toolbar,
+  .notes-rte .rdw-editor-main,
+  .notes-rte .rdw-option-wrapper {
+    border-color: #b9bdc9 !important;
+  }
 }
 
 /* Scrollable without a visible scrollbar — for strips where the bar would sit

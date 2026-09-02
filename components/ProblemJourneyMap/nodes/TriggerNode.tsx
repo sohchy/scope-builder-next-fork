@@ -13,6 +13,7 @@ import {
   type JourneyNodeType,
   type JourneyNodeData,
 } from "../JourneyContext";
+import { useNodeContentDraft } from "../hooks/useNodeContentDraft";
 import type { StakeholderRow } from "@/services/market";
 import { Textarea } from "@/components/ui/textarea";
 import { STAKEHOLDERS_SUB_STEP } from "@/lib/milestones";
@@ -63,6 +64,15 @@ function TriggerNodeInner({ id, data }: NodeProps) {
 
   const selectedIds = nodeData.stakeholderIds ?? [];
   const groups = groupSelected(stakeholderRows, selectedIds);
+
+  const commitContent = useCallback(
+    (value: string) => updateNodeData(id, { content: value }),
+    [updateNodeData, id],
+  );
+  const [content, handleContentChange] = useNodeContentDraft(
+    nodeData.content ?? "",
+    commitContent,
+  );
 
   const handleToggleMenu = useCallback(() => {
     if (anchorRect) {
@@ -166,11 +176,11 @@ function TriggerNodeInner({ id, data }: NodeProps) {
       )}
 
       <Textarea
-        value={nodeData.content ?? ""}
+        value={content}
         placeholder="Type your trigger..."
         readOnly={readOnly}
         className="nodrag nopan w-full text-base md:text-base text-gray-800 bg-transparent border-[#B9BDC9] resize-none placeholder-gray-500 focus:outline-none leading-snug"
-        onChange={(e) => updateNodeData(id, { content: e.target.value })}
+        onChange={handleContentChange}
       />
 
       <Handle

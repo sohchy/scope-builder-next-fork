@@ -43,6 +43,14 @@ interface GetStartedCardProps {
   readOnly?: boolean;
 }
 
+/**
+ * Typography for the authored card body. The markup arrives as a raw string, so
+ * the tags inside it can only be reached with child selectors — same approach as
+ * the help popover, kept in one place because the list is long.
+ */
+const BODY_HTML_CLASSNAME =
+  "text-base leading-relaxed break-words text-[#4E5566] [&_a]:text-[#6A35FF] [&_a]:underline [&_a]:underline-offset-2 [&_strong]:font-semibold [&_strong]:text-[#1F2430] [&_em]:italic [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mt-1 [&_p+p]:mt-2 [&_:is(h1,h2,h3,h4)]:mt-3 [&_:is(h1,h2,h3,h4)]:font-semibold [&_:is(h1,h2,h3,h4)]:text-[#1F2430]";
+
 export function GetStartedCard({
   card,
   cardReviewed,
@@ -66,9 +74,14 @@ export function GetStartedCard({
   const body = (
     <>
       {card.body && (
-        <p className="whitespace-pre-line text-base leading-relaxed text-[#4E5566]">
-          {card.body}
-        </p>
+        // Authored in /admin-panel and rendered as markup, so a div rather than
+        // a p — the value may carry block-level tags. Same trust model as the
+        // other authored html in the app (see components/ui/help-popover.tsx):
+        // only admins can write it, so it goes in unsanitized.
+        <div
+          className={BODY_HTML_CLASSNAME}
+          dangerouslySetInnerHTML={{ __html: card.body }}
+        />
       )}
       <div className="mt-4">
         <ReviewedToggle
@@ -119,9 +132,10 @@ export function GetStartedCard({
           {/* Optional intro authored in /admin-panel — text, then a video, then
               the checklist. The sub-steps themselves come from the seed. */}
           {card.body && (
-            <p className="mb-4 whitespace-pre-line text-base leading-relaxed text-[#4E5566]">
-              {card.body}
-            </p>
+            <div
+              className={cn("mb-4", BODY_HTML_CLASSNAME)}
+              dangerouslySetInnerHTML={{ __html: card.body }}
+            />
           )}
 
           {card.url && (

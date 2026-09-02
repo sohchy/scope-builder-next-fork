@@ -13,6 +13,7 @@ import {
 } from "../JourneyContext";
 import { useSelectedNode } from "../SelectedNodeContext";
 import { useNodeProblems } from "../NodeProblemsContext";
+import { useNodeContentDraft } from "../hooks/useNodeContentDraft";
 import { Textarea } from "@/components/ui/textarea";
 import { PROBLEMS_SUB_STEP } from "@/lib/milestones";
 import type { Problem } from "../components/ActionNodeSheet";
@@ -152,6 +153,15 @@ function ActionNodeInner({ id, data }: NodeProps) {
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+  const commitContent = useCallback(
+    (value: string) => updateNodeData(id, { content: value }),
+    [updateNodeData, id],
+  );
+  const [content, handleContentChange] = useNodeContentDraft(
+    nodeData.content ?? "",
+    commitContent,
+  );
+
   const handleToggleMenu = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -244,9 +254,9 @@ function ActionNodeInner({ id, data }: NodeProps) {
       <Textarea
         className="nodrag nopan w-full text-base md:text-base text-gray-800 bg-transparent border-[#B9BDC9] resize-none placeholder-gray-500 focus:outline-none leading-snug"
         placeholder="Type your action..."
-        value={nodeData.content ?? ""}
+        value={content}
         readOnly={readOnly}
-        onChange={(e) => updateNodeData(id, { content: e.target.value })}
+        onChange={handleContentChange}
         onClick={(e) => e.stopPropagation()}
       />
 

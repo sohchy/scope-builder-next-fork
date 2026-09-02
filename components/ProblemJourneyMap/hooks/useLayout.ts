@@ -13,6 +13,7 @@ import {
   type Node,
   type Edge,
   type ReactFlowState,
+  type XYPosition,
 } from "@xyflow/react";
 import { stratify, tree, type HierarchyPointNode } from "d3-hierarchy";
 import { timer } from "d3-timer";
@@ -237,26 +238,34 @@ export function useLayout(
       id: node.id,
       from: getNode(node.id)?.position ?? node.position,
       to: node.position,
-      node,
     }));
+
+    // Each frame writes *only* positions, onto whatever the nodes hold right
+    // then. Writing the laid-out nodes wholesale would pin every node's data to
+    // the snapshot taken when the animation started — and a card grows (and so
+    // relayouts) the moment its text wraps a line, so anything typed during the
+    // next 300ms would be reverted keystroke by keystroke.
+    const applyPositions = (at: (t: (typeof transitions)[number]) => XYPosition) =>
+      setNodes((current) => {
+        const positions = new Map<string, XYPosition>(
+          transitions.map((t) => [t.id, at(t)]),
+        );
+        return current.map((n) => {
+          const position = positions.get(n.id);
+          return position ? { ...n, position } : n;
+        });
+      });
 
     const t = timer((elapsed: number) => {
       const s = Math.min(elapsed / ANIMATION_DURATION, 1);
 
-      const currNodes = transitions.map(({ node, from, to }) => ({
-        ...node,
-        position: {
-          x: from.x + (to.x - from.x) * s,
-          y: from.y + (to.y - from.y) * s,
-        },
+      applyPositions(({ from, to }) => ({
+        x: from.x + (to.x - from.x) * s,
+        y: from.y + (to.y - from.y) * s,
       }));
 
-      setNodes(currNodes);
-
       if (elapsed >= ANIMATION_DURATION) {
-        setNodes(
-          transitions.map(({ node, to }) => ({ ...node, position: to })),
-        );
+        applyPositions(({ to }) => to);
         t.stop();
 
         const centerOn = (node: Node) =>

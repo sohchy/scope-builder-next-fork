@@ -284,7 +284,9 @@ export default function GetStartedCardsTable({
               <Textarea rows={6} {...field} value={field.value ?? ""} />
             </FormControl>
             <FormDescription>
-              Shown on the card. Optional for image and video cards.
+              Shown on the card. Optional for image and video cards. HTML is
+              rendered, so wrap paragraphs in tags — plain line breaks are
+              ignored.
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -493,7 +495,8 @@ export default function GetStartedCardsTable({
                       </FormControl>
                       <FormDescription>
                         Shown under the card title, above the sub-step list.
-                        Leave empty to hide it.
+                        Leave empty to hide it. HTML is rendered, so wrap
+                        paragraphs in tags — plain line breaks are ignored.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

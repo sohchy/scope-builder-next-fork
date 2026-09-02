@@ -320,7 +320,7 @@ export default function Notes() {
                         },
                         //list: { options: ["unordered", "ordered"] },
                       }}
-                      wrapperClassName="w-full"
+                      wrapperClassName="w-full notes-rte"
                       toolbarClassName={`border-b px-2 text-[14px]
                   "bg-white"
 `}
@@ -334,6 +334,7 @@ export default function Notes() {
                   <div className="flex flex-row gap-2  items-center">
                     <Checkbox
                       id="share"
+                      className="border-[#B9BDC9]"
                       checked={shareWithStartup}
                       onCheckedChange={() =>
                         setShareWithStartup(!shareWithStartup)
@@ -521,7 +522,7 @@ export function ChatNote({
                     },
                     //list: { options: ["unordered", "ordered"] },
                   }}
-                  wrapperClassName="w-full"
+                  wrapperClassName="w-full notes-rte"
                   toolbarClassName={`border-b px-2 text-[14px]
                   "bg-white"
 `}
@@ -532,6 +533,7 @@ export function ChatNote({
                 <div className="flex flex-row gap-2 items-center">
                   <Checkbox
                     id="share"
+                    className="border-[#B9BDC9]"
                     checked={shareWithStartup}
                     onCheckedChange={() =>
                       setShareWithStartup(!shareWithStartup)
