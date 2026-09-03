@@ -3,8 +3,13 @@ import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 
+// Scheduled jobs arrive with no session, so `auth.protect()` would bounce them to
+// sign-in. They authenticate themselves with CRON_SECRET in the route handler
+// instead — see app/api/cron/milestone-digest/route.ts.
+const isCronRoute = createRouteMatcher(["/api/cron/(.*)"]);
+
 export default clerkMiddleware(async (auth, req) => {
-  if (isPublicRoute(req)) return;
+  if (isPublicRoute(req) || isCronRoute(req)) return;
 
   await auth.protect();
 

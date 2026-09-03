@@ -14,7 +14,7 @@
  *   --startup <name>     startup name in the title (pass "" for the fallback)
  *   --method <REQUEST|CANCEL>
  *   --template <confirmation|cancelled|withdrawn>  defaults from --method
- *   --send <email>       actually deliver through Mailjet
+ *   --send <email>       actually deliver through Resend
  */
 import {
   buildOfficeHourIcs,
@@ -29,7 +29,7 @@ import {
   bookingConfirmationEmail,
   bookingWithdrawnEmail,
 } from "../lib/emails/officeHourBookingEmail";
-import { sendEmail } from "../lib/mailjet";
+import { sendEmail } from "../lib/email";
 
 function flag(name: string): string | undefined {
   const index = process.argv.indexOf(`--${name}`);
@@ -122,20 +122,20 @@ async function main() {
   console.log("--- end ---\n");
 
   if (!sendTo) {
-    console.log("Dry run. Pass --send <email> to deliver through Mailjet.");
+    console.log("Dry run. Pass --send <email> to deliver through Resend.");
     return;
   }
 
   const result = await sendEmail({
-    to: [{ Email: sendTo, Name: attendeeName }],
+    to: [{ email: sendTo, name: attendeeName }],
     subject,
-    textPart: text,
-    htmlPart: html,
+    text,
+    html,
     attachments: [
       {
-        ContentType: `text/calendar; charset=UTF-8; method=${method}`,
-        Filename: "invite.ics",
-        Base64Content: Buffer.from(ics, "utf8").toString("base64"),
+        content_type: `text/calendar; charset=UTF-8; method=${method}`,
+        filename: "invite.ics",
+        content: Buffer.from(ics, "utf8").toString("base64"),
       },
     ],
   });

@@ -165,8 +165,8 @@ export async function updateOfficeHourSlot(
 
   revalidatePath("/office-hours");
   if (snapshots.length > 0) {
-    // Deferred so the Mailjet round trip never delays or fails the edit.
-    after(() => Promise.all(snapshots.map(sendBookingWithdrawn)));
+    // Deferred so the Resend round trip never delays or fails the edit.
+    after(() => sendWithdrawnSequentially(snapshots));
   }
   return slot;
 }
@@ -188,7 +188,21 @@ export async function deleteOfficeHourSlot(id: string) {
 
   revalidatePath("/office-hours");
   if (snapshots.length > 0) {
-    after(() => Promise.all(snapshots.map(sendBookingWithdrawn)));
+    after(() => sendWithdrawnSequentially(snapshots));
+  }
+}
+
+/**
+ * One send at a time. A slot split into many sub-slots has one booking each, and
+ * firing them all at once trips Resend's per-second rate limit — the 429s would be
+ * swallowed by the fire-and-forget send and startups would never hear their
+ * booking was withdrawn. Nothing awaits this, so serializing costs nothing.
+ */
+async function sendWithdrawnSequentially(
+  snapshots: BookingEmailSnapshot[]
+): Promise<void> {
+  for (const snapshot of snapshots) {
+    await sendBookingWithdrawn(snapshot);
   }
 }
 
@@ -309,7 +323,7 @@ export async function bookSlot(
     });
 
     revalidatePath("/office-hours");
-    // Deferred so the Mailjet round trip never delays or fails the booking.
+    // Deferred so the Resend round trip never delays or fails the booking.
     after(() => sendBookingInvite(booking.id));
     return { status: "booked", booking };
   } catch (err) {

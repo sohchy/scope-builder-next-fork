@@ -1,6 +1,6 @@
 import { clerkClient } from "@clerk/nextjs/server";
 
-import type { MailjetRecipient } from "@/lib/mailjet";
+import type { EmailRecipient } from "@/lib/email";
 
 /**
  * Resolving "everyone on a startup's team" to real email addresses. Shared by the
@@ -17,7 +17,7 @@ export const STARTUP_MEMBER_ROLES = new Set(["org:founder", "org:member"]);
 export interface StartupContext {
   name: string | null;
   /** The whole team, so nobody on the startup misses the mail. */
-  recipients: MailjetRecipient[];
+  recipients: EmailRecipient[];
 }
 
 export const EMPTY_STARTUP: StartupContext = { name: null, recipients: [] };
@@ -49,14 +49,14 @@ export async function getStartupContext(orgId: string): Promise<StartupContext> 
       limit: userIds.length,
     });
 
-    const recipients = users.data.flatMap<MailjetRecipient>((user) => {
+    const recipients = users.data.flatMap<EmailRecipient>((user) => {
       const email =
         user.primaryEmailAddress?.emailAddress ??
         user.emailAddresses?.[0]?.emailAddress;
       if (!email) return [];
       const name =
         [user.firstName, user.lastName].filter(Boolean).join(" ") || undefined;
-      return [{ Email: email, Name: name }];
+      return [{ email, name }];
     });
 
     return { name: organization.name ?? null, recipients };
@@ -68,11 +68,11 @@ export async function getStartupContext(orgId: string): Promise<StartupContext> 
 
 /** First occurrence wins, so the more specific display name survives the merge. */
 export function dedupeRecipients(
-  recipients: MailjetRecipient[],
-): MailjetRecipient[] {
+  recipients: EmailRecipient[],
+): EmailRecipient[] {
   const seen = new Set<string>();
   return recipients.filter((r) => {
-    const key = r.Email.trim().toLowerCase();
+    const key = r.email.trim().toLowerCase();
     if (!key || seen.has(key)) return false;
     seen.add(key);
     return true;

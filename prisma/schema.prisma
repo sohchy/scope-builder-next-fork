@@ -335,6 +335,24 @@ model MilestoneAccess {
   @@map("milestone_access")
 }
 
+// One row per (startup, milestone) already announced in a daily digest. Existence
+// IS the dedup key: the digest selects submitted milestones that have no row here,
+// so a row means "never report this pair again". Rows are written only after the
+// send succeeds, which is what makes a re-run — restart, retry, manual trigger —
+// send nothing extra.
+//
+// `milestone` is the number from lib/milestones.ts rather than a foreign key,
+// same as MilestoneAccess: the 6 milestones are hardcoded, there is no table.
+model MilestoneDigestNotification {
+  id        Int      @id @default(autoincrement())
+  org_id    String
+  milestone Int // 0..5, the milestone number in lib/milestones.ts
+  sent_at   DateTime @default(now())
+
+  @@unique([org_id, milestone])
+  @@map("milestone_digest_notifications")
+}
+
 model GetStartedCard {
   id        Int     @id @default(autoincrement())
   milestone Int // 0..5, the milestone number in lib/milestones.ts

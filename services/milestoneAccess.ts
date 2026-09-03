@@ -287,7 +287,7 @@ export async function reviewMilestone(
   revalidatePath("/startups");
   revalidatePath("/teams-dashboard");
 
-  // Deferred so the Mailjet round trip never delays or fails the review.
+  // Deferred so the Resend round trip never delays or fails the review.
   after(() => sendMilestoneReviewedEmail(orgId, milestone, unlockedMilestone));
 
   return { reviewedAt, notes, unlockedMilestone };

@@ -1,7 +1,7 @@
 import { clerkClient } from "@clerk/nextjs/server";
 
 import { prisma } from "@/lib/prisma";
-import { sendEmail, type MailjetRecipient } from "@/lib/mailjet";
+import { sendEmail, type EmailRecipient } from "@/lib/email";
 import {
   buildOfficeHourIcs,
   getOfficeHoursTimeZone,
@@ -108,22 +108,22 @@ async function deliver(options: {
 
   const eventTitle = officeHourEventTitle(startup.name);
 
-  const candidates: MailjetRecipient[] = [];
+  const candidates: EmailRecipient[] = [];
   if (snapshot.attendeeEmail) {
     candidates.push({
-      Email: snapshot.attendeeEmail,
-      Name: snapshot.attendeeName,
+      email: snapshot.attendeeEmail,
+      name: snapshot.attendeeName,
     });
   }
   if (mentorEmail) {
-    candidates.push({ Email: mentorEmail, Name: snapshot.mentorName });
+    candidates.push({ email: mentorEmail, name: snapshot.mentorName });
   }
   // The booker is usually a member too — dedupe handles the overlap.
   candidates.push(...startup.recipients);
 
   const notifyEmail = process.env.OFFICE_HOURS_NOTIFY_EMAIL?.trim();
   if (notifyEmail) {
-    candidates.push({ Email: notifyEmail });
+    candidates.push({ email: notifyEmail });
   }
 
   const recipients = dedupeRecipients(candidates);
@@ -149,7 +149,7 @@ async function deliver(options: {
   // ORGANIZER must be a real address; fall back to the configured sender so the
   // invite stays valid even when the mentor's Clerk lookup fails.
   const organizerEmail =
-    mentorEmail || process.env.MAILJET_FROM_EMAIL || "no-reply@appollo.app";
+    mentorEmail || process.env.EMAIL_FROM_ADDRESS || "no-reply@appollo.app";
 
   const ics = buildOfficeHourIcs({
     method,
@@ -164,19 +164,19 @@ async function deliver(options: {
     location: snapshot.meetingLink,
     url: snapshot.meetingLink,
     organizer: { name: snapshot.mentorName, email: organizerEmail },
-    attendees: recipients.map((r) => ({ name: r.Name, email: r.Email })),
+    attendees: recipients.map((r) => ({ name: r.name, email: r.email })),
   });
 
   await sendEmail({
     to: recipients,
     subject,
-    textPart: text,
-    htmlPart: html,
+    text,
+    html,
     attachments: [
       {
-        ContentType: `text/calendar; charset=UTF-8; method=${method}`,
-        Filename: "invite.ics",
-        Base64Content: Buffer.from(ics, "utf8").toString("base64"),
+        content_type: `text/calendar; charset=UTF-8; method=${method}`,
+        filename: "invite.ics",
+        content: Buffer.from(ics, "utf8").toString("base64"),
       },
     ],
   });
