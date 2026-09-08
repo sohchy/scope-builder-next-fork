@@ -4,7 +4,7 @@ import { LiveList, LiveObject } from "@liveblocks/client";
 
 export interface JourneyNodeStorage {
   id: string;
-  type: 'trigger' | 'action' | 'split_route';
+  type: 'trigger' | 'action' | 'split_route' | 'startup_idea';
   content: string;
   stakeholderIds: number[];
   problems: Array<{

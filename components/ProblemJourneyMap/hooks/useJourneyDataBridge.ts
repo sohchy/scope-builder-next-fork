@@ -123,14 +123,19 @@ export function useJourneyDataBridge() {
     if (!initializedRef.current) {
       initializedRef.current = true;
 
+      setNodes(visibleNodes.map(lbNodeToRFNode));
+      setEdges(visibleEdges.map(lbEdgeToRFEdge));
+
       // Seeding is decided on the raw list, not the visible one: a room whose
       // nodes were all deleted must stay empty rather than push a second
       // 'initial-trigger' that would collide with the deleted one by id.
-      if (lbNodes.length > 0) {
-        setNodes(visibleNodes.map(lbNodeToRFNode));
-        setEdges(visibleEdges.map(lbEdgeToRFEdge));
-      } else {
-        setNodes([INITIAL_TRIGGER_NODE]);
+      //
+      // The Startup Idea card doesn't count towards that: it is seeded
+      // server-side on every load, so a room that has one but no journey nodes
+      // is still an untouched room and needs its first Trigger.
+      const hasJourneyNodes = lbNodes.some((n) => n.type !== 'startup_idea');
+      if (!hasJourneyNodes) {
+        setNodes((current) => [...current, INITIAL_TRIGGER_NODE]);
         addJourneyNode(buildNodeStorage(INITIAL_TRIGGER_ID, 'trigger'));
       }
       return;

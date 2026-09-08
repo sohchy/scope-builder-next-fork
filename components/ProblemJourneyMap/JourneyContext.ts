@@ -4,7 +4,11 @@ import { createContext, useContext } from 'react';
 import type { ActionSheetTab, Solution } from './components/ActionNodeSheet';
 import type { StakeholderRow } from '@/services/market';
 
-export type JourneyNodeType = 'trigger' | 'action' | 'split_route';
+// `startup_idea` is the one type that is never part of the journey tree: exactly
+// one per canvas, no edges, parked to the left of the first Trigger. It is seeded
+// server-side rather than added from the "+" menu, so it isn't offered in
+// `NodeTypeMenu` and can't be deleted.
+export type JourneyNodeType = 'trigger' | 'action' | 'split_route' | 'startup_idea';
 
 export interface JourneyNodeData extends Record<string, unknown> {
   id: string;

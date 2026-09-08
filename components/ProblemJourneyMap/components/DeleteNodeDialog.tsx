@@ -18,6 +18,9 @@ const TYPE_LABELS: Record<JourneyNodeType, string> = {
   trigger: "Trigger / Motivation",
   action: "Action",
   split_route: "Scenarios",
+  // Never reached — a Startup Idea card has no delete affordance — but the map
+  // is exhaustive over the node types.
+  startup_idea: "Startup Idea",
 };
 
 // A stored answer is either a single value or the selections of a multi-choice

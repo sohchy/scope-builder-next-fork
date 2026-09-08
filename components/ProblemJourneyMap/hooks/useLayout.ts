@@ -18,6 +18,12 @@ import {
 import { stratify, tree, type HierarchyPointNode } from "d3-hierarchy";
 import { timer } from "d3-timer";
 
+// The Startup Idea card is the one node that isn't part of the journey tree: it
+// has no edges, so handing it to `layoutForest` would make it a root of its own
+// and stack it *below* the map. It's pulled out before layout and positioned
+// against the first Trigger afterwards instead.
+const STARTUP_IDEA_TYPE = "startup_idea";
+
 const HORIZONTAL_GAP = 200; // px between the right edge of a node and its children's left edge
 const VERTICAL_GAP = 40; // px gap between siblings (top ↔ bottom)
 const TREE_GAP = 80; // px gap between separate trigger chains
@@ -104,6 +110,19 @@ function layoutNodes(nodes: Node[], edges: Edge[]): Node[] {
     ...d.data,
     position: { x: d.y, y: d.x - nodeHeight(d.data) / 2 },
   }));
+}
+
+// Park the Startup Idea card one horizontal gap to the left of the first
+// Trigger, centred on it. Both cards are measured, so this re-runs — and stays
+// centred — as either one grows with its text.
+function placeStartupIdea(idea: Node, firstRoot: Node): Node {
+  return {
+    ...idea,
+    position: {
+      x: firstRoot.position.x - nodeWidth(idea) - HORIZONTAL_GAP,
+      y: firstRoot.position.y + nodeHeight(firstRoot) / 2 - nodeHeight(idea) / 2,
+    },
+  };
 }
 
 function getSubtree(
@@ -225,14 +244,34 @@ export function useLayout(
 
     if (nodes.length === 0) return;
 
+    // The Startup Idea card sits beside the tree rather than in it — see
+    // STARTUP_IDEA_TYPE above.
+    const ideaNode = nodes.find((n) => n.type === STARTUP_IDEA_TYPE) ?? null;
+    const treeNodes = ideaNode
+      ? nodes.filter((n) => n.id !== ideaNode.id)
+      : nodes;
+
     let targetNodes: Node[];
-    try {
-      targetNodes = layoutForest(nodes, edges);
-    } catch {
-      // stratify throws if the graph isn't a valid tree (e.g. multiple roots
-      // during a transient state while Liveblocks is syncing). Skip this tick.
-      return;
+    if (treeNodes.length === 0) {
+      // Nothing to sit beside yet (the room's first Trigger hasn't landed).
+      targetNodes = ideaNode ? [{ ...ideaNode, position: { x: 0, y: 0 } }] : [];
+    } else {
+      let laidOut: Node[];
+      try {
+        laidOut = layoutForest(treeNodes, edges);
+      } catch {
+        // stratify throws if the graph isn't a valid tree (e.g. multiple roots
+        // during a transient state while Liveblocks is syncing). Skip this tick.
+        return;
+      }
+      // The idea card goes first so it — not the Trigger — is what the initial
+      // viewport is aligned on below, which keeps it on screen on load.
+      targetNodes = ideaNode
+        ? [placeStartupIdea(ideaNode, laidOut[0]), ...laidOut]
+        : laidOut;
     }
+
+    if (targetNodes.length === 0) return;
 
     const transitions = targetNodes.map((node) => ({
       id: node.id,
