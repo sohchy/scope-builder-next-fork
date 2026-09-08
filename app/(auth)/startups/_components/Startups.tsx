@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useOrganizationList } from "@clerk/nextjs";
 
 import StartupsTable from "./StartupsTable";
+import { isInCurrentCohort } from "@/lib/cohort";
 
 export default function Startups() {
   const [data, setData] = useState<any[]>([]);
@@ -26,38 +27,40 @@ export default function Startups() {
 
       const founders = memberships.data.filter(
         (membership) =>
-          membership.role === "org:founder" || membership.role === "org:member"
+          membership.role === "org:founder" || membership.role === "org:member",
       );
       const mentors = memberships.data.filter(
-        (membership) => membership.role === "org:mentor"
+        (membership) => membership.role === "org:mentor",
       );
 
-      data.push({
-        org_id: startup.id,
-        name: startup.name,
-        createdAt: startup.createdAt,
-        founders: founders.map((founder) => {
-          if (
-            founder.publicUserData?.firstName &&
-            founder.publicUserData?.lastName
-          )
-            return `${founder.publicUserData?.firstName} ${founder.publicUserData?.lastName}`;
+      if (isInCurrentCohort(startup.publicMetadata)) {
+        data.push({
+          org_id: startup.id,
+          name: startup.name,
+          createdAt: startup.createdAt,
+          founders: founders.map((founder) => {
+            if (
+              founder.publicUserData?.firstName &&
+              founder.publicUserData?.lastName
+            )
+              return `${founder.publicUserData?.firstName} ${founder.publicUserData?.lastName}`;
 
-          if (founder.publicUserData?.firstName)
-            return founder.publicUserData?.firstName;
+            if (founder.publicUserData?.firstName)
+              return founder.publicUserData?.firstName;
 
-          if (founder.publicUserData?.lastName)
-            return founder.publicUserData?.lastName;
+            if (founder.publicUserData?.lastName)
+              return founder.publicUserData?.lastName;
 
-          return founder.publicUserData?.identifier;
-        }),
-        // mentors: mentors.map((mentor) => {
-        //   console.log("mentor");
+            return founder.publicUserData?.identifier;
+          }),
+          // mentors: mentors.map((mentor) => {
+          //   console.log("mentor");
 
-        //   return `${mentor.publicUserData?.firstName} ${mentor.publicUserData?.lastName}`;
-        // }),
-        mentors: startup.publicMetadata?.lead_instructor || "",
-      });
+          //   return `${mentor.publicUserData?.firstName} ${mentor.publicUserData?.lastName}`;
+          // }),
+          mentors: startup.publicMetadata?.lead_instructor || "",
+        });
+      }
     }
 
     setData(data);
