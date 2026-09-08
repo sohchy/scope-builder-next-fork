@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useOrganizationList } from "@clerk/nextjs";
 
 import StartupsTable from "./StartupsTable";
+import { isInCurrentCohort } from "@/lib/cohort";
 
 export default function Startups() {
   const [data, setData] = useState<any[]>([]);
@@ -32,7 +33,7 @@ export default function Startups() {
         (membership) => membership.role === "org:mentor",
       );
 
-      if (startup.publicMetadata?.cohort === "spring26") {
+      if (isInCurrentCohort(startup.publicMetadata)) {
         data.push({
           org_id: startup.id,
           name: startup.name,
