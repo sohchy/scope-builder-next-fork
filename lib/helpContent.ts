@@ -15,17 +15,19 @@ export const HELP_CONTENT = {
   "node.trigger": `
     <p><strong>Jobs to be Done</strong></p>
     <p>This describes the original need of the stakeholder. You may describe who your stakeholder is in the text area, or you may wait till Session #1 and select it from a list of possibilities.</p>
-    <p>A good litmus test for a well written Job to be Done is: if you remove technology, problem, need, solution, benefit, etc. from the sentence, and the sentence would still make sense to the stakeholder 50 or 100 years ago and across geographies, then you have a good Job to be Done statement.</p>
-    <p><strong>Poorly written:</strong> Small business owners need an easier to use, less expensive and mobile friendly version of TurboTax. It includes needs, solutions and technologies.</p>
-    <p><strong>Better:</strong> Small business owners need to do their taxes.</p>
+    <p>A good litmus test for a well written original need / Job to be Done is: if you remove technology, problem, need, solution, benefit, etc. from the sentence, and the sentence would still make sense to the stakeholder 50 or 100 years ago and across geographies, then you have a good Job to be Done statement.</p>
+    <p><strong>Poorly written:</strong> Football coaches need an easier way to track and a mobile friendly way of teaching tackling. It includes needs, solutions and technologies.</p>
+    <p><strong>Better:</strong> Football coaches want their players to tackle safely.</p>
   `,
   "node.action": `
-    <p>Lorem ipsum dolor sit amet, <strong>consectetur adipiscing</strong> elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    <p><strong>Action / Activity</strong></p>
+    <p>This describes what the stakeholder does today to get the Job to be Done. We are still not describing any problems or needs or gains yet. We are simply putting down what it is they do today. You may include the solutions / technologies they use, or keep it agnostic.</p>
+    <p><strong>Examples:</strong></p>
     <ul>
-      <li>Ut enim ad minim veniam.</li>
-      <li>Quis nostrud exercitation ullamco.</li>
+      <li>Coach demonstrates how to tackle safely.</li>
+      <li>Coach creates a one page visual to remember easily.</li>
+      <li>Coach assigns practice tackle reps.</li>
     </ul>
-    <p><a href="https://example.com" target="_blank" rel="noreferrer">Read more</a></p>
   `,
   "problem.painGain": `
     <p>Lorem ipsum dolor sit amet, <strong>consectetur adipiscing</strong> elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
