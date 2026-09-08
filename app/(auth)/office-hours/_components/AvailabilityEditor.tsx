@@ -47,10 +47,10 @@ export default function AvailabilityEditor({
   const [, startTransition] = useTransition();
 
   const programStart = parseISO(
-    process.env.NEXT_PUBLIC_PROGRAM_START_DATE ?? "2026-01-01"
+    process.env.NEXT_PUBLIC_PROGRAM_START_DATE ?? "2026-01-01",
   );
   const programEnd = parseISO(
-    process.env.NEXT_PUBLIC_PROGRAM_END_DATE ?? "2026-12-31"
+    process.env.NEXT_PUBLIC_PROGRAM_END_DATE ?? "2026-12-31",
   );
   const slotStartTime = process.env.NEXT_PUBLIC_SLOT_START_TIME ?? "08:00";
   const slotEndTime = process.env.NEXT_PUBLIC_SLOT_END_TIME ?? "22:00";
@@ -61,7 +61,7 @@ export default function AvailabilityEditor({
   const totalPages = Math.ceil(weeks.length / WEEKS_PER_PAGE);
   const visibleWeeks = weeks.slice(
     pageIndex * WEEKS_PER_PAGE,
-    pageIndex * WEEKS_PER_PAGE + WEEKS_PER_PAGE
+    pageIndex * WEEKS_PER_PAGE + WEEKS_PER_PAGE,
   );
 
   async function handleAddSlot(date: Date) {
@@ -85,10 +85,12 @@ export default function AvailabilityEditor({
 
     startTransition(async () => {
       try {
-        const saved = await createOfficeHourSlot(date, defaultStart, defaultEnd);
-        setSlots((prev) =>
-          prev.map((s) => (s.id === tempId ? saved : s))
+        const saved = await createOfficeHourSlot(
+          date,
+          defaultStart,
+          defaultEnd,
         );
+        setSlots((prev) => prev.map((s) => (s.id === tempId ? saved : s)));
       } catch {
         setSlots((prev) => prev.filter((s) => s.id !== tempId));
       }
@@ -99,8 +101,8 @@ export default function AvailabilityEditor({
     // Optimistic update
     setSlots((prev) =>
       prev.map((s) =>
-        s.id === id ? { ...s, start_time: startTime, end_time: endTime } : s
-      )
+        s.id === id ? { ...s, start_time: startTime, end_time: endTime } : s,
+      ),
     );
 
     startTransition(async () => {
@@ -108,7 +110,7 @@ export default function AvailabilityEditor({
         const saved = await updateOfficeHourSlot(id, startTime, endTime);
         // Bookings may have been dropped — resync so the marker stays honest.
         setSlots((prev) =>
-          prev.map((s) => (s.id === id ? { ...s, ...saved } : s))
+          prev.map((s) => (s.id === id ? { ...s, ...saved } : s)),
         );
       } catch {
         // Revert on error — re-fetch would be ideal but keep simple for now
@@ -132,7 +134,7 @@ export default function AvailabilityEditor({
   async function handleUpdateSlot(
     id: string,
     startTime: string,
-    endTime: string
+    endTime: string,
   ) {
     const slot = slots.find((s) => s.id === id);
     if (!slot || bookingCount(slot) === 0) {
@@ -189,24 +191,24 @@ export default function AvailabilityEditor({
         <button
           onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
           disabled={pageIndex === 0}
-          className="absolute left-0 w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:bg-gray-50 transition-colors"
+          className="absolute left-0 w-11 h-11 rounded-full border border-gray-400 flex items-center justify-center text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
           aria-label="Previous weeks"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={22} />
         </button>
-        <h1
+        {/* <h1
           className="text-2xl font-bold text-gray-900"
           style={{ fontFamily: "Manrope" }}
         >
           Your availability
-        </h1>
+        </h1> */}
         <button
           onClick={() => setPageIndex((p) => Math.min(totalPages - 1, p + 1))}
           disabled={pageIndex >= totalPages - 1}
-          className="absolute right-0 w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:bg-gray-50 transition-colors"
+          className="absolute right-0 w-11 h-11 rounded-full border border-gray-400 flex items-center justify-center text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
           aria-label="Next weeks"
         >
-          <ChevronRight size={16} />
+          <ChevronRight size={22} />
         </button>
       </div>
 

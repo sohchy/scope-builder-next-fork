@@ -33,14 +33,14 @@ export default function OfficeHoursTabs({
     <Tabs value={tab} onValueChange={setTab} className="flex flex-col h-full">
       <TabsList>
         <TabsTrigger value="availability">Your availability</TabsTrigger>
-        <TabsTrigger value="schedule">Office Hours</TabsTrigger>
+        <TabsTrigger value="schedule">My Office Hours</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="availability" className="flex-1 min-h-0 mt-4">
+      <TabsContent value="availability" className="flex-1 min-h-0 mt-8">
         <AvailabilityEditor initialSlots={ownSlots} />
       </TabsContent>
 
-      <TabsContent value="schedule" className="flex-1 min-h-0 mt-4">
+      <TabsContent value="schedule" className="flex-1 min-h-0 mt-8">
         <BookingView
           initialSlots={allSlots}
           startupNames={startupNames}

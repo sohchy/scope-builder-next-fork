@@ -61,7 +61,9 @@ const INTERVIEW_TARGET = 15;
  * opaque background of its own or the cells show through. */
 const STICKY_NAME_CELL = "sticky left-0 z-20 bg-white";
 const STICKY_NAME_HEAD = "sticky left-0 z-30 bg-muted";
-const MILESTONE_TINT = "bg-muted/40";
+/** A translucent black rather than a `--muted` tint: it has to darken both the white
+ * body cells and the already-muted header, and `--muted` over `--muted` is invisible. */
+const MILESTONE_TINT = "bg-black/[0.06]";
 
 /** Matches the sign-off column only — `milestone-group-N` is the header above the
  * whole group and must not pick up the tint. */
@@ -73,10 +75,11 @@ function ProgressCheck({ done }: { done: boolean }) {
       className="flex justify-center"
       title={done ? "Reviewed" : "Not reviewed"}
     >
+      {/* A size up from `SubStepCheck` — the sign-off is the column that matters. */}
       {done ? (
-        <CheckIcon className="text-progress-done size-4" />
+        <CheckIcon className="text-progress-done size-5" />
       ) : (
-        <CircleIcon className="text-check-empty size-4" />
+        <CircleIcon className="text-check-empty size-5" />
       )}
     </span>
   );
@@ -97,10 +100,13 @@ function SubStepCheck({ done }: { done: boolean }) {
       <div
         className={
           done
-            ? "border-progress-done size-4 rounded-full border bg-[#6ec48f]"
+            ? "border-progress-done flex size-4 items-center justify-center rounded-full border bg-[#6ec48f]"
             : "border-check-empty size-4 rounded-full border"
         }
-      />
+      >
+        {/* Thickened, since at 10px a default-weight tick reads as a smudge. */}
+        {done && <CheckIcon className="size-2.5 stroke-3 text-white" />}
+      </div>
     </span>
   );
 }
@@ -258,7 +264,9 @@ export default function MilestoneProgressTable({
                     className={`p-2 text-center text-xs font-semibold ${
                       isName ? `text-left ${STICKY_NAME_HEAD}` : ""
                     } ${isInterviews ? "text-left" : ""} ${
-                      isMilestone ? MILESTONE_TINT : ""
+                      isMilestone
+                        ? `${MILESTONE_TINT} text-foreground font-bold`
+                        : ""
                     }`}
                   >
                     {header.isPlaceholder

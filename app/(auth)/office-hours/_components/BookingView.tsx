@@ -331,17 +331,17 @@ export default function BookingView({
             setSelectedInstructors(defaultInstructorsForPage(next));
           }}
           disabled={pageIndex === 0}
-          className="absolute left-0 w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:bg-gray-50 transition-colors"
+          className="absolute left-0 w-11 h-11 rounded-full border border-gray-400 flex items-center justify-center text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
           aria-label="Previous weeks"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={22} />
         </button>
-        <h1
+        {/* <h1
           className="text-2xl font-bold text-gray-900"
           style={{ fontFamily: "Manrope" }}
         >
           Office Hours
-        </h1>
+        </h1> */}
         <button
           onClick={() => {
             const next = Math.min(totalPages - 1, pageIndex + 1);
@@ -349,10 +349,10 @@ export default function BookingView({
             setSelectedInstructors(defaultInstructorsForPage(next));
           }}
           disabled={pageIndex >= totalPages - 1}
-          className="absolute right-0 w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:bg-gray-50 transition-colors"
+          className="absolute right-0 w-11 h-11 rounded-full border border-gray-400 flex items-center justify-center text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors"
           aria-label="Next weeks"
         >
-          <ChevronRight size={16} />
+          <ChevronRight size={22} />
         </button>
       </div>
 

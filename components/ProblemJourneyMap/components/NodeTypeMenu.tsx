@@ -20,7 +20,7 @@ const OPTIONS: {
 }[] = [
   {
     type: "trigger",
-    label: "Trigger / Motivation",
+    label: "Trigger / Motivation / Jobs to be Done",
     description: "Starts the journey",
     icon: <ZapIcon className="w-3.5 h-3.5 text-indigo-500" />,
   },
@@ -66,7 +66,7 @@ export function NodeTypeMenu({
         transform: "translateY(-50%)",
         zIndex: 9999,
       }}
-      className="w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1 overflow-hidden"
+      className="w-[340px] bg-white rounded-xl shadow-lg border border-gray-100 py-1 overflow-hidden"
       onClick={(e) => e.stopPropagation()}
     >
       {OPTIONS.map(({ type, label, description, icon }) => (

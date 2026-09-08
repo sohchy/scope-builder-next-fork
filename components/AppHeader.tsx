@@ -57,6 +57,7 @@ export default function AppHeader() {
     if (pathname.includes("/exercises/exercise-1")) title = "Exercise 1";
     if (pathname.includes("/exercises/exercise-2")) title = "Exercise 2";
     if (pathname.includes("/user-journey-map")) title = "Milestones";
+    if (pathname.includes("/office-hours")) title = "Office Hours";
 
     // if (
     //   pathname.includes("/participants/") ||

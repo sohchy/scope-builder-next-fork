@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
  * handles. `useLayout` keeps it out of the tree and positions it against the
  * first Trigger instead.
  *
- * Same 370px width as the journey cards for the same reason they are fixed: the
+ * Same 370px width as an Action card for the same reason those are fixed: the
  * textarea sizes to its content, so on an auto-width card every character would
  * re-run the tree layout mid-keystroke. Pinned, the text wraps and only the
  * height grows — which the layout does follow, via its measured-height selector.

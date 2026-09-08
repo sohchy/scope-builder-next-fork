@@ -15,6 +15,7 @@ import { useSelectedNode } from "../SelectedNodeContext";
 import { useNodeProblems } from "../NodeProblemsContext";
 import { useNodeContentDraft } from "../hooks/useNodeContentDraft";
 import { Textarea } from "@/components/ui/textarea";
+import { HelpPopover } from "@/components/ui/help-popover";
 import { PROBLEMS_SUB_STEP } from "@/lib/milestones";
 import type { Problem } from "../components/ActionNodeSheet";
 
@@ -225,10 +226,10 @@ function ActionNodeInner({ id, data }: NodeProps) {
             Action
           </span>
         </div>
-        {/* Delete sits *before* the badge so the badge can end flush with the
-            card's padding, matching the icon's inset on the left. The button is
-            only visible on hover but still occupies its width — parked here it
-            eats into the row's slack instead of pushing the badge inward. */}
+        {/* Delete sits *before* the badge rather than after it: the button is
+            only visible on hover but still occupies its width, so parked here it
+            eats into the row's slack instead of shunting the badge sideways as
+            the pointer comes and goes. */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {canDeleteNode && (
             <button
@@ -248,6 +249,10 @@ function ActionNodeInner({ id, data }: NodeProps) {
               {hypothesisCount === 1 ? "Hypothesis" : "Hypotheses"}
             </span>
           )}
+          {/* Last in the row so it sits in the card's top-right corner, and
+              outside the readOnly/unlock gates above — the help copy is worth
+              the same to someone who can only read the card. */}
+          <HelpPopover helpKey="node.action" label="Action" align="end" />
         </div>
       </div>
 

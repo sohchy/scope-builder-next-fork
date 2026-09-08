@@ -266,7 +266,7 @@ function CanvasInner({
                         className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#6A35FF] text-white text-sm font-medium shadow hover:bg-[#5a2de0] transition-colors"
                       >
                         <ZapIcon className="w-3.5 h-3.5" />
-                        Add Trigger / Motivation
+                        Add Trigger / Motivation / Jobs to be Done
                       </button>
                     </Panel>
                   )}
