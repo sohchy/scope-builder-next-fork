@@ -150,7 +150,7 @@ export async function runMilestoneDigest(
   const deps = { ...defaultDeps(), ...options.deps };
 
   if (!force && !isMilestoneDigestEnabled()) {
-    console.warn("[milestone-digest] skipped — MILESTONE_DIGEST_ENABLED is off");
+    console.warn("[milestone-digest] skipped — MILESTONE_CRON_EMAIL_ENABLED is off");
     return { status: "skipped", reason: "disabled" };
   }
 

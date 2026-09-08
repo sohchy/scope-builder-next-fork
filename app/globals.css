@@ -184,6 +184,24 @@
   .notes-rte .rdw-option-wrapper {
     border-color: #b9bdc9 !important;
   }
+
+  /* Frame the whole composer — toolbar plus typing area — as one input-shaped
+     box. Vendor CSS puts a 1px border on the toolbar alone, which left the
+     typing area open on three sides. The border moves out to the wrapper and
+     the toolbar keeps only its underline, so the two read as one control.
+     box-sizing is reset because the vendor sets the wrapper to content-box,
+     where a full-width child plus the new border overflows its parent by 2px. */
+  .notes-rte.rdw-editor-wrapper {
+    box-sizing: border-box !important;
+    border: 1px solid #b9bdc9 !important;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .notes-rte.rdw-editor-wrapper .rdw-editor-toolbar {
+    border-width: 0 0 1px 0 !important;
+    border-radius: 0 !important;
+  }
 }
 
 /* Scrollable without a visible scrollbar — for strips where the bar would sit

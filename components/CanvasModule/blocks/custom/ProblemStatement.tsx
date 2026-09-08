@@ -255,7 +255,7 @@ export const ProblemStatementCard: React.FC<ProblemStatementCardProps> = (
             <div className="relative w-full flex flex-col ">
               <Label className="text-gray-200 font-semibold text-[14px] pl-3">
                 action they take to get job done; either
-                quantifiable/emotional/social
+                functional/emotional/social/consumption
               </Label>
               <Textarea
                 value={shape.summary?.["they"]}

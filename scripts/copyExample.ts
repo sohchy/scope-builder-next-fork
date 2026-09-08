@@ -121,7 +121,9 @@ async function copyDatabase(sourceOrgId: string, exampleNumber: number) {
 
     // ---- Id-remapped copies ----
     const participantIdMap = new Map<string, string>();
-    const participants = await tx.participant.findMany({ where: { org_id: sourceOrgId } });
+    const participants = await tx.participant.findMany({
+      where: { org_id: sourceOrgId, deleted_at: null },
+    });
     for (const p of participants) {
       const created = await tx.participant.create({
         data: {

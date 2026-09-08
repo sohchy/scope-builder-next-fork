@@ -48,6 +48,13 @@ export function formatTimeDisplay(time: string): string {
   return `${displayH}:${displayM} ${period}`;
 }
 
+/** "Jane Doe" → "JD", "Jane" → "JA". Used on the slot avatars. */
+export function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 /**
  * Produces 30-min interval options from startTime to endTime inclusive.
  * e.g. generateTimeOptions("08:00", "10:00") → [{label:"8:00 AM", value:"08:00"}, ...]

@@ -15,31 +15,38 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
   bookingLinkFormSchema,
   BookingLinkFormValues,
+  BOOKING_NOTE_MAX_LENGTH,
 } from "@/schemas/officeHours";
-
-function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
+import { getInitials } from "@/lib/officeHoursUtils";
 
 interface BookingLinkPopoverProps {
   subSlotId: string;
   mentorName: string;
   mode: "book" | "manage";
   currentLink?: string | null;
+  currentNote?: string | null;
   lastMeetingLink?: string | null;
   disabled?: boolean;
-  onBook: (subSlotId: string, meetingLink: string) => Promise<void>;
-  onUpdateLink: (subSlotId: string, meetingLink: string) => Promise<void>;
+  onBook: (
+    subSlotId: string,
+    meetingLink: string,
+    note: string,
+  ) => Promise<void>;
+  onUpdate: (
+    subSlotId: string,
+    meetingLink: string,
+    note: string,
+  ) => Promise<void>;
   onCancel: (subSlotId: string) => Promise<void>;
 }
 
@@ -48,10 +55,11 @@ export default function BookingLinkPopover({
   mentorName,
   mode,
   currentLink,
+  currentNote,
   lastMeetingLink,
   disabled,
   onBook,
-  onUpdateLink,
+  onUpdate,
   onCancel,
 }: BookingLinkPopoverProps) {
   const { user } = useUser();
@@ -65,10 +73,10 @@ export default function BookingLinkPopover({
   const form = useForm<BookingLinkFormValues>({
     resolver: zodResolver(bookingLinkFormSchema),
     mode: "onChange",
-    defaultValues: { meetingLink: "" },
-    // Keeps the field in sync with the saved booking link, so reopening the
-    // popover always shows the current value without a manual reset.
-    values: { meetingLink: currentLink ?? "" },
+    defaultValues: { meetingLink: "", note: "" },
+    // Keeps the fields in sync with the saved booking, so reopening the popover
+    // always shows the current values without a manual reset.
+    values: { meetingLink: currentLink ?? "", note: currentNote ?? "" },
     resetOptions: { keepDirtyValues: true },
   });
 
@@ -108,9 +116,9 @@ export default function BookingLinkPopover({
     setError(null);
     try {
       if (mode === "manage") {
-        await onUpdateLink(subSlotId, values.meetingLink);
+        await onUpdate(subSlotId, values.meetingLink, values.note);
       } else {
-        await onBook(subSlotId, values.meetingLink);
+        await onBook(subSlotId, values.meetingLink, values.note);
       }
       setOpen(false);
     } catch {
@@ -125,7 +133,7 @@ export default function BookingLinkPopover({
     setError(null);
     try {
       await onCancel(subSlotId);
-      form.reset({ meetingLink: "" });
+      form.reset({ meetingLink: "", note: "" });
       setOpen(false);
     } catch {
       setError("Something went wrong. Please try again.");
@@ -153,7 +161,7 @@ export default function BookingLinkPopover({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <p className="text-sm font-semibold text-gray-700">
               {mode === "manage"
-                ? "Update your meeting link"
+                ? "Update your booking"
                 : "Submit a meeting link to the instructor"}
             </p>
             {canReuseLastLink && (
@@ -187,6 +195,29 @@ export default function BookingLinkPopover({
                         setUseLastLink(false);
                         field.onChange(e);
                       }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="note"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-normal text-gray-600">
+                    Note for the instructor{" "}
+                    <span className="text-gray-400">(optional)</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="What would you like to cover?"
+                      rows={3}
+                      maxLength={BOOKING_NOTE_MAX_LENGTH}
+                      className="min-h-20 resize-none text-sm"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />

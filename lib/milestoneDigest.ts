@@ -82,7 +82,7 @@ export function getMilestoneDigestHour(): number {
 
 /** Master switch for the digest. On unless explicitly turned off. */
 export function isMilestoneDigestEnabled(): boolean {
-  return readFlag(process.env.MILESTONE_DIGEST_ENABLED, true);
+  return readFlag(process.env.MILESTONE_CRON_EMAIL_ENABLED, true);
 }
 
 /**

@@ -11,6 +11,7 @@
     "db:copy-example": "npx tsx scripts/copyExample.ts",
     "db:seed-summary-answers": "npx tsx --env-file=.env scripts/seedSummaryAnswers.ts",
     "email:test": "npx tsx --env-file=.env scripts/testOfficeHourEmail.ts",
+    "oh:resend": "npx tsx --env-file=.env scripts/resendOfficeHourInvites.ts",
     "digest:run": "npx tsx --env-file=.env scripts/runMilestoneDigest.ts",
     "digest:seed": "npx tsx --env-file=.env scripts/seedMilestoneDigestNotifications.ts"
   },

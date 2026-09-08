@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import dynamic from "next/dynamic";
 import { useAuth } from "@clerk/nextjs";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ContentState,
   EditorState,
@@ -14,6 +14,7 @@ import {
   EllipsisIcon,
   FileIcon,
   FileTextIcon,
+  Loader2Icon,
   MessageCircleIcon,
   PaperclipIcon,
   XIcon,
@@ -33,7 +34,14 @@ import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Checkbox } from "./ui/checkbox";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
-import { createNote, deleteNote, getNotes, updateNote } from "@/services/notes";
+import {
+  createNote,
+  deleteNote,
+  getNotes,
+  getUnreadNotesCount,
+  markNotesRead,
+  updateNote,
+} from "@/services/notes";
 import { uploadToSupabase } from "@/lib/uploadToSupabase";
 import Link from "next/link";
 
@@ -70,44 +78,69 @@ export default function Notes() {
   const [text, setText] = useState("");
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [shareWithStartup, setShareWithStartup] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>(
     [],
   );
 
+  const loadNotes = useCallback(async () => {
+    setIsLoading(true);
+
+    const notesData = await getNotes();
+    setNotes(
+      notesData.map((note) => ({
+        id: note.id,
+        org_id: note.org_id,
+        content: note.content,
+        user_id: note.user_id,
+        author: note.author_name,
+        share_with_startup: note.share_with_startup,
+        created_at: format(note.created_at, "MMM d, yyyy h:mm:ss a"),
+        attachments: note.attachments as Attachment[],
+      })),
+    );
+
+    setIsLoading(false);
+  }, []);
+
   useEffect(() => {
-    async function fetchNotes() {
-      setIsLoading(true);
+    loadNotes();
+  }, [orgId, orgRole, loadNotes]);
 
-      const notesData = await getNotes();
-      setNotes(
-        notesData.map((note) => ({
-          id: note.id,
-          org_id: note.org_id,
-          content: note.content,
-          user_id: note.user_id,
-          author: note.author_name,
-          share_with_startup: note.share_with_startup,
-          created_at: format(note.created_at, "MMM d, yyyy h:mm:ss a"),
-          attachments: note.attachments as Attachment[],
-        })),
-      );
+  // The header lives in a layout and never remounts as the user navigates, so
+  // the badge polls instead of relying on the mount fetch.
+  useEffect(() => {
+    let cancelled = false;
 
-      setIsLoading(false);
-    }
+    const refreshUnreadCount = async () => {
+      const count = await getUnreadNotesCount();
+      if (!cancelled) setUnreadCount(count);
+    };
 
-    fetchNotes();
+    refreshUnreadCount();
+    const interval = setInterval(refreshUnreadCount, 60_000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [orgId, orgRole]);
 
   const addNote = async () => {
     const contentState = editorState.getCurrentContent();
     //if (text.trim().length === 0) return;
 
-    if (!contentState.hasText()) return;
+    const hasText = contentState.hasText();
+
+    // A note needs either text or at least one attachment.
+    if (!hasText && pendingAttachments.length === 0) return;
 
     try {
-      const raw = convertToRaw(contentState);
-      const editorText = JSON.stringify(raw);
+      const editorText = hasText
+        ? JSON.stringify(convertToRaw(contentState))
+        : "";
 
       const newNote = await createNote(
         editorText,
@@ -166,27 +199,43 @@ export default function Notes() {
   };
 
   const onUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const files = Array.from(e.target.files ?? []);
 
-    if (!file) return;
-
-    const filename = file.name;
-    const sizeKB = file.size / 1024;
-    const isImage = file.type.startsWith("image/");
-    const { url, mime } = await uploadToSupabase(file);
-
-    const newAttachment: Attachment = {
-      url,
-      name: filename,
-      type: isImage ? "image" : "file",
-      size:
-        sizeKB > 1024
-          ? `${(sizeKB / 1024).toFixed(1)} MB`
-          : `${Math.round(sizeKB)} KB`,
-    };
-
-    setPendingAttachments((prev) => [...prev, newAttachment]);
+    // Reset the input right away so picking the same file(s) again still fires
+    // a change event.
     e.target.value = "";
+
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+
+    try {
+      const uploaded = await Promise.all(
+        files.map(async (file) => {
+          const sizeKB = file.size / 1024;
+          const isImage = file.type.startsWith("image/");
+          const { url } = await uploadToSupabase(file);
+
+          const attachment: Attachment = {
+            url,
+            name: file.name,
+            type: isImage ? "image" : "file",
+            size:
+              sizeKB > 1024
+                ? `${(sizeKB / 1024).toFixed(1)} MB`
+                : `${Math.round(sizeKB)} KB`,
+          };
+
+          return attachment;
+        }),
+      );
+
+      setPendingAttachments((prev) => [...prev, ...uploaded]);
+    } catch (err) {
+      console.error("Error uploading attachments:", err);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const removeAttachment = (index: number) => {
@@ -197,17 +246,35 @@ export default function Notes() {
 
   return (
     <Sheet
-      onOpenChange={() => {
+      onOpenChange={async (open) => {
         setText("");
         setPendingAttachments([]);
         setShareWithStartup(false);
+
+        if (!open) return;
+
+        setUnreadCount(0);
+        // Refetch first, then stamp: a note that lands in between stays unread
+        // rather than being marked read without ever having been shown.
+        await loadNotes();
+        markNotesRead();
       }}
     >
-      <SheetTrigger asChild>
-        <Button size={"icon"} variant={"ghost"} className="cursor-pointer">
-          <MessageCircleIcon size={14} />
-        </Button>
-      </SheetTrigger>
+      <div className="relative">
+        <SheetTrigger asChild>
+          <Button size={"icon"} variant={"ghost"} className="cursor-pointer">
+            <MessageCircleIcon size={14} />
+          </Button>
+        </SheetTrigger>
+        {unreadCount > 0 && (
+          <span
+            aria-label={`${unreadCount} unread notes`}
+            className="pointer-events-none absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-white tabular-nums"
+          >
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
+      </div>
       <SheetContent className="w-[450px] min-w-[450px] max-w-none">
         <SheetHeader>
           <SheetTitle>Notes</SheetTitle>
@@ -347,19 +414,37 @@ export default function Notes() {
                     <Button
                       variant={"ghost"}
                       size={"icon"}
+                      title="Attach files"
+                      aria-label="Attach files"
+                      disabled={isUploading}
+                      className="size-10"
                       onClick={() => inputRef.current?.click()}
                     >
-                      <PaperclipIcon size={14} />
+                      {isUploading ? (
+                        <Loader2Icon className="size-5 animate-spin" />
+                      ) : (
+                        <PaperclipIcon className="size-5" />
+                      )}
                     </Button>
                     <input
                       type="file"
+                      multiple
                       className="hidden"
                       ref={inputRef}
                       onChange={onUploadFile}
                     />
                   </div>
                 </div>
-                <Button onClick={addNote}>Add Note</Button>
+                <Button
+                  onClick={addNote}
+                  disabled={
+                    isUploading ||
+                    (!editorState.getCurrentContent().hasText() &&
+                      pendingAttachments.length === 0)
+                  }
+                >
+                  Add Note
+                </Button>
               </div>
             </>
           )}
@@ -471,11 +556,14 @@ export function ChatNote({
 
   const onUpdate = async () => {
     const contentState = editorState.getCurrentContent();
+    const hasText = contentState.hasText();
 
-    if (!contentState.hasText()) return;
+    // Attachment-only notes stay editable (e.g. to toggle sharing) with no text.
+    if (!hasText && !hasAttachments) return;
 
-    const raw = convertToRaw(contentState);
-    const editorText = JSON.stringify(raw);
+    const editorText = hasText
+      ? JSON.stringify(convertToRaw(contentState))
+      : "";
 
     await onUpdateNote(editorText, shareWithStartup);
     setOpen(false);
@@ -572,16 +660,18 @@ export function ChatNote({
         <span className="text-xs text-muted-foreground px-1">
           {sender.name}
         </span>
-        <div
-          className={cn(
-            "rounded-2xl px-2 py-2.5 text-sm leading-relaxed max-w-prose bg-muted",
-            isAuthor
-              ? "bg-muted text-foreground rounded-br-md"
-              : "bg-muted text-foreground rounded-bl-md",
-            hasAttachments ? "pb-2.5" : "",
-          )}
-        >
-          {/* {images.length > 0 && (
+        {/* Attachment-only notes have no text bubble to draw. */}
+        {content && (
+          <div
+            className={cn(
+              "rounded-2xl px-2 py-2.5 text-sm leading-relaxed max-w-prose bg-muted",
+              isAuthor
+                ? "bg-muted text-foreground rounded-br-md"
+                : "bg-muted text-foreground rounded-bl-md",
+              hasAttachments ? "pb-2.5" : "",
+            )}
+          >
+            {/* {images.length > 0 && (
             <div
               className={cn(
                 "grid gap-1",
@@ -596,32 +686,32 @@ export function ChatNote({
             </div>
           )} */}
 
-          {content && (
-            <div
-              className={cn(
-                // "px-2",
-                images.length > 0 ? "pt-2" : "pt-0",
-                files.length > 0 ? "pb-1.5" : "pb-0",
-              )}
-            >
-              {/* {content} */}
-              <RteEditor
-                editorState={editorState}
-                onEditorStateChange={setEditorState}
-                toolbar={{
-                  options: [],
-                  //list: { options: ["unordered", "ordered"] },
-                }}
-                wrapperClassName="w-full"
-                toolbarHidden
-                editorClassName={`px-2 py-2  text-[14px] 
+            {content && (
+              <div
+                className={cn(
+                  // "px-2",
+                  images.length > 0 ? "pt-2" : "pt-0",
+                  files.length > 0 ? "pb-1.5" : "pb-0",
+                )}
+              >
+                {/* {content} */}
+                <RteEditor
+                  editorState={editorState}
+                  onEditorStateChange={setEditorState}
+                  toolbar={{
+                    options: [],
+                    //list: { options: ["unordered", "ordered"] },
+                  }}
+                  wrapperClassName="w-full"
+                  toolbarHidden
+                  editorClassName={`px-2 py-2  text-[14px] 
                         "bg-[#FFE0E0] rounded" 
                        placeholder:text-gray-500 `}
-              />
-            </div>
-          )}
+                />
+              </div>
+            )}
 
-          {/* {files.length > 0 && (
+            {/* {files.length > 0 && (
             <div className="flex flex-col gap-1.5 px-2.5">
               {files.map((file) => (
                 <FileAttachment
@@ -632,7 +722,8 @@ export function ChatNote({
               ))}
             </div>
           )} */}
-        </div>
+          </div>
+        )}
         <span className="text-[11px] text-muted-foreground px-1 flex flex-row gap-1.5 items-center">
           {timestamp}
           {isPublic && (

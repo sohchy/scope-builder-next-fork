@@ -158,7 +158,7 @@ export async function getExampleParticipants(exampleNumber: number) {
   await requireUser();
 
   const participants = await prisma.participant.findMany({
-    where: { example_number: exampleNumber },
+    where: { example_number: exampleNumber, deleted_at: null },
     orderBy: [{ scheduled_date: "asc" }, { name: "asc" }],
   });
 
@@ -177,12 +177,17 @@ export async function getExampleInterviewMilestonesWithProgress(
         orderBy: { date: "asc" },
       }),
       prisma.participant.count({
-        where: { example_number: exampleNumber, status: "documented" },
+        where: {
+          example_number: exampleNumber,
+          status: "documented",
+          deleted_at: null,
+        },
       }),
       prisma.participant.count({
         where: {
           example_number: exampleNumber,
           status: "documented",
+          deleted_at: null,
           role: { contains: "Payer" },
         },
       }),

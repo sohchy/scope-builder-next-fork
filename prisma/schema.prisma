@@ -68,6 +68,11 @@ model Participant {
   pending_review         Boolean                  @default(false)
   scheduled_date         DateTime?
   example_number         Int? // NULL = real data, N = example set N
+  // Soft delete: NULL = live, a timestamp = removed from the product. Every read of
+  // this table filters on `deleted_at: null`, including the counts the milestone
+  // progress and instructor dashboards derive, so a deleted interview stops
+  // existing everywhere at once. Nothing in the app clears this back to NULL.
+  deleted_at             DateTime?
   created_at             DateTime                 @default(now())
   ParticipantRoom        ParticipantRoom?
   interview_responses    InterviewResponse[]
@@ -489,7 +494,24 @@ model Note {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+  @@index([org_id, created_at])
   @@map("notes")
+}
+
+// How far each member has read the notes of a startup. Unlike the other
+// trackers here this one is per-user, not just per-org: an instructor reads the
+// notes of many startups, and each member of a startup reads at their own pace.
+model NoteRead {
+  id           Int      @id @default(autoincrement())
+  org_id       String
+  user_id      String
+  last_read_at DateTime
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([user_id, org_id])
+  @@map("note_reads")
 }
 
 model InterviewMilestone {
@@ -543,6 +565,7 @@ model OfficeHourBooking {
   user_name    String?
   user_email   String?
   meeting_link String?
+  note         String? // free-text context the booker leaves for the instructor
   ics_sequence Int               @default(0) // iCalendar SEQUENCE, bumped so updates replace the event
   created_at   DateTime          @default(now())
   updated_at   DateTime          @updatedAt

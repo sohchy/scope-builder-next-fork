@@ -25,6 +25,7 @@ export async function generateAnalysisRoom(roomId: string) {
   const participants = await prisma.participant.findMany({
     where: {
       org_id: orgId,
+      deleted_at: null,
     },
     include: {
       ParticipantRoom: true,

@@ -60,6 +60,7 @@ export async function createValuePropositionVersion() {
       where: {
         org_id: orgId,
         status: "complete",
+        deleted_at: null,
       },
     });
 

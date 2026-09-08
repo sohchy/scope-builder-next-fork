@@ -3,6 +3,7 @@
 import { Participant } from "@/lib/generated/prisma";
 import {
   completeInterviewReview,
+  deleteParticipant,
   getParticipants,
 } from "@/services/participants";
 import { getExampleParticipants } from "@/services/examples";
@@ -11,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Pencil, Plus } from "lucide-react";
+import { MoreHorizontal, Plus } from "lucide-react";
 import AddParticipant from "@/app/(auth)/participants/_components/AddParticipant";
 import EditParticipantForm from "@/app/(auth)/participants/_components/EditParticipantForm";
 import {
@@ -20,6 +21,23 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { InterviewAnswersView } from "./InterviewAnswers/InterviewAnswersView";
 import {
   RELATIONSHIP_OPTIONS,
@@ -108,6 +126,7 @@ function ParticipantCard({
   hideRelationship = false,
   onCardClick,
   onEditClick,
+  onDeleteClick,
   onReviewClick,
 }: {
   participant: Participant;
@@ -118,8 +137,12 @@ function ParticipantCard({
   hideRelationship?: boolean;
   onCardClick?: () => void;
   onEditClick?: () => void;
+  onDeleteClick?: () => void;
   onReviewClick?: () => void;
 }) {
+  // Both actions live behind one menu, so the menu itself only exists when at least
+  // one of them does — on the read-only /examples boards, neither is passed.
+  const hasMenu = !!onEditClick || !!onDeleteClick;
   return (
     <div
       onClick={onCardClick}
@@ -151,19 +174,40 @@ function ParticipantCard({
         <p className="font-semibold text-[16px] text-[#111827] min-w-0 break-words">
           {participant.name}
         </p>
-        {onEditClick && (
-          <button
-            // The card's own onClick sits on the wrapping div, so without this an
-            // edit click would open the interview view too.
-            onClick={(e) => {
-              e.stopPropagation();
-              onEditClick();
-            }}
-            aria-label={`Edit ${participant.name}`}
-            className="shrink-0 text-[#70747D] hover:text-[#111827]"
-          >
-            <Pencil className="w-3.5 h-3.5" />
-          </button>
+        {hasMenu && (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              // The card's own onClick sits on the wrapping div, so without this
+              // opening the menu would open the interview view underneath it.
+              onClick={(e) => e.stopPropagation()}
+              aria-label={`Actions for ${participant.name}`}
+              className="shrink-0 text-[#70747D] hover:text-[#111827]"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              // The menu renders in a portal at the document root, but React bubbles
+              // synthetic events through the *React* tree, not the DOM one — so a
+              // click on an item still reaches the card's onClick and would open the
+              // interview behind the sheet or the delete dialog. Stopped once here
+              // rather than on each item.
+              onClick={(e) => e.stopPropagation()}
+            >
+              {onEditClick && (
+                <DropdownMenuItem onSelect={onEditClick}>Edit</DropdownMenuItem>
+              )}
+              {onEditClick && onDeleteClick && <DropdownMenuSeparator />}
+              {onDeleteClick && (
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onSelect={onDeleteClick}
+                >
+                  Delete
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
       <CardField label="Organization" value={participant.organization} />
@@ -200,6 +244,7 @@ function KanbanBoard({
   onAddClick,
   onCardClick,
   onEditClick,
+  onDeleteClick,
   onReviewClick,
 }: {
   columns: { key: string; label: string }[];
@@ -209,6 +254,7 @@ function KanbanBoard({
   onAddClick?: () => void;
   onCardClick?: (participant: Participant) => void;
   onEditClick?: (participant: Participant) => void;
+  onDeleteClick?: (participant: Participant) => void;
   onReviewClick?: (participant: Participant) => void;
 }) {
   return (
@@ -258,6 +304,11 @@ function KanbanBoard({
                     onEditClick={
                       onEditClick ? () => onEditClick(participant) : undefined
                     }
+                    onDeleteClick={
+                      onDeleteClick
+                        ? () => onDeleteClick(participant)
+                        : undefined
+                    }
                     onReviewClick={
                       onReviewClick
                         ? () => onReviewClick(participant)
@@ -300,6 +351,11 @@ export default function ParticipantsKanbanView({
   );
   const [interviewParticipant, setInterviewParticipant] =
     useState<Participant | null>(null);
+  // The card awaiting delete confirmation. Held as the whole participant, not just
+  // an id, so the dialog can name the person being removed.
+  const [deleteParticipantTarget, setDeleteParticipantTarget] =
+    useState<Participant | null>(null);
+  const [deleting, setDeleting] = useState(false);
   // Reviewing opens the same interview view as a card click, but locked and with
   // Complete Review in place of Save.
   const [reviewing, setReviewing] = useState(false);
@@ -339,6 +395,21 @@ export default function ParticipantsKanbanView({
     setReviewing(true);
   };
 
+  const handleDelete = async () => {
+    if (!deleteParticipantTarget) return;
+    setDeleting(true);
+    try {
+      await deleteParticipant(deleteParticipantTarget.id);
+      await refetch();
+      setDeleteParticipantTarget(null);
+      // The milestone header's documented/payer counts are server-rendered, so a
+      // deleted interview keeps counting there until the server components re-run.
+      router.refresh();
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleCompleteReview = async () => {
     if (!interviewParticipant) return;
     await completeInterviewReview(interviewParticipant.id);
@@ -375,6 +446,43 @@ export default function ParticipantsKanbanView({
             onOpenChange={setSheetOpen}
             onSuccess={refetch}
           />
+          <AlertDialog
+            open={deleteParticipantTarget !== null}
+            onOpenChange={(open) => {
+              // Never close underneath an in-flight delete — the dialog is what's
+              // reporting that it's still running.
+              if (!open && !deleting) setDeleteParticipantTarget(null);
+            }}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Delete {deleteParticipantTarget?.name}&apos;s interview?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  The card and everything documented on it — answers, notes and
+                  progress toward your interview milestones — will be removed from
+                  the board and from your counts. This can&apos;t be undone from
+                  here.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={deleting}
+                  // Radix closes on click; hold the dialog open until the delete and
+                  // the refetch land so the card can't linger on a closed board.
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDelete();
+                  }}
+                  className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                >
+                  {deleting ? "Deleting…" : "Delete"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <Sheet
             open={editParticipant !== null}
             onOpenChange={(open) => {
@@ -440,6 +548,9 @@ export default function ParticipantsKanbanView({
               onAddClick={readOnly ? undefined : () => setSheetOpen(true)}
               onCardClick={openInterview}
               onEditClick={readOnly ? undefined : setEditParticipant}
+              onDeleteClick={
+                readOnly ? undefined : setDeleteParticipantTarget
+              }
               onReviewClick={canReview ? openReview : undefined}
             />
           </TabsContent>
@@ -457,6 +568,9 @@ export default function ParticipantsKanbanView({
               onAddClick={readOnly ? undefined : () => setSheetOpen(true)}
               onCardClick={openInterview}
               onEditClick={readOnly ? undefined : setEditParticipant}
+              onDeleteClick={
+                readOnly ? undefined : setDeleteParticipantTarget
+              }
               onReviewClick={canReview ? openReview : undefined}
             />
           </TabsContent>

@@ -320,7 +320,7 @@ export async function getInterviewAnswersData(
 
   // participantId comes from the client, so it can't be trusted to be ours.
   const participant = await prisma.participant.findFirst({
-    where: { id: participantId, org_id: orgId },
+    where: { id: participantId, org_id: orgId, deleted_at: null },
     select: { id: true },
   });
   if (!participant) return [];
@@ -342,7 +342,7 @@ export async function getExampleInterviewAnswersData(
   if (!userId) redirect("/sign-in");
 
   const participant = await prisma.participant.findFirst({
-    where: { id: participantId, example_number: exampleNumber },
+    where: { id: participantId, example_number: exampleNumber, deleted_at: null },
     select: { id: true },
   });
   if (!participant) return [];
@@ -470,8 +470,14 @@ async function buildSummaryProblems(
     questionIds.length
       ? prisma.problemInterviewAnswer.findMany({
           // Unanswered questions are stored as empty rows by the answering view, and the
-          // summary only lists people who actually said something.
-          where: { question_id: { in: questionIds }, value: { not: "" } },
+          // summary only lists people who actually said something. A deleted interview
+          // keeps its answer rows — they cascade off the participant — so it has to be
+          // filtered out through the relation rather than by the rows themselves.
+          where: {
+            question_id: { in: questionIds },
+            value: { not: "" },
+            participant: { deleted_at: null },
+          },
           include: {
             participant: {
               select: { id: true, name: true, scheduled_date: true },
@@ -621,7 +627,7 @@ export async function upsertProblemInterviewAnswer(
       select: { id: true },
     }),
     prisma.participant.findFirst({
-      where: { id: participantId, org_id: orgId },
+      where: { id: participantId, org_id: orgId, deleted_at: null },
       select: { id: true },
     }),
   ]);

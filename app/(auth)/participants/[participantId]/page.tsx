@@ -17,8 +17,10 @@ export default async function RoomPage({
 
   const valuePropData = await getValuePropData();
 
-  const participant = await prisma.participant.findUnique({
-    where: { id: participantId },
+  // `findFirst`, not `findUnique`: a deleted participant's room shouldn't be
+  // reachable by URL, and `deleted_at` isn't part of a unique constraint.
+  const participant = await prisma.participant.findFirst({
+    where: { id: participantId, deleted_at: null },
     include: { ParticipantRoom: true },
   });
 

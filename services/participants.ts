@@ -100,7 +100,7 @@ export async function getParticipant(participantId: string) {
   if (!orgId) redirect("/pick-startup");
 
   const participant = await prisma.participant.findFirst({
-    where: { id: participantId, org_id: orgId },
+    where: { id: participantId, org_id: orgId, deleted_at: null },
   });
 
   return participant;
@@ -114,7 +114,7 @@ export async function getParticipants() {
   if (!orgId) redirect("/pick-startup");
 
   const participants = await prisma.participant.findMany({
-    where: { org_id: orgId },
+    where: { org_id: orgId, deleted_at: null },
     orderBy: [{ scheduled_date: "asc" }, { name: "asc" }],
   });
 
@@ -127,6 +127,7 @@ export async function getAllParticipants() {
   if (!userId) redirect("/sign-in");
 
   const participants = await prisma.participant.findMany({
+    where: { deleted_at: null },
     orderBy: [{ scheduled_date: "asc" }, { name: "asc" }],
   });
 
@@ -166,6 +167,7 @@ export async function getAllInterviewCounts(): Promise<
     // participants into this same table and would otherwise count as real progress.
     where: {
       example_number: null,
+      deleted_at: null,
       status: { in: COUNTED_STATUSES },
     },
     _count: { _all: true },
@@ -243,7 +245,7 @@ export async function updateParticipant(
   // Read the live status rather than trusting the value the form round-tripped —
   // the interview flow may have advanced it while the edit sheet was open.
   const current = await prisma.participant.findFirst({
-    where: { id: participantId, org_id: orgId },
+    where: { id: participantId, org_id: orgId, deleted_at: null },
     select: { status: true, pending_review: true },
   });
 
@@ -329,16 +331,30 @@ export async function completeInterviewReview(participantId: string) {
   revalidatePath(`/participants`, "layout");
 }
 
+/**
+ * Soft delete. The row stays in the database — its interview responses, problem
+ * answers and Liveblocks room are all keyed off this id and would cascade away with
+ * it — and every read filters `deleted_at: null` instead, so the interview vanishes
+ * from the board, the table and every derived count. There is no restore path in the
+ * product: recovering one means clearing `deleted_at` by hand.
+ */
 export async function deleteParticipant(participantId: string) {
   const { orgId, userId } = await auth();
 
   if (!orgId || !userId) return redirect("/sign-in");
 
-  await prisma.participant.delete({
-    where: { id: participantId, org_id: orgId },
+  // `updateMany` rather than `update`: deleting an already-deleted card — a second
+  // click, or a board another tab has moved on from — should be a no-op, not a
+  // P2025 thrown out of a server action.
+  await prisma.participant.updateMany({
+    where: { id: participantId, org_id: orgId, deleted_at: null },
+    data: { deleted_at: new Date() },
   });
 
-  revalidatePath(`/participants`);
+  // "layout" so the nested /participants/interviews board is busted too — the same
+  // reasoning as the status changes above, since the milestone header's counts are
+  // server-rendered off the participants this removes.
+  revalidatePath(`/participants`, "layout");
 }
 
 export async function getInterviewMilestonesWithProgress() {
@@ -354,12 +370,13 @@ export async function getInterviewMilestonesWithProgress() {
         orderBy: { date: "asc" },
       }),
       prisma.participant.count({
-        where: { org_id: orgId, status: "documented" },
+        where: { org_id: orgId, status: "documented", deleted_at: null },
       }),
       prisma.participant.count({
         where: {
           org_id: orgId,
           status: "documented",
+          deleted_at: null,
           role: { contains: "Payer" },
         },
       }),

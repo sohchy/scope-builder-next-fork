@@ -65,10 +65,13 @@ export default function ParticipantTableActions({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete {participant.name}&apos;s interview?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete a
-              participant.
+              The participant and everything documented on them — answers, notes
+              and progress toward your interview milestones — will be removed
+              from every list and count. This can&apos;t be undone from here.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -76,7 +76,7 @@ function makeRandom(seed: number): () => number {
 async function listOrgs() {
   const groups = await prisma.participant.groupBy({
     by: ["org_id"],
-    where: { example_number: null },
+    where: { example_number: null, deleted_at: null },
     _count: { _all: true },
   });
 
@@ -103,7 +103,7 @@ async function main() {
 
   const [participants, questions] = await Promise.all([
     prisma.participant.findMany({
-      where: { org_id: orgId, example_number: null },
+      where: { org_id: orgId, example_number: null, deleted_at: null },
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),

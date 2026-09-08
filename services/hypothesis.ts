@@ -270,6 +270,7 @@ export async function getInterviewResponses() {
     where: {
       participant: {
         org_id: orgId,
+        deleted_at: null,
       },
     },
     include: {
@@ -291,6 +292,7 @@ export async function getParticipantInterviewResponses(participantId: string) {
   const responses = await prisma.interviewResponse.findMany({
     where: {
       participant_id: participantId,
+      participant: { deleted_at: null },
     },
     include: {
       question: true,
@@ -307,6 +309,7 @@ export async function getAllInterviewResponses() {
   if (!userId) redirect("/sign-in");
 
   const responses = await prisma.interviewResponse.findMany({
+    where: { participant: { deleted_at: null } },
     include: {
       question: true,
       participant: true,

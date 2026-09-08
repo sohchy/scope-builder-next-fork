@@ -12,7 +12,7 @@
  * permanently suppress the milestones they cover.
  *
  * Both `--force` behaviours are always on here — the send-hour gate and
- * MILESTONE_DIGEST_ENABLED are for the cron, not for a human asking for it now.
+ * MILESTONE_CRON_EMAIL_ENABLED are for the cron, not for a human asking for it now.
  */
 import { runMilestoneDigest, type MilestoneDigestDeps } from "../services/milestoneDigest";
 import type { CompletedMilestone } from "../lib/milestoneDigest";
@@ -90,7 +90,7 @@ async function main() {
         "PRIMARY_APP_INSTRUCTOR is unset. Set it in .env, or pass --to <email>.",
       "nothing-to-report":
         "No submitted milestones without a digest row. Nothing would be sent.",
-      disabled: "MILESTONE_DIGEST_ENABLED is off.",
+      disabled: "MILESTONE_CRON_EMAIL_ENABLED is off.",
       "outside-send-hour": "Outside the send hour (unexpected with --force).",
     };
     console.log(`skipped : ${result.reason}`);

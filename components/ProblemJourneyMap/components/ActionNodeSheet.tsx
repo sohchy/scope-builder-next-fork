@@ -90,7 +90,7 @@ export interface NodeConclusion {
 
 // ─── Problem metadata options ─────────────────────────────────────────────────
 
-const PROBLEM_TYPES = ["Functional", "Emotional", "Social"] as const;
+const PROBLEM_TYPES = ["Functional", "Emotional", "Social", "Consumption"] as const;
 
 const PAIN_OR_GAIN_OPTIONS: { value: PainOrGain; label: string }[] = [
   { value: "pain", label: "Pain" },
@@ -984,7 +984,7 @@ export function ActionNodeSheet({
                       </div>
                       <div className="flex flex-col gap-1">
                         <span className="text-sm font-medium text-gray-700">
-                          Is it pain or gain?
+                          Is it a Pain or a Gain?
                         </span>
                         <Select
                           value={problemPainGain}
