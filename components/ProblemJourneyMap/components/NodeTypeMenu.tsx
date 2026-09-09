@@ -26,7 +26,7 @@ const OPTIONS: {
   },
   {
     type: "action",
-    label: "Action",
+    label: "Action / Activity",
     description: "What a user does at a particular step",
     icon: <PlayIcon className="w-3.5 h-3.5 text-blue-500" />,
   },
