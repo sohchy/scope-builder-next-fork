@@ -83,12 +83,19 @@ export const HELP_CONTENT = {
     </ul>
     `,
   "market.segments": `
-    <p>Lorem ipsum dolor sit amet, <strong>consectetur adipiscing</strong> elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    <p>This helps you categorize different groups and sub-groups of people who have similar Jobs to be Done, Pains / Gains, etc. If two market segments have a lot of overlap, then the same solution/product can work for both. Otherwise they may each need unique features that the other segment doesn't.</p>
+    <br/>
+    <p>Understanding what Job to be Done, Pain / Gain, etc. separates two segments is important. Just because the two segments have different attributes like geographic location, age, gender, income, etc. doesn't make them distinct segments.</p>
+    <br/>
+    <p><strong>Example :</strong></p>
+    <p>College Coaches and High School Coaches are distinct market segments because of the following differences:</p>
     <ul>
-      <li>Ut enim ad minim veniam.</li>
-      <li>Quis nostrud exercitation ullamco.</li>
+      <li>College Coaches have higher budgets and are expected to utilize more tools & resources to increase their chances of success</li>
+      <li>College Coaches are limited in their interaction and training of their student athletes during summer break</li>
+      <li>College Coaches have a greater number of staff assisting them and therefore decision making is fragmented and slower</li>
     </ul>
-    <p><a href="https://example.com" target="_blank" rel="noreferrer">Read more</a></p>
+    <br/>
+    <p>On the other hand, let's say the needs of the end-user athletes are pretty much the same irrespective of their level, then High School and College athletes both could be grouped into a single market segment called <u>Student Athletes</u>.</p>
   `
 } as const;
 
