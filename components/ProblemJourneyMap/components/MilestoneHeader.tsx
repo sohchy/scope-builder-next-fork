@@ -649,13 +649,13 @@ export function MilestoneHeader({
           milestones overflow. */}
       <div className="flex shrink-0 flex-col items-end justify-center border-l border-[#E4E5ED] bg-white px-3 py-2 lg:px-5 lg:py-3 xl:px-8">
         <div className="flex items-center gap-2 whitespace-nowrap text-xs xl:text-sm">
-          <span className="text-gray-500">Payer interviews:</span>
+          <span className="text-gray-500">Min. # of Payer interviews:</span>
           <span className="font-semibold text-[#111827]">
             {payerInterviews}
           </span>
         </div>
         <div className="flex items-center gap-2 whitespace-nowrap text-xs xl:text-sm">
-          <span className="text-gray-400">Current number:</span>
+          <span className="text-gray-400">Current # of Payer interviews:</span>
           <span className="font-medium text-gray-400">{currentNumber}</span>
         </div>
       </div>

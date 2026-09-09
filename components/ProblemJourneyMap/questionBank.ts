@@ -20,50 +20,50 @@ export interface BankQuestion {
 export const BANK_QUESTIONS: BankQuestion[] = [
   {
     id: "bq-1",
-    category: "Market Opportunity",
-    text: "Out of a pool of 100 stakeholders, how many people do you think are experiencing this?",
-    answerType: "plain_text",
-  },
-  {
-    id: "bq-2",
-    category: "Market Opportunity",
-    text: "Out of a pool of 100 stakeholders, on a scale of 1-5, how many would identify they are satisfied with the current solution, a 4 or higher?",
-    answerType: "plain_text",
-  },
-  {
-    id: "bq-3",
-    category: "Market Opportunity",
-    text: "Out of a pool of 100 stakeholders, on a scale of 1-5, how many would identify solving this problem as important, a 4 or higher?",
-    answerType: "plain_text",
-  },
-  {
-    id: "bq-4",
     category: "Market Status Quo",
     text: "How are they solving it today?",
     answerType: "plain_text",
   },
   {
-    id: "bq-5",
+    id: "bq-2",
     category: "Market Status Quo",
     text: "How do they acquire the current solution? How much do they pay for it?",
     answerType: "plain_text",
   },
   {
-    id: "bq-7",
+    id: "bq-3",
     category: "Market Status Quo",
     text: "Why did they pick this current solution? What other solutions did they consider?",
     answerType: "plain_text",
   },
   {
-    id: "bq-8",
+    id: "bq-4",
     category: "Market Status Quo",
     text: "How often do they experience this problem / pain / lack-of-gain?",
     answerType: "plain_text",
   },
   {
-    id: "bq-9",
+    id: "bq-5",
     category: "Market Status Quo",
     text: "What happens if this problem / pain / lack-of-gain is left unsolved?",
+    answerType: "plain_text",
+  },
+  {
+    id: "bq-6",
+    category: "Market Opportunity",
+    text: "Out of a pool of 100 stakeholders, how many people do you think are experiencing this?",
+    answerType: "plain_text",
+  },
+  {
+    id: "bq-7",
+    category: "Market Opportunity",
+    text: "Out of a pool of 100 stakeholders, on a scale of 1-5, how many would identify they are satisfied with the current solution, a 4 or higher?",
+    answerType: "plain_text",
+  },
+  {
+    id: "bq-8",
+    category: "Market Opportunity",
+    text: "Out of a pool of 100 stakeholders, on a scale of 1-5, how many would identify solving this problem as important, a 4 or higher?",
     answerType: "plain_text",
   },
 ];
