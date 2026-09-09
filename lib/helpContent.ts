@@ -18,8 +18,8 @@ export const HELP_CONTENT = {
     <p>A good litmus test for a well written original need / Job to be Done is: if you remove technology, problem, need, solution, benefit, emotions, etc. from the sentence, and the sentence would still make sense to the stakeholder 50 or 100 years ago and across geographies, then you have a good Job to be Done statement.</p>
     <p><strong>Poorly written:</strong> Football coaches need an easier way to track and a mobile friendly way of teaching tackling. It includes needs, solutions and technologies.</p>
     <p><strong>Better:</strong> Football coaches want their players to tackle safely.</p>
-    <p><strong>Watch Out #1: </strong>A Job to Done should be written from a stakeholder's perspective. It shouldn't be written as a generic event where multiple stakeholders are involved. Remember, the intended Stakeholder is <strong>wanting/needing to get a job done.</strong></p>
-    <p><strong>Watch Out #2: </strong>Sometimes a certain event may happen which then may cause the stakeholder to want/need to get a job done. This original event is NOT the Job to be Done. It's just context.</p>
+    <p><strong>Important #1: </strong>A Job to Done should be written from a <strong>stakeholder's perspective</strong. It <strong>shouldn't be written as a generic event</strong> where multiple stakeholders are involved. Remember, the intended Stakeholder is wanting/needing to get a job done.</p>
+    <p><strong>Important #2: </strong>Sometimes a certain event may happen which then may cause the stakeholder to want/need to get a job done. This original event is NOT the Job to be Done. It's just <strong>context/</strong>.</p>
   `,
   "node.action": `
     <p><strong>Action / Activity</strong></p>
@@ -30,7 +30,7 @@ export const HELP_CONTENT = {
       <li>Coach creates a one page visual to remember easily.</li>
       <li>Coach assigns practice tackle reps.</li>
     </ul>
-    <p><strong>Watch Out #1: </strong>Similar to the Job to be Done, an Action / Activity is something that stakeholder actively does as part of a series of steps to get the job done. It's <strong>not an event</strong>. If there's a related event that happens around this step, it maybe written as [Context].</p>
+    <p><strong>Important #1: </strong>Similar to the Job to be Done, an Action / Activity is something that stakeholder actively does as part of a series of steps to get the job done. It's <strong>not an event</strong>. If there's a related event that happens around this step, it maybe written as [Context].</p>
     <p><strong>For Example:</strong></p>
     <p><strong>[Context]: </strong> Athletes are not able to meet with their Coaches during summer break. So Coaches must share any recommendations before semester ends.</p>
     <p><strong>Action: </strong> Coach creates a one page visual for practice drills.</p>
