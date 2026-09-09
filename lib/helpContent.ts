@@ -13,7 +13,7 @@
  */
 export const HELP_CONTENT = {
   "node.trigger": `
-    <p><strong>Jobs to be Done</strong></p>
+    <p><strong>Jobs to be Done Explanation</strong></p>
     <p>This describes the original need of the stakeholder. You may describe who your stakeholder is in the text area, or you may wait till Session #1 and select it from a list of possibilities.</p>
     <p>A good litmus test for a well written original need / Job to be Done is: if you remove technology, problem, need, solution, benefit, emotions, etc. from the sentence, and the sentence would still make sense to the stakeholder 50 or 100 years ago and across geographies, then you have a good Job to be Done statement.</p>
     <p><strong>Poorly written:</strong> Football coaches need an easier way to track and a mobile friendly way of teaching tackling. It includes needs, solutions and technologies.</p>
@@ -22,7 +22,7 @@ export const HELP_CONTENT = {
     <p><strong>Important #2: </strong>Sometimes a certain event may happen which then may cause the stakeholder to want/need to get a job done. This original event is NOT the Job to be Done. It's just <strong>context/</strong>.</p>
   `,
   "node.action": `
-    <p><strong>Action / Activity</strong></p>
+    <p><strong>Action / Activity Explanation</strong></p>
     <p>This describes what the stakeholder does today to get the Job to be Done. We are still not describing any problems or needs or gains yet. We are simply putting down what it is they do today. You may include the solutions / technologies they use, or keep it agnostic.</p>
     <p><strong>Examples:</strong></p>
     <ul>
