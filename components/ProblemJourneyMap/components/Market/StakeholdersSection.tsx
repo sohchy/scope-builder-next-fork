@@ -19,10 +19,9 @@ export function StakeholdersSection({ rows, readOnly = false }: StakeholdersSect
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-[#1F2430]">Stakeholders</h2>
+      <h2 className="text-lg font-semibold text-[#1F2430]">Stakeholder Types</h2>
       <p className="mb-4 mt-1 text-base text-[#4E5566]">
-        In the realm of decision-making, the individual wielding influence
-        determines the path…
+        Choose from the Icorps suggested list of 6 Stakeholder Types.
       </p>
 
       <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
