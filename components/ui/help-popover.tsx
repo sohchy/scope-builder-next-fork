@@ -68,7 +68,7 @@ export function HelpPopover({
       <PopoverContent
         side={side}
         align={align}
-        className="w-[min(24rem,calc(100vw-2rem))] text-sm leading-relaxed text-gray-700 [&_a]:text-[#6A35FF] [&_a]:underline [&_a]:underline-offset-2 [&_strong]:font-semibold [&_strong]:text-gray-900 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mt-2 [&_ul]:mt-2 [&_p+p]:mt-2"
+        className="w-[min(36rem,calc(100vw-2rem))] text-sm leading-relaxed text-gray-700 [&_a]:text-[#6A35FF] [&_a]:underline [&_a]:underline-offset-2 [&_strong]:font-semibold [&_strong]:text-gray-900 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mt-2 [&_ul]:mt-2 [&_p+p]:mt-2"
         dangerouslySetInnerHTML={{ __html: help }}
       />
     </Popover>

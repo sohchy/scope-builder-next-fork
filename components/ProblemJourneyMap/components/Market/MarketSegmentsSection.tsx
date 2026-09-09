@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { HelpPopover } from "@/components/ui/help-popover";
 import {
   createMarketSegment,
   deleteMarketSegment,
@@ -161,9 +162,12 @@ export function MarketSegmentsSection({
 
   return (
     <section>
-      <h2 className="mb-4 text-lg font-semibold text-[#1F2430]">
-        Market Segments
-      </h2>
+      <div className="mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-[#1F2430]">
+          Market Segments
+        </h2>
+        <HelpPopover helpKey="market.segments" label="Market Segments" />
+      </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Editable spreadsheet-style table — full grid borders on every cell. */}

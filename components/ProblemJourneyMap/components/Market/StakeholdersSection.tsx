@@ -1,6 +1,7 @@
 "use client";
 
 import type { StakeholderRow } from "@/services/market";
+import { HelpPopover } from "@/components/ui/help-popover";
 import { STAKEHOLDER_DEFINITIONS } from "./constants";
 import { StakeholderCard } from "./StakeholderCard";
 
@@ -19,7 +20,10 @@ export function StakeholdersSection({ rows, readOnly = false }: StakeholdersSect
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-[#1F2430]">Stakeholder Types</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-[#1F2430]">Stakeholder Types</h2>
+        <HelpPopover helpKey="market.stakeholders" label="Stakeholder Types" />
+      </div>
       <p className="mb-4 mt-1 text-base text-[#4E5566]">
         Choose from the Icorps suggested list of 6 Stakeholder Types.
       </p>
