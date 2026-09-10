@@ -100,13 +100,10 @@ function SubStepCheck({ done }: { done: boolean }) {
       <div
         className={
           done
-            ? "border-progress-done flex size-4 items-center justify-center rounded-full border bg-[#6ec48f]"
+            ? "border-progress-done size-4 rounded-full border bg-[#6ec48f]"
             : "border-check-empty size-4 rounded-full border"
         }
-      >
-        {/* Thickened, since at 10px a default-weight tick reads as a smudge. */}
-        {done && <CheckIcon className="size-2.5 stroke-3 text-white" />}
-      </div>
+      />
     </span>
   );
 }
