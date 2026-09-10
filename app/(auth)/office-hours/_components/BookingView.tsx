@@ -5,12 +5,18 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { parseISO, isSameDay } from "date-fns";
 import { toast } from "sonner";
 import {
+  BookingOutcome,
   OfficeHourSlot,
   OfficeHourSubSlot,
   OfficeHourBooking,
 } from "@/lib/generated/prisma";
 import { generateWeeks, formatTimeDisplay } from "@/lib/officeHoursUtils";
-import { bookSlot, cancelBooking, updateBooking } from "@/services/officeHours";
+import {
+  bookSlot,
+  cancelBooking,
+  setBookingOutcome,
+  updateBooking,
+} from "@/services/officeHours";
 import BookingLinkPopover from "./BookingLinkPopover";
 import SlotDetailsPopover from "./SlotDetailsPopover";
 import { MultiSelect } from "@/components/ui/multiselect";
@@ -32,7 +38,13 @@ type TimeBlock = {
     isOwnSlot: boolean;
     booking: Pick<
       OfficeHourBooking,
-      "id" | "user_id" | "org_id" | "meeting_link" | "user_name" | "note"
+      | "id"
+      | "user_id"
+      | "org_id"
+      | "meeting_link"
+      | "user_name"
+      | "note"
+      | "outcome"
     > | null;
   }[];
 };
@@ -180,6 +192,7 @@ export default function BookingView({
                 meeting_link: sub.booking.meeting_link,
                 user_name: sub.booking.user_name,
                 note: sub.booking.note,
+                outcome: sub.booking.outcome,
               }
             : null,
         });
@@ -212,6 +225,7 @@ export default function BookingView({
                   user_email: null,
                   meeting_link: meetingLink,
                   note: note || null,
+                  outcome: null,
                   ics_sequence: 0,
                   created_at: new Date(),
                   updated_at: new Date(),
@@ -289,6 +303,37 @@ export default function BookingView({
         })),
       );
       throw err;
+    }
+  }
+
+  /** Instructor-only: records how the session went, or clears the record. */
+  async function handleSetOutcome(
+    subSlotId: string,
+    outcome: BookingOutcome | null,
+  ) {
+    const originalOutcome =
+      slots.flatMap((s) => s.subSlots).find((sub) => sub.id === subSlotId)
+        ?.booking?.outcome ?? null;
+
+    const applyOutcome = (value: BookingOutcome | null) =>
+      setSlots((prev) =>
+        prev.map((slot) => ({
+          ...slot,
+          subSlots: slot.subSlots.map((sub) =>
+            sub.id === subSlotId && sub.booking
+              ? { ...sub, booking: { ...sub.booking, outcome: value } }
+              : sub,
+          ),
+        })),
+      );
+
+    applyOutcome(outcome);
+
+    try {
+      await setBookingOutcome(subSlotId, outcome);
+    } catch {
+      applyOutcome(originalOutcome);
+      toast.error("Could not save the session outcome.");
     }
   }
 
@@ -445,8 +490,20 @@ export default function BookingView({
                                                 meetingLink:
                                                   entry.booking.meeting_link,
                                                 note: entry.booking.note,
+                                                outcome: entry.booking.outcome,
                                               }
                                             : null
+                                        }
+                                        // Attendance is the slot owner's own
+                                        // bookkeeping; peers only read it.
+                                        onSetOutcome={
+                                          entry.isOwnSlot
+                                            ? (outcome) =>
+                                                handleSetOutcome(
+                                                  entry.subSlotId,
+                                                  outcome,
+                                                )
+                                            : undefined
                                         }
                                       />
                                     );

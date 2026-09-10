@@ -8,7 +8,11 @@ import { revalidatePath } from "next/cache";
 import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 import { split30MinIntervals } from "@/lib/officeHoursUtils";
 import { bookingLinkFormSchema } from "@/schemas/officeHours";
-import { OfficeHourBooking, Prisma } from "@/lib/generated/prisma";
+import {
+  BookingOutcome,
+  OfficeHourBooking,
+  Prisma,
+} from "@/lib/generated/prisma";
 import { getStartupContext } from "@/lib/startupRecipients";
 import {
   getBookingEmailSnapshot,
@@ -323,6 +327,31 @@ export async function getBookingStartupNames(): Promise<
   return names;
 }
 
+/**
+ * Attended office-hour sessions per startup, for the instructor-facing leaderboard.
+ * Keyed org id → count. Only bookings an instructor actually marked `attended` are
+ * counted, and like `getBookingStartupNames` this spans every cohort — the caller
+ * filters the orgs it renders. Orgs with none are absent; callers fall back to 0.
+ */
+export async function getAllAttendedCounts(): Promise<Record<string, number>> {
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+
+  const rows = await prisma.officeHourBooking.groupBy({
+    by: ["org_id"],
+    where: { outcome: BookingOutcome.attended, org_id: { not: null } },
+    _count: { _all: true },
+  });
+
+  const byOrg: Record<string, number> = {};
+  for (const row of rows) {
+    if (!row.org_id) continue;
+    byOrg[row.org_id] = row._count._all;
+  }
+
+  return byOrg;
+}
+
 export type BookSlotResult =
   | { status: "booked"; booking: OfficeHourBooking }
   | { status: "already_booked"; booking: OfficeHourBooking | null };
@@ -428,4 +457,32 @@ export async function cancelBooking(subSlotId: string) {
   if (snapshot) {
     after(() => sendBookingCancellation(snapshot));
   }
+}
+
+/**
+ * Records how a session went, or clears the record when `outcome` is null. Only
+ * the instructor who owns the slot may mark it: the schedule shows everyone's
+ * bookings, but attendance is the slot owner's own bookkeeping. Deliberately
+ * silent — no email, no calendar bump, nothing the booker sees.
+ */
+export async function setBookingOutcome(
+  subSlotId: string,
+  outcome: BookingOutcome | null,
+) {
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+
+  const booking = await prisma.officeHourBooking.findFirst({
+    where: { sub_slot_id: subSlotId, subSlot: { slot: { user_id: userId } } },
+    select: { id: true },
+  });
+  if (!booking) throw new Error("Booking not found on one of your slots.");
+
+  const updated = await prisma.officeHourBooking.update({
+    where: { id: booking.id },
+    data: { outcome },
+  });
+
+  revalidatePath("/office-hours");
+  return updated;
 }

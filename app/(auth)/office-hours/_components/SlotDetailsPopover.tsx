@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import {
   Building2,
   CalendarCheck,
@@ -12,7 +13,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { getInitials } from "@/lib/officeHoursUtils";
+import type { BookingOutcome } from "@/lib/generated/prisma";
+
+/** The outcomes an instructor can record, in the order they're offered. */
+const OUTCOME_OPTIONS: { value: BookingOutcome; label: string }[] = [
+  { value: "attended", label: "Attended" },
+  { value: "rescheduled", label: "Rescheduled" },
+  { value: "missed", label: "Missed" },
+];
 
 interface SlotDetailsPopoverProps {
   mentorName: string;
@@ -25,7 +35,14 @@ interface SlotDetailsPopoverProps {
     startupName: string | null;
     meetingLink: string | null;
     note: string | null;
+    /** How the session went, as marked by the slot's owner. */
+    outcome: BookingOutcome | null;
   } | null;
+  /**
+   * Records the outcome, or clears it when passed null. Omitted for slots the
+   * signed-in instructor doesn't own — they see the mark, they don't set it.
+   */
+  onSetOutcome?: (outcome: BookingOutcome | null) => Promise<void>;
 }
 
 /**
@@ -39,7 +56,16 @@ export default function SlotDetailsPopover({
   isOwnSlot,
   timeLabel,
   booking,
+  onSetOutcome,
 }: SlotDetailsPopoverProps) {
+  // Several popovers can be mounted at once, so the radio ids have to be
+  // per-instance or the labels point at the wrong card's inputs.
+  const fieldId = useId();
+  const canMarkOutcome = !!booking && !!onSetOutcome;
+  const outcomeLabel = booking?.outcome
+    ? OUTCOME_OPTIONS.find((o) => o.value === booking.outcome)!.label
+    : null;
+
   const avatarClassName = `w-9 h-9 rounded-full border-2 text-xs font-bold flex items-center justify-center transition-colors cursor-pointer ${
     booking
       ? isOwnSlot
@@ -111,6 +137,58 @@ export default function SlotDetailsPopover({
             <StickyNote className="mt-px size-3.5 shrink-0 text-gray-400" />
             <p className="whitespace-pre-wrap break-words">{booking.note}</p>
           </div>
+        )}
+
+        {canMarkOutcome ? (
+          <div className="border-t border-gray-100 pt-3">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-xs font-semibold text-gray-700">
+                Session outcome
+              </p>
+              {/* Radix radios never deselect on their own, so undoing a
+                  mis-click needs its own affordance. */}
+              {booking!.outcome && (
+                <button
+                  type="button"
+                  onClick={() => onSetOutcome!(null)}
+                  className="text-xs text-gray-400 underline hover:text-gray-600"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <RadioGroup
+              value={booking!.outcome ?? ""}
+              onValueChange={(value) => onSetOutcome!(value as BookingOutcome)}
+              className="gap-2"
+            >
+              {OUTCOME_OPTIONS.map((option) => (
+                <div key={option.value} className="flex items-center gap-2">
+                  <RadioGroupItem
+                    id={`${fieldId}-${option.value}`}
+                    value={option.value}
+                  />
+                  <label
+                    htmlFor={`${fieldId}-${option.value}`}
+                    className="cursor-pointer text-xs text-gray-600"
+                  >
+                    {option.label}
+                  </label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+        ) : (
+          outcomeLabel && (
+            <div className="border-t border-gray-100 pt-3">
+              <p className="text-xs text-gray-500">
+                Session outcome:{" "}
+                <span className="font-semibold text-gray-700">
+                  {outcomeLabel}
+                </span>
+              </p>
+            </div>
+          )
         )}
       </PopoverContent>
     </Popover>

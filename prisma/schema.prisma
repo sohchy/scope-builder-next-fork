@@ -557,6 +557,13 @@ model OfficeHourSubSlot {
   @@map("office_hour_sub_slots")
 }
 
+// How the session went, as recorded by the instructor who owns the slot.
+enum BookingOutcome {
+  attended
+  rescheduled
+  missed
+}
+
 model OfficeHourBooking {
   id           String            @id @default(uuid())
   sub_slot_id  String            @unique
@@ -566,6 +573,7 @@ model OfficeHourBooking {
   user_email   String?
   meeting_link String?
   note         String? // free-text context the booker leaves for the instructor
+  outcome      BookingOutcome? // instructor's own record of the session; NULL = not marked yet
   ics_sequence Int               @default(0) // iCalendar SEQUENCE, bumped so updates replace the event
   created_at   DateTime          @default(now())
   updated_at   DateTime          @updatedAt

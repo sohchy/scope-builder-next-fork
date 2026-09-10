@@ -39,6 +39,8 @@ export interface MilestoneProgressRow {
   orgId: string;
   orgName: string;
   interviews: InterviewCounts;
+  /** Office-hour bookings an instructor marked as attended. */
+  officeHoursAttended: number;
   /** Sub-step key ("1.1", "2.3"…) → reviewed. Absent key means not reviewed. */
   subSteps: Record<string, boolean>;
   /** All 6 slots, indexed by milestone number (milestone 0 is first). */
@@ -52,6 +54,8 @@ const MILESTONE_WIDTH = 64;
 const NAME_WIDTH = 220;
 /** Wide enough for "5 | 3 | 4 (15)" plus the bar beside it. */
 const INTERVIEWS_WIDTH = 230;
+/** Just a count, so no wider than a milestone sign-off. */
+const OFFICE_HOURS_WIDTH = 56;
 
 /** Interviews each startup is expected to land by the end of the program. The bar
  * is always drawn against this, so a team past it simply fills the track. */
@@ -188,6 +192,22 @@ const columns: ColumnDef<MilestoneProgressRow>[] = [
     size: INTERVIEWS_WIDTH,
     minSize: INTERVIEWS_WIDTH,
     cell: ({ row }) => <InterviewProgress {...row.original.interviews} />,
+  },
+  // Sits between the interviews bar and the milestone groups, so both cross-org
+  // tallies read together before the per-milestone grid starts.
+  {
+    id: "office-hours",
+    header: () => <span title="Office hours attended">OH</span>,
+    size: OFFICE_HOURS_WIDTH,
+    minSize: OFFICE_HOURS_WIDTH,
+    cell: ({ row }) => (
+      <span
+        className="flex justify-center font-semibold"
+        title={`${row.original.officeHoursAttended} office hours attended`}
+      >
+        {row.original.officeHoursAttended}
+      </span>
+    ),
   },
   // One group per milestone: its sub-steps, then the milestone sign-off itself.
   // The grouped header is what keeps 31 columns readable — `getHeaderGroups()`

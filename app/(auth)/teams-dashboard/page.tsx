@@ -5,6 +5,7 @@ import MilestoneProgressTable, {
 } from "./_components/MilestoneProgressTable";
 import { getAllSubStepProgress } from "@/services/getStarted";
 import { getAllInterviewCounts } from "@/services/participants";
+import { getAllAttendedCounts } from "@/services/officeHours";
 import { getAllMilestoneAccess } from "@/services/milestoneAccess";
 import { defaultMilestoneAccess } from "@/lib/milestones";
 import { isInCurrentCohort } from "@/lib/cohort";
@@ -25,13 +26,19 @@ export default async function TeamsDashboardPage() {
 
   // Org identity comes from Clerk, per-startup progress from Prisma; the two are
   // joined by `org_id` here on the server.
-  const [organizations, subStepProgress, milestoneAccess, interviewCounts] =
-    await Promise.all([
-      client.organizations.getOrganizationList({ limit: 200 }),
-      getAllSubStepProgress(),
-      getAllMilestoneAccess(),
-      getAllInterviewCounts(),
-    ]);
+  const [
+    organizations,
+    subStepProgress,
+    milestoneAccess,
+    interviewCounts,
+    attendedCounts,
+  ] = await Promise.all([
+    client.organizations.getOrganizationList({ limit: 200 }),
+    getAllSubStepProgress(),
+    getAllMilestoneAccess(),
+    getAllInterviewCounts(),
+    getAllAttendedCounts(),
+  ]);
 
   const rows: MilestoneProgressRow[] = organizations.data
     .filter((org) => isInCurrentCohort(org.publicMetadata))
@@ -43,6 +50,7 @@ export default async function TeamsDashboardPage() {
         conducted: 0,
         documented: 0,
       },
+      officeHoursAttended: attendedCounts[org.id] ?? 0,
       subSteps: subStepProgress[org.id] ?? {},
       milestones: milestoneAccess[org.id] ?? defaultMilestoneAccess(),
     }))
