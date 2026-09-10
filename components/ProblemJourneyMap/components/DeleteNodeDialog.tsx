@@ -16,7 +16,7 @@ import type { Problem } from "./ActionNodeSheet";
 
 const TYPE_LABELS: Record<JourneyNodeType, string> = {
   trigger: "Trigger / Motivation / Jobs to be Done",
-  action: "Action",
+  action: "Action / Activity",
   split_route: "Scenarios",
   // Never reached — a Startup Idea card has no delete affordance — but the map
   // is exhaustive over the node types.

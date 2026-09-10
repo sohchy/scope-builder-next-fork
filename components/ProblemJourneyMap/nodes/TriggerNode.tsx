@@ -188,7 +188,7 @@ function TriggerNodeInner({ id, data }: NodeProps) {
 
       <Textarea
         value={content}
-        placeholder="Type your trigger..."
+        placeholder="Type your Job to be Done ..."
         readOnly={readOnly}
         className="nodrag nopan w-full text-base md:text-base text-gray-800 bg-transparent border-[#B9BDC9] resize-none placeholder-gray-500 focus:outline-none leading-snug"
         onChange={handleContentChange}
