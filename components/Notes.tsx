@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import dynamic from "next/dynamic";
 import { useAuth } from "@clerk/nextjs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ContentState,
   EditorState,
@@ -67,6 +67,17 @@ const RteEditor = dynamic(
   () => import("react-draft-wysiwyg").then((m) => m.Editor),
   { ssr: false },
 );
+
+// Notes are stored as raw Draft content; older ones may still be plain text.
+function editorStateFromContent(content: string): EditorState {
+  if (!content) return EditorState.createEmpty();
+
+  try {
+    return EditorState.createWithContent(convertFromRaw(JSON.parse(content)));
+  } catch {
+    return EditorState.createWithContent(ContentState.createFromText(content));
+  }
+}
 
 export default function Notes() {
   const { userId, orgId, orgRole } = useAuth();
@@ -529,33 +540,32 @@ export function ChatNote({
   onDeleteNote,
   onUpdateNote,
 }: ChatNoteProps) {
-  const initialEditorState = useMemo(() => {
-    try {
-      if (content) {
-        const raw = JSON.parse(content);
-        return EditorState.createWithContent(convertFromRaw(raw));
-      }
-    } catch {
-      if (content) {
-        const contentState = ContentState.createFromText(content);
-        return EditorState.createWithContent(contentState);
-      }
-    }
-    return EditorState.createEmpty();
-  }, []);
-
   const [open, setOpen] = useState(false);
   const [text, setText] = useState(content);
   const [shareWithStartup, setShareWithStartup] = useState(isPublic);
-  const [editorState, setEditorState] =
-    useState<EditorState>(initialEditorState);
+
+  // The bubble and the edit sheet each need their own EditorState. Sharing one
+  // between two mounted Draft editors makes typing impossible: every leaf whose
+  // block is in a *focused* selection pushes the browser selection into its own
+  // DOM on render, so each keystroke handed the caret to the bubble and the
+  // sheet's input went blurry.
+  const [bubbleEditorState, setBubbleEditorState] = useState<EditorState>(() =>
+    editorStateFromContent(content),
+  );
+  const [draftEditorState, setDraftEditorState] = useState<EditorState>(() =>
+    editorStateFromContent(content),
+  );
+
+  useEffect(() => {
+    setBubbleEditorState(editorStateFromContent(content));
+  }, [content]);
 
   const hasAttachments = attachments && attachments.length > 0;
   const files = attachments?.filter((a) => a.type === "file") ?? [];
   const images = attachments?.filter((a) => a.type === "image") ?? [];
 
   const onUpdate = async () => {
-    const contentState = editorState.getCurrentContent();
+    const contentState = draftEditorState.getCurrentContent();
     const hasText = contentState.hasText();
 
     // Attachment-only notes stay editable (e.g. to toggle sharing) with no text.
@@ -584,10 +594,13 @@ export function ChatNote({
         <div className="absolute top-0 size-7">
           <Sheet
             open={open}
-            onOpenChange={() => {
-              setOpen(!open);
+            onOpenChange={(nextOpen) => {
+              setOpen(nextOpen);
               setText(content);
               setShareWithStartup(isPublic);
+              // Reopening starts from the saved note, so a cancelled edit is
+              // not still sitting in the sheet next time.
+              if (nextOpen) setDraftEditorState(editorStateFromContent(content));
             }}
           >
             <SheetTrigger className="invisible group-hover:visible" asChild>
@@ -601,8 +614,8 @@ export function ChatNote({
               </SheetHeader>
               <div className="flex flex-col gap-3 p-3">
                 <RteEditor
-                  editorState={editorState}
-                  onEditorStateChange={setEditorState}
+                  editorState={draftEditorState}
+                  onEditorStateChange={setDraftEditorState}
                   toolbar={{
                     options: ["inline"],
                     inline: {
@@ -696,12 +709,13 @@ export function ChatNote({
               >
                 {/* {content} */}
                 <RteEditor
-                  editorState={editorState}
-                  onEditorStateChange={setEditorState}
+                  editorState={bubbleEditorState}
+                  onEditorStateChange={setBubbleEditorState}
                   toolbar={{
                     options: [],
                     //list: { options: ["unordered", "ordered"] },
                   }}
+                  readOnly
                   wrapperClassName="w-full"
                   toolbarHidden
                   editorClassName={`px-2 py-2  text-[14px] 
