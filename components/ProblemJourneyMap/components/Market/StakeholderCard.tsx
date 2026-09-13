@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { ChevronDown, Plus, User, X } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   createStakeholderRow,
@@ -184,29 +184,37 @@ export function StakeholderCard({
           className="flex max-h-[168px] flex-col gap-2 overflow-y-auto"
         >
           {rows.map((row) => (
-            <div key={row.localKey} className="flex items-center gap-1">
+            <div key={row.localKey} className="flex items-start gap-1">
               {selectable && row.id !== null && (
                 <Checkbox
+                  className="mt-2"
                   checked={selectedIds?.has(row.id) ?? false}
                   onCheckedChange={() => onToggleSelect?.(row.id as number)}
                 />
               )}
-              <Input
+              {/* Grows with its content up to 3 lines, then scrolls — long
+                  values stay readable instead of running off the right edge. */}
+              <Textarea
+                rows={1}
                 value={row.value}
                 readOnly={readOnly}
                 autoFocus={!readOnly && row.id === null && row.value === ""}
                 onChange={(e) => setRowValue(row.localKey, e.target.value)}
                 onBlur={() => commitRow(row.localKey)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") e.currentTarget.blur();
+                  // Enter commits the row rather than inserting a newline.
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    e.currentTarget.blur();
+                  }
                 }}
-                className="h-8 border-[#CDD1DC] text-base shadow-none focus-visible:border-[#6A35FF] focus-visible:ring-0"
+                className="min-h-0 resize-none overflow-y-auto border-[#CDD1DC] px-3 py-1 text-base leading-6 shadow-none max-h-[82px] focus-visible:border-[#6A35FF] focus-visible:ring-0 md:text-base"
               />
               {!readOnly && (
                 <button
                   type="button"
                   onClick={() => removeRow(row.localKey)}
-                  className="flex size-6 shrink-0 items-center justify-center rounded text-[#6E7689] hover:text-[#6A35FF]"
+                  className="mt-1 flex size-6 shrink-0 items-center justify-center rounded text-[#6E7689] hover:text-[#6A35FF]"
                   aria-label="Remove row"
                 >
                   <X className="size-4" />
