@@ -6,6 +6,9 @@ import { MilestoneSelectionProvider } from "@/components/ProblemJourneyMap/Miles
 import { SubStepProgressProvider } from "@/components/ProblemJourneyMap/SubStepProgressContext";
 import { Room } from "@/components/Room";
 import { generateProblemJourneyRoom } from "@/services/problemJourney";
+import { generateAdLibValuePropRoom } from "@/services/adLibValueProp";
+import { AdLibValuePropCanvas } from "@/components/ProblemJourneyMap/components/AdLibValueProp/AdLibValuePropCanvas";
+import { adLibRoomId } from "@/lib/adLibValueProp";
 import { getMarketData } from "@/services/market";
 import {
   getAvailableMilestones,
@@ -18,6 +21,7 @@ import { MIN_PAYER_INTERVIEWS } from "@/lib/milestones";
 export default async function ProblemJourneyMapPage() {
   const { orgId } = await auth();
   const roomId = `problem-journey-${orgId}`;
+  const adLibRoom = adLibRoomId(orgId!);
   const [
     ,
     marketData,
@@ -38,6 +42,7 @@ export default async function ProblemJourneyMapPage() {
     getSubStepProgress(),
     getInterviewMilestonesWithProgress(),
     getReviewedMilestones(),
+    generateAdLibValuePropRoom(adLibRoom),
   ]);
 
   return (
@@ -56,6 +61,13 @@ export default async function ProblemJourneyMapPage() {
               <Room roomId={roomId}>
                 <ProblemJourneyCanvas
                   stakeholderRows={marketData.stakeholderRows}
+                  availableMilestones={availableMilestones}
+                />
+              </Room>
+            }
+            adLibCanvas={
+              <Room roomId={adLibRoom}>
+                <AdLibValuePropCanvas
                   availableMilestones={availableMilestones}
                 />
               </Room>

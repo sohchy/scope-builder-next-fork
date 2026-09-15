@@ -101,6 +101,14 @@ export const HYPOTHESIS_SUB_STEP = subStepKey(2, 1);
  */
 export const INTERVIEW_PREP_SUB_STEP = subStepKey(2, 2);
 
+/**
+ * Milestone that opens the Ad-Lib Value Prop tab. Instructor-granted, like
+ * `MARKET_QUESTIONS_MILESTONE`, rather than a sub-step the team ticks. Locked
+ * means the tab still opens, with its canvas greyed and read-only behind the
+ * badge; see `JourneyMapTabs` and `AdLibValuePropCanvas`.
+ */
+export const ADLIB_VALUE_PROP_MILESTONE = 3;
+
 /** Payer interviews a startup has to document — the denominator the MilestoneHeader
  * counts toward. Read here rather than at each call site so the interviews board and
  * the journey map can't show different targets. */

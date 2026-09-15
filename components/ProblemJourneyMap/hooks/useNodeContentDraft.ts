@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'reac
 
 /**
  * Local mirror of a card's `content`, for the textareas on the Trigger and
- * Action nodes.
+ * Action nodes and the blanks on the Ad-Lib Value Prop cards.
  *
  * A card can't drive its textarea straight off `data.content`. React Flow's
  * `StoreUpdater` copies the `nodes` prop into its own store from a *passive*

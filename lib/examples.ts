@@ -11,6 +11,11 @@ export function exampleRoomId(n: number): string {
   return `problem-journey-example-${n}`;
 }
 
+/** Liveblocks room id holding example set N's Ad-Lib Value Prop cards. */
+export function exampleAdLibRoomId(n: number): string {
+  return `adlib-value-prop-example-${n}`;
+}
+
 /** Synthetic org id stamped on example set N's DB rows. */
 export function exampleOrgId(n: number): string {
   return `example-${n}`;
@@ -18,5 +23,8 @@ export function exampleOrgId(n: number): string {
 
 /** True when a Liveblocks room id belongs to an example set (read-only). */
 export function isExampleRoomId(roomId: string): boolean {
-  return roomId.startsWith("problem-journey-example-");
+  return (
+    roomId.startsWith("problem-journey-example-") ||
+    roomId.startsWith("adlib-value-prop-example-")
+  );
 }

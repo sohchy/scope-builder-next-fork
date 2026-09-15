@@ -6,6 +6,7 @@ import { SubStepProgressProvider } from "@/components/ProblemJourneyMap/SubStepP
 import { Room } from "@/components/Room";
 import {
   generateExampleProblemJourneyRoom,
+  generateExampleAdLibValuePropRoom,
   getExampleMarketData,
   getExampleSubStepProgress,
   getExampleInterviewMilestonesWithProgress,
@@ -14,7 +15,8 @@ import {
   getAvailableMilestones,
   getReviewedMilestones,
 } from "@/services/milestoneAccess";
-import { exampleRoomId } from "@/lib/examples";
+import { exampleAdLibRoomId, exampleRoomId } from "@/lib/examples";
+import { AdLibValuePropCanvas } from "@/components/ProblemJourneyMap/components/AdLibValueProp/AdLibValuePropCanvas";
 import { MIN_PAYER_INTERVIEWS } from "@/lib/milestones";
 
 // Read-only showcase mirror of /user-journey-map. Everything is identical to the
@@ -23,6 +25,7 @@ const EXAMPLE_NUMBER = 1;
 
 export default async function ExampleProblemJourneyPage() {
   const roomId = exampleRoomId(EXAMPLE_NUMBER);
+  const adLibRoom = exampleAdLibRoomId(EXAMPLE_NUMBER);
   const [
     ,
     marketData,
@@ -51,6 +54,7 @@ export default async function ExampleProblemJourneyPage() {
     // Sign-off is the viewer's, same as availability above — the green blocks
     // read as "where you are", against the example's locks.
     getReviewedMilestones(),
+    generateExampleAdLibValuePropRoom(adLibRoom),
   ]);
 
   return (
@@ -74,6 +78,14 @@ export default async function ExampleProblemJourneyPage() {
               <Room roomId={roomId}>
                 <ProblemJourneyCanvas
                   stakeholderRows={marketData.stakeholderRows}
+                  availableMilestones={availableMilestones}
+                  readOnly
+                />
+              </Room>
+            }
+            adLibCanvas={
+              <Room roomId={adLibRoom}>
+                <AdLibValuePropCanvas
                   availableMilestones={availableMilestones}
                   readOnly
                 />

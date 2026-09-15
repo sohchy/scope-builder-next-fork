@@ -8,6 +8,7 @@
  * prisma seed). It copies both:
  *   - DB rows  → stamped with example_number = N and a synthetic org_id ("example-N")
  *   - the Liveblocks journey-map room → problem-journey-example-N
+ *   - the Liveblocks Ad-Lib Value Prop room → adlib-value-prop-example-N
  *
  * Node/problem ids in the canvas are preserved, so the copied
  * ProblemInterviewQuestion rows (which address them by id) stay valid.
@@ -15,7 +16,12 @@
 import { Liveblocks } from "@liveblocks/node";
 
 import { PrismaClient, Prisma } from "../lib/generated/prisma";
-import { exampleOrgId, exampleRoomId } from "../lib/examples";
+import {
+  exampleAdLibRoomId,
+  exampleOrgId,
+  exampleRoomId,
+} from "../lib/examples";
+import { adLibRoomId } from "../lib/adLibValueProp";
 
 const prisma = new PrismaClient();
 const liveblocks = new Liveblocks({
@@ -255,6 +261,32 @@ async function copyLiveblocks(sourceOrgId: string, exampleNumber: number) {
   console.log(`Liveblocks: copied ${sourceRoom} → ${targetRoom}.`);
 }
 
+// Same reset-and-copy as the journey room above. An org that never opened the
+// Ad-Lib tab has no room to copy; the example page then shows an empty canvas.
+async function copyAdLibLiveblocks(sourceOrgId: string, exampleNumber: number) {
+  const sourceRoom = adLibRoomId(sourceOrgId);
+  const targetRoom = exampleAdLibRoomId(exampleNumber);
+
+  let doc;
+  try {
+    doc = await liveblocks.getStorageDocument(sourceRoom);
+  } catch {
+    console.log(`Liveblocks: ${sourceRoom} not found, skipped.`);
+    return;
+  }
+
+  try {
+    await liveblocks.deleteRoom(targetRoom);
+  } catch {
+    // Room may not exist yet — fine.
+  }
+
+  await liveblocks.getOrCreateRoom(targetRoom, { defaultAccesses: [] });
+  await liveblocks.initializeStorageDocument(targetRoom, doc as never);
+
+  console.log(`Liveblocks: copied ${sourceRoom} → ${targetRoom}.`);
+}
+
 async function main() {
   const sourceOrgId = process.argv[2];
   const exampleNumber = Number(process.argv[3] ?? 1);
@@ -271,6 +303,7 @@ async function main() {
   console.log(`Copying org ${sourceOrgId} → example #${exampleNumber}…`);
   await copyDatabase(sourceOrgId, exampleNumber);
   await copyLiveblocks(sourceOrgId, exampleNumber);
+  await copyAdLibLiveblocks(sourceOrgId, exampleNumber);
   console.log("Done.");
 }
 

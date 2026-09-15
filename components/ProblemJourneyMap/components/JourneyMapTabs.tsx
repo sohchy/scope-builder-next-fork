@@ -5,6 +5,7 @@ import { ListChecks } from "lucide-react";
 
 import { EmptyTab, PageTabs } from "@/components/PageTabs";
 import {
+  ADLIB_VALUE_PROP_MILESTONE,
   INTERVIEW_PREP_SUB_STEP,
   isSubStepUnlocked,
   MARKET_SEGMENTS_SUB_STEP,
@@ -19,13 +20,19 @@ import { MilestoneStepsDialog } from "./MilestoneStepsDialog";
 
 const STORAGE_KEY = "pjm-active-tab";
 
-type TabValue = "get-started" | "canvas" | "market" | "interview-prep";
+type TabValue =
+  | "get-started"
+  | "canvas"
+  | "market"
+  | "interview-prep"
+  | "adlib-value-prop";
 
 const TABS: { value: TabValue; label: string }[] = [
   { value: "get-started", label: "Instructions" },
   { value: "canvas", label: "Canvas" },
   { value: "market", label: "Market" },
   { value: "interview-prep", label: "Interview Prep." },
+  { value: "adlib-value-prop", label: "Ad-Lib Value Prop" },
 ];
 
 const TAB_VALUES = TABS.map((t) => t.value);
@@ -35,6 +42,11 @@ const DEFAULT_TAB: TabValue = "canvas";
 interface JourneyMapTabsProps {
   /** The live journey-map canvas. Rendered only while the Canvas tab is active. */
   canvas: React.ReactNode;
+  /** The Ad-Lib Value Prop canvas, in its own room. Rendered only while its tab
+   *  is active. It greys itself out while `ADLIB_VALUE_PROP_MILESTONE` is locked
+   *  (pass it the same `availableMilestones`); this component only adds the
+   *  tab's lock icon. */
+  adLibCanvas: React.ReactNode;
   /** Render every tab as a read-only viewer (Examples pages). */
   readOnly?: boolean;
   /** When set, tabs read example set N's data instead of the active org's. */
@@ -56,6 +68,7 @@ interface JourneyMapTabsProps {
 
 export function JourneyMapTabs({
   canvas,
+  adLibCanvas,
   readOnly = false,
   exampleNumber,
   availableMilestones,
@@ -91,9 +104,14 @@ export function JourneyMapTabs({
   // The tab's lock icon means "nothing here is open yet". A tab with one section
   // unlocked loses it, and the still-locked section keeps its own badge — the two
   // halves of Market open at different points in the curriculum.
+  const adLibLocked =
+    unlockedMilestones !== null &&
+    !unlockedMilestones.has(ADLIB_VALUE_PROP_MILESTONE);
+
   const lockedTabs: Partial<Record<TabValue, boolean>> = {
     market: stakeholdersLocked && segmentsLocked,
     "interview-prep": interviewPrepLocked,
+    "adlib-value-prop": adLibLocked,
   };
 
   const tabs = TABS.map((tab) => ({ ...tab, locked: lockedTabs[tab.value] }));
@@ -161,6 +179,8 @@ export function JourneyMapTabs({
               exampleNumber={exampleNumber}
               locked={interviewPrepLocked}
             />
+          ) : value === "adlib-value-prop" ? (
+            adLibCanvas
           ) : (
             <EmptyTab />
           )}

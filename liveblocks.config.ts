@@ -55,6 +55,29 @@ export interface JourneyEdgeStorage {
   label?: string;
 }
 
+/** The blanks of one Ad-Lib Value Proposition card, in the order the sentence
+ * reads them. */
+export type AdLibField =
+  | "productsAndServices"
+  | "customerSegment"
+  | "jobsToBeDone"
+  | "painVerb"
+  | "pain"
+  | "gainVerb"
+  | "gain"
+  | "competingValueProp";
+
+// A type alias rather than an interface: LiveObject needs its shape to be
+// assignable to LsonObject, which an interface (no implicit index signature) isn't.
+export type AdLibCardStorage = {
+  [field in AdLibField]: string;
+} & {
+  id: string;
+  /** "Version N". Stored rather than derived from list order so it never shifts. */
+  version: number;
+  position: { x: number; y: number };
+};
+
 // https://liveblocks.io/docs/api-reference/liveblocks-react#Typing-your-data
 declare global {
   interface Liveblocks {
@@ -73,6 +96,12 @@ declare global {
       connections: LiveList<LiveObject<any>>;
       journeyNodes: LiveList<LiveObject<any>>;
       journeyEdges: LiveList<LiveObject<any>>;
+      // Its own room (`adlib-value-prop-<orgId>`), not the journey room.
+      adLibCards: LiveList<LiveObject<AdLibCardStorage>>;
+      /** Highest version ever handed out in the room. Cards are hard-deleted, so
+       * the list alone can't stop a deleted number coming back. Absent in rooms
+       * created before deletes existed — readers fall back to the list. */
+      adLibLastVersion?: number;
     };
 
     // Custom user info set when authenticating with a secret key

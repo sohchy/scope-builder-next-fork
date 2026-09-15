@@ -56,6 +56,26 @@ export async function generateExampleProblemJourneyRoom(roomId: string) {
   }
 }
 
+// Mirror of `generateAdLibValuePropRoom` (services/adLibValueProp.ts) without the
+// org guard — and without seeding Version 1: an example shows only what
+// scripts/copyExample.ts authored, so an uncopied room stays empty.
+export async function generateExampleAdLibValuePropRoom(roomId: string) {
+  await requireUser();
+
+  await liveblocks.getOrCreateRoom(roomId, { defaultAccesses: [] });
+
+  const roomStorage: any = await liveblocks.getStorageDocument(roomId);
+
+  if (Object.keys(roomStorage.data).length === 0) {
+    await liveblocks.initializeStorageDocument(roomId, {
+      liveblocksType: "LiveObject",
+      data: {
+        adLibCards: { liveblocksType: "LiveList", data: [] },
+      },
+    });
+  }
+}
+
 export async function getExampleJobTitles(
   exampleNumber: number,
 ): Promise<string[]> {
