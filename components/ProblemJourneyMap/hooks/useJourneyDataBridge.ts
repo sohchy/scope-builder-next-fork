@@ -98,10 +98,19 @@ export function useJourneyDataBridge() {
   // Logically deleted nodes stay in storage; everything downstream reads these
   // filtered views instead. An edge is dropped when either endpoint is gone,
   // which is why a delete never has to touch the edge list itself.
-  const visibleNodes = useMemo(
-    () => (lbNodes ?? []).filter((n) => !n.deletedAt),
-    [lbNodes]
-  );
+  //
+  // Only the first node per id is kept. A racing server seed can leave two
+  // Startup Idea cards sharing one id: edits land on the first (every mutation
+  // looks nodes up with `find`), but React Flow's node lookup keeps the last, so
+  // a reload showed the untouched copy until some other card's edit re-synced it.
+  const visibleNodes = useMemo(() => {
+    const seen = new Set<string>();
+    return (lbNodes ?? []).filter((n) => {
+      if (n.deletedAt || seen.has(n.id)) return false;
+      seen.add(n.id);
+      return true;
+    });
+  }, [lbNodes]);
 
   const visibleEdges = useMemo(() => {
     const live = new Set(visibleNodes.map((n) => n.id));

@@ -231,13 +231,13 @@ function Blank({
         onKeyDown={handleKeyDown}
         aria-label={caption}
         className={cn(
-          "nodrag field-sizing-content w-full flex-1 resize-none overflow-hidden border-0 border-b-2 bg-transparent px-0 py-1.5 text-base leading-normal text-[#111827] outline-none transition-colors",
+          "nodrag field-sizing-content w-full flex-1 resize-none overflow-hidden border-0 border-b-2 bg-transparent px-0 py-1.5 text-[28px] leading-snug text-[#111827] outline-none transition-colors",
           muted ? "border-[#9CA3AF]" : "border-[#111827]",
           !readOnly && "focus:border-[#6A35FF]",
         )}
       />
-      <span className="mt-2 flex items-center gap-1.5 text-[12px] text-[#4E5566]">
-        {Icon && <Icon className="shrink-0" />}
+      <span className="mt-2 flex items-center gap-2 text-[22px] leading-snug text-[#4E5566]">
+        {Icon && <Icon className="h-[22px] w-[22px] shrink-0" />}
         {caption}
       </span>
     </label>
