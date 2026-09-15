@@ -291,7 +291,7 @@ export default function Notes() {
           <SheetTitle>Notes</SheetTitle>
         </SheetHeader>
         <div className="flex flex-col justify-between h-full">
-          <div className="flex flex-1 w-full overflow-y-scroll">
+          <div className="flex flex-1 min-h-0 w-full overflow-y-scroll">
             {isLoading ? (
               <EllipsisIcon
                 size={40}
@@ -375,7 +375,7 @@ export default function Notes() {
                   ))}
                 </div>
               )}
-              <div className="flex flex-col gap-3 p-3">
+              <div className="flex flex-col gap-3 p-3 shrink-0">
                 <div className="flex flex-row items-center gap-2">
                   {/* <Textarea
                     value={text}
@@ -402,7 +402,10 @@ export default function Notes() {
                       toolbarClassName={`border-b px-2 text-[14px]
                   "bg-white"
 `}
-                      editorClassName={`px-2 py-2 min-h-[150px] text-[14px] 
+                      // The typing area scrolls past ~200px instead of growing:
+                      // an unbounded editor pushes the Add Note button below the
+                      // sheet, where there is nothing to scroll it back into view.
+                      editorClassName={`px-2 py-2 min-h-[150px] max-h-[200px] overflow-y-auto text-[14px]
                         "bg-[#FFE0E0] rounded" 
                        placeholder:text-gray-500 `}
                     />
@@ -627,7 +630,9 @@ export function ChatNote({
                   toolbarClassName={`border-b px-2 text-[14px]
                   "bg-white"
 `}
-                  editorClassName={`px-2 py-2 min-h-[150px] text-[14px] 
+                  // Same cap as the composer, so editing a long note keeps the
+                  // Update/Delete buttons on screen.
+                  editorClassName={`px-2 py-2 min-h-[150px] max-h-[200px] overflow-y-auto text-[14px]
                         "bg-[#FFE0E0] rounded" 
                        placeholder:text-gray-500 `}
                 />

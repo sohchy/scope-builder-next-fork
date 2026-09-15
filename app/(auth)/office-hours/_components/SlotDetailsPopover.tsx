@@ -66,14 +66,20 @@ export default function SlotDetailsPopover({
     ? OUTCOME_OPTIONS.find((o) => o.value === booking.outcome)!.label
     : null;
 
+  // An attended session reads as green for everyone, owner or not — the mark is
+  // shown to both, so it outranks the booked/own-slot colouring below.
+  const attended = booking?.outcome === "attended";
+
   const avatarClassName = `w-9 h-9 rounded-full border-2 text-xs font-bold flex items-center justify-center transition-colors cursor-pointer ${
-    booking
-      ? isOwnSlot
-        ? "bg-[#6A35FF] text-white border-[#6A35FF] hover:bg-[#5520e0]"
-        : "bg-gray-200 text-gray-600 border-gray-300 hover:bg-gray-300"
-      : isOwnSlot
-        ? "bg-white text-[#6A35FF] border-[#6A35FF] hover:bg-[#F4F0FF]"
-        : "bg-white text-gray-400 border-gray-200 hover:border-gray-300 hover:text-gray-600"
+    attended
+      ? "bg-[#28BF58] text-white border-[#28BF58] hover:bg-[#20A249]"
+      : booking
+        ? isOwnSlot
+          ? "bg-[#6A35FF] text-white border-[#6A35FF] hover:bg-[#5520e0]"
+          : "bg-gray-200 text-gray-600 border-gray-300 hover:bg-gray-300"
+        : isOwnSlot
+          ? "bg-white text-[#6A35FF] border-[#6A35FF] hover:bg-[#F4F0FF]"
+          : "bg-white text-gray-400 border-gray-200 hover:border-gray-300 hover:text-gray-600"
   }`;
 
   const participant = booking?.userName?.trim() || "Participant";

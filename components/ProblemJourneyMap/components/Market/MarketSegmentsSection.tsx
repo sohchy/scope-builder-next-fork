@@ -233,7 +233,7 @@ export function MarketSegmentsSection({
         </div>
 
         {/* Beachhead chart + section-level notes */}
-        <div className="flex flex-col gap-4 col-span-2 rounded-lg bg-[#EFF0F4] p-5 justify-between">
+        <div className="flex flex-col gap-4 col-span-2 self-start rounded-lg bg-[#EFF0F4] p-5">
           <div className="flex flex-row items-center justify-between gap-6">
             <p>
               The Beachhead Market is the first and best market to generate
