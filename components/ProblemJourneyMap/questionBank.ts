@@ -84,29 +84,43 @@ export const BANK_QUESTIONS: BankQuestion[] = [
     category: "Market Status Quo",
     text: "Why did they pick this current solution? What other solutions did they consider?",
     answerType: "plain_text",
+    defaultInterviewQuestions: [
+        { title: "Why did you pick this solution?", responseType: "text" },
+        { title: "Which other solutions did you conisder?", responseType: "text" },
+        { title: "Did you follow anybody's recommendation or influenced by someone? If yes, who and what was their recommendation?", responseType: "text" },
+        { title: "How long did you spend considering the solution?", responseType: "text" },
+
+
+    ]
   },
   {
     id: "bq-4",
     category: "Market Status Quo",
     text: "How often do they experience this problem / pain / lack-of-gain?",
     answerType: "plain_text",
+    defaultInterviewQuestions: [
+        { title: "How often do you experience this problem / pain?", responseType: "text" },
+    ]
   },
   {
     id: "bq-5",
     category: "Market Status Quo",
     text: "What happens if this problem / pain / lack-of-gain is left unsolved?",
     answerType: "plain_text",
+    defaultInterviewQuestions: [
+        { title: "What happens if this problem / pain is not solved fully or partially?", responseType: "text" },
+    ]
   },
   {
     id: "bq-6",
     category: "Problem Clarity",
-    text: "If the Problem (Pain/Gain) is primiarly of Functional Type, what is a tangible size of the pain or gain today and what outcome would they want instead? Example: (Pain: 20mins wait time, would prefer max 2-3 mins); (Gain: possibility to get $200 savings)",
+    text: "If the Problem (Pain/Gain) is primiarly of Functional Type, what is a tangible size of the pain or gain today and what outcome would they want instead? Example: 20mins wait time",
     answerType: "plain_text",
   },
   {
     id: "bq-7",
     category: "Problem Clarity",
-    text: "If the Problem (Pain/Gain) is primarily of Emotional Type, what emotions are they experiencing today and what outcome would they want instead? Example: lack of peace of mind if they will get accepted, would like not to be in limbo",
+    text: "If the Problem (Pain/Gain) is primarily of Emotional Type, what emotions are they experiencing today and what outcome would they want instead? Example: lack of peace of mind if they will get accepted",
     answerType: "plain_text",
   },
   {
@@ -126,12 +140,18 @@ export const BANK_QUESTIONS: BankQuestion[] = [
     category: "Market Opportunity",
     text: "Out of a pool of 100 stakeholders, on a scale of 1-5, how many would identify they are satisfied with the current solution, a 4 or higher?",
     answerType: "plain_text",
+    defaultInterviewQuestions: [
+        { title: "On a scale of 1-5, how would you rate your satisfaction with the current solution?", responseType: "text" },
+    ]
   },
   {
     id: "bq-11",
     category: "Market Opportunity",
     text: "Out of a pool of 100 stakeholders, on a scale of 1-5, how many would identify solving this problem as important, a 4 or higher?",
     answerType: "plain_text",
+    defaultInterviewQuestions: [
+        { title: "On a scale of 1-5, how would you rate the importance of this problem being solved?", responseType: "text" },
+    ]
   },
 ];
 
