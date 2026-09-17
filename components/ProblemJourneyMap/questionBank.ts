@@ -2,6 +2,8 @@
 // server code (services/interviewPrep.ts) can resolve a bankQuestionId to its text
 // without importing the client component.
 
+import type { ResponseType } from "./components/InterviewPrep/types";
+
 export type AnswerType =
   | "plain_text"
   | "yes_no"
@@ -9,12 +11,49 @@ export type AnswerType =
   | "single_choice"
   | "multiple_choice";
 
+/**
+ * One interview question a bank question ships with, in the same terms the user
+ * gets when they write one by hand on the Interview Prep tab: a title, a response
+ * type, and — for a dropdown — its options.
+ *
+ * Options are authored as plain labels rather than { id, label }: the ids key a
+ * participant's stored answer, so they are generated per seeded row instead of
+ * being shared by every problem that uses the same bank question.
+ */
+export interface DefaultInterviewQuestion {
+  /** The interview question itself, e.g. "How often does this happen?". */
+  title: string;
+  /** "text" | "scale" | "dropdown". */
+  responseType: ResponseType;
+  /** Only read when responseType is "dropdown"; order is kept. */
+  options?: string[];
+}
+
 export interface BankQuestion {
   id: string;
   category: string;
   text: string;
   answerType: AnswerType;
   options?: string[];
+  /**
+   * Seeded onto the hypothesis the first time this question is marked as one, so
+   * the Interview Prep tab opens with questions already written. They are ordinary
+   * questions from that point on — the team edits, reorders and deletes them like
+   * any other, and a deleted one does not come back.
+   *
+   * Omitted or empty = the hypothesis starts blank, as it does today.
+   *
+   *   defaultInterviewQuestions: [
+   *     { title: "How do you handle this today?", responseType: "text" },
+   *     { title: "How painful is it?", responseType: "scale" },
+   *     {
+   *       title: "How often does it come up?",
+   *       responseType: "dropdown",
+   *       options: ["Daily", "Weekly", "Monthly"],
+   *     },
+   *   ],
+   */
+  defaultInterviewQuestions?: DefaultInterviewQuestion[];
 }
 
 export const BANK_QUESTIONS: BankQuestion[] = [
@@ -50,18 +89,36 @@ export const BANK_QUESTIONS: BankQuestion[] = [
   },
   {
     id: "bq-6",
+    category: "Problem Clarity",
+    text: "If the Problem (Pain/Gain) is primiarly of Functional Type, what is a tangible size of the pain or gain today and what outcome would they want instead? Example: (Pain: 20mins wait time, would prefer max 2-3 mins); (Gain: possibility to get $200 savings)",
+    answerType: "plain_text",
+  },
+  {
+    id: "bq-7",
+    category: "Problem Clarity",
+    text: "If the Problem (Pain/Gain) is primarily of Emotional Type, what emotions are they experiencing today and what outcome would they want instead? Example: lack of peace of mind if they will get accepted, would like not to be in limbo",
+    answerType: "plain_text",
+  },
+  {
+    id: "bq-8",
+    category: "Problem Clarity",
+    text: "If the Problem (Pain/Gain) is primarily of Social Type, what social expectations do they have today and which ones are being met or not met? Example: appear to my neighbors that I care for my environment by reducing sprinkler usage",
+    answerType: "plain_text",
+  },
+  {
+    id: "bq-9",
     category: "Market Opportunity",
     text: "Out of a pool of 100 stakeholders, how many people do you think are experiencing this?",
     answerType: "plain_text",
   },
   {
-    id: "bq-7",
+    id: "bq-10",
     category: "Market Opportunity",
     text: "Out of a pool of 100 stakeholders, on a scale of 1-5, how many would identify they are satisfied with the current solution, a 4 or higher?",
     answerType: "plain_text",
   },
   {
-    id: "bq-8",
+    id: "bq-11",
     category: "Market Opportunity",
     text: "Out of a pool of 100 stakeholders, on a scale of 1-5, how many would identify solving this problem as important, a 4 or higher?",
     answerType: "plain_text",

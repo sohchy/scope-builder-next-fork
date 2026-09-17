@@ -222,20 +222,23 @@ function ActionNodeInner({ id, data }: NodeProps) {
           <div className="w-[30px] h-[30px] bg-[#F4F0FF] rounded-full flex items-center justify-center flex-shrink-0">
             <ActionIcon className="text-[#6A35FF]" />
           </div>
-          <span className="text-lg font-semibold text-[#111827] tracking-wide">
-            Action
+          {/* Named the same as the pills elsewhere. It's a phrase now, so it
+              keeps its own line rather than breaking around the slash — the
+              badge beside it is what gives way if the row runs short. */}
+          <span className="text-lg font-semibold text-[#111827] whitespace-nowrap">
+            Action / Activity
           </span>
         </div>
         {/* Delete sits *before* the badge rather than after it: the button is
             only visible on hover but still occupies its width, so parked here it
             eats into the row's slack instead of shunting the badge sideways as
             the pointer comes and goes. */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
           {canDeleteNode && (
             <button
               onClick={handleDeleteNode}
               title="Delete card"
-              className="nodrag nopan opacity-0 group-hover/card:opacity-100 transition-opacity w-6 h-6 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-red-50"
+              className="nodrag nopan opacity-0 group-hover/card:opacity-100 transition-opacity w-6 h-6 flex-shrink-0 rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 hover:bg-red-50"
             >
               <Trash2Icon className="w-4 h-4" />
             </button>
@@ -244,7 +247,7 @@ function ActionNodeInner({ id, data }: NodeProps) {
               problems themselves are hidden, so a count of them would point at
               something the user cannot see. */}
           {problemsUnlocked && hypothesisCount > 0 && (
-            <span className="bg-[#F4F0FF] text-[#6A35FF] text-sm font-semibold rounded-full px-2.5 py-0.5 whitespace-nowrap">
+            <span className="bg-[#F4F0FF] text-[#6A35FF] text-sm font-semibold rounded-full px-2.5 py-0.5 min-w-0 truncate">
               {hypothesisCount}{" "}
               {hypothesisCount === 1 ? "Hypothesis" : "Hypotheses"}
             </span>
@@ -252,7 +255,11 @@ function ActionNodeInner({ id, data }: NodeProps) {
           {/* Last in the row so it sits in the card's top-right corner, and
               outside the readOnly/unlock gates above — the help copy is worth
               the same to someone who can only read the card. */}
-          <HelpPopover helpKey="node.action" label="Action" align="end" />
+          <HelpPopover
+            helpKey="node.action"
+            label="Action / Activity"
+            align="end"
+          />
         </div>
       </div>
 

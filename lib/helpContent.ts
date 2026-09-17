@@ -39,12 +39,23 @@ export const HELP_CONTENT = {
     <p><strong>Action: </strong> Coach creates a one page visual for practice drills.</p>
   `,
   "problem.painGain": `
-    <p>Lorem ipsum dolor sit amet, <strong>consectetur adipiscing</strong> elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    <p><strong>Pains / Gains Explanation</strong></p>
+    <p>Pains & Gains can seem like they're the opposite of each other. But there's a subtle difference.</p>
+    <p><strong>Pains </strong> are easy to identify. When stakeholders complain about bad outcomes, risks, and obstacles, you can identify it as a Pain.</p>
+    <p><strong>Examples:</strong></p>
     <ul>
-      <li>Ut enim ad minim veniam.</li>
-      <li>Quis nostrud exercitation ullamco.</li>
+      <li>Coaches say it <u>takes them too long</u> to individually track every student athlete how many practice reps and tackles they've done.</li>
+      <li>Coaches say it's <u>annoying that they have to be present</u> everytime the athlete is practicing tackling reps, to be able to tell if they practiced correctly or not.</li>
     </ul>
-    <p><a href="https://example.com" target="_blank" rel="noreferrer">Read more</a></p>
+    <p>Solving a Pain is called a <u>Pain Reliever</u>.</p>
+    <br/>
+    <p><strong>Gains </strong> are a bit more challenging to identify because the stakeholder is not identifying them by complaining. Sometimes (not always!) the stakeholder may not even recognize they want such and such benefit. Apple products are often described as such. They're positive outcomes and benefits they want.</p>
+    <p><strong>Examples:</strong></p>
+    <ul>
+      <li>Coaches are surprised by being able to see the exact angle and body motion the athlete is performing their tackle at allowing them to give very precise suggestions to the athlete.</li>
+      <li>Coaches say it's annoying that they have to be present when the athlete is practicing tackling reps, to be able to tell if they practiced correctly or not.</li>
+    </ul>
+
   `,
   "solution.description": `
     <p>Lorem ipsum dolor sit amet, <strong>consectetur adipiscing</strong> elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
@@ -55,6 +66,7 @@ export const HELP_CONTENT = {
     <p><a href="https://example.com" target="_blank" rel="noreferrer">Read more</a></p>
   `,
   "market.stakeholders": `
+    <p><strong>Market Stakeholders Explanation</strong></p>
     <p>Whenever you're thinking of wanting to address a pain or a gain, always connect it to a Stakeholder.</p>
     <p>When thinking about a Stakeholder, be specific and identify individual roles and consider if the different roles have different pains / gains or the same.</p> 
     <p><strong>Example: </strong> (where different people in charge of coaching football may use the app)</p>  
@@ -83,6 +95,7 @@ export const HELP_CONTENT = {
     </ul>
     `,
   "market.segments": `
+    <p><strong>Market Segments Explanation</strong></p>
     <p>This helps you categorize different groups and sub-groups of people who have similar Jobs to be Done, Pains / Gains, etc. If two market segments have a lot of overlap, then the same solution/product can work for both. Otherwise they may each need unique features that the other segment doesn't.</p>
     <br/>
     <p>Understanding what Job to be Done, Pain / Gain, etc. separates two segments is important. Just because the two segments have different attributes like geographic location, age, gender, income, etc. doesn't make them distinct segments.</p>

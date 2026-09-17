@@ -30,6 +30,7 @@ import {
 } from "./components/ActionNodeSheet";
 import { DeleteNodeDialog } from "./components/DeleteNodeDialog";
 import type { StakeholderRow } from "@/services/market";
+import { seedDefaultInterviewQuestions } from "@/services/interviewPrep";
 import {
   HYPOTHESIS_SUB_STEP,
   isSubStepUnlocked as isSubStepUnlockedFor,
@@ -296,15 +297,37 @@ function CanvasInner({
                 problems={selectedNodeProblems}
                 onSelectProblem={selectProblem}
                 onSaveProblem={(desc, type, painOrGain, questions) => {
-                  if (selectedProblem)
-                    saveProblem(
-                      selectedProblem.nodeId,
-                      selectedProblem.problemId,
-                      desc,
-                      type,
-                      painOrGain,
-                      questions,
-                    );
+                  if (!selectedProblem) return;
+                  const problemId = saveProblem(
+                    selectedProblem.nodeId,
+                    selectedProblem.problemId,
+                    desc,
+                    type,
+                    painOrGain,
+                    questions,
+                  );
+                  // Questions marked as hypotheses by *this* save get their bank
+                  // question's default interview questions. Diffed against what was
+                  // stored rather than sent wholesale so an existing hypothesis whose
+                  // questions were all deleted isn't re-seeded on the next save.
+                  if (readOnly) return;
+                  const wasHypothesis = new Set(
+                    (selectedProblemData?.questions ?? [])
+                      .filter((q) => q.isHypothesis)
+                      .map((q) => q.bankQuestionId),
+                  );
+                  const newlyMarked = questions
+                    .filter(
+                      (q) =>
+                        q.isHypothesis && !wasHypothesis.has(q.bankQuestionId),
+                    )
+                    .map((q) => q.bankQuestionId);
+                  if (newlyMarked.length === 0) return;
+                  void seedDefaultInterviewQuestions({
+                    nodeId: selectedProblem.nodeId,
+                    problemId,
+                    bankQuestionIds: newlyMarked,
+                  });
                 }}
                 solution={selectedSolutionData}
                 onSaveSolution={(desc, type, relieverOrCreator, questions) => {

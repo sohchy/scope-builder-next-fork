@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 
@@ -42,6 +43,13 @@ export type InterviewQuestionCreateInput = {
   title?: string;
   responseType?: ResponseType;
   options?: DropdownOption[];
+};
+
+export type SeedDefaultInterviewQuestionsInput = {
+  nodeId: string;
+  problemId: string;
+  /** The bank questions newly marked as hypotheses on this save. */
+  bankQuestionIds: string[];
 };
 
 export type InterviewQuestionUpdateInput = {
@@ -698,6 +706,68 @@ export async function createProblemInterviewQuestion(
     responseType: created.response_type as ResponseType,
     options: toDropdownOptions(created.options),
   };
+}
+
+/**
+ * Give each newly marked hypothesis the default interview questions its bank question
+ * carries, so the Interview Prep tab opens with something already written.
+ *
+ * Called from the canvas when a problem is saved, not from the prep tab: the seeded rows
+ * are ordinary questions from then on, so this must run once and never re-run — a
+ * hypothesis that already holds questions is left alone, which is also what keeps a
+ * deleted default from coming back.
+ */
+export async function seedDefaultInterviewQuestions(
+  input: SeedDefaultInterviewQuestionsInput,
+): Promise<void> {
+  const orgId = await requireOrg();
+
+  const { nodeId, problemId, bankQuestionIds } = input;
+  if (bankQuestionIds.length === 0) return;
+
+  const withDefaults = bankQuestionIds.flatMap((id) => {
+    const defaults =
+      BANK_QUESTIONS.find((b) => b.id === id)?.defaultInterviewQuestions ?? [];
+    return defaults.length > 0 ? [{ bankQuestionId: id, defaults }] : [];
+  });
+  if (withDefaults.length === 0) return;
+
+  const existing = await prisma.problemInterviewQuestion.findMany({
+    where: {
+      org_id: orgId,
+      node_id: nodeId,
+      problem_id: problemId,
+      bank_question_id: { in: withDefaults.map((w) => w.bankQuestionId) },
+    },
+    select: { bank_question_id: true },
+  });
+  const alreadySeeded = new Set(existing.map((row) => row.bank_question_id));
+
+  const rows = withDefaults
+    .filter((w) => !alreadySeeded.has(w.bankQuestionId))
+    .flatMap(({ bankQuestionId, defaults }) =>
+      defaults.map((question, index) => ({
+        org_id: orgId,
+        node_id: nodeId,
+        problem_id: problemId,
+        bank_question_id: bankQuestionId,
+        title: question.title,
+        response_type: question.responseType,
+        // Option ids are minted per row rather than authored in the bank: they key a
+        // participant's stored answer, so two problems must not share them.
+        options: (question.responseType === "dropdown"
+          ? (question.options ?? []).map((label) => ({
+              id: randomUUID(),
+              label,
+            }))
+          : []) as Prisma.InputJsonValue[],
+        sort_order: index,
+      })),
+    );
+
+  if (rows.length === 0) return;
+
+  await prisma.problemInterviewQuestion.createMany({ data: rows });
 }
 
 export async function updateProblemInterviewQuestion(

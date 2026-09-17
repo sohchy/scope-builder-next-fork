@@ -15,6 +15,14 @@ import { HypothesisRow } from "./HypothesisRow";
 import { useSortableSensors } from "./useSortableSensors";
 import type { Hypothesis, InterviewQuestionDraft, ProblemBlock } from "./types";
 
+/**
+ * Both header pills, minus their colours. They name the journey-map card type the
+ * text below them came from, so they are written out here rather than read off the
+ * block — `block.label` carries the stored "Problem" wording the answering view uses.
+ */
+const PILL =
+  "inline-flex w-fit items-center rounded-full border px-2.5 py-0.5 text-sm font-medium";
+
 interface ProblemCardProps {
   block: ProblemBlock;
   onQuestionCreate: (
@@ -61,15 +69,30 @@ export function ProblemCard({
   return (
     <div className="rounded-2xl bg-white shadow-sm">
       <div className="flex">
-        {/* Left column — the problem summary (read-only). */}
+        {/* Left column — the problem summary (read-only). Each pill names the kind
+            of card its text came from, so it hugs that text and keeps its distance
+            from the group above. */}
         <aside className="flex w-[260px] shrink-0 flex-col gap-4 border-r border-[#CFD3E0] px-6 py-6">
           {/* The action this problem hangs off — context only, so it sits above
-              the pill rather than competing with the problem itself. */}
-          <ActionLabel action={block.action} className="-mb-2" />
-          <span className="inline-flex w-fit items-center rounded-full border border-[#E0CDA1] bg-[#FBF3DE] px-2.5 py-0.5 text-sm font-medium text-[#6F5615]">
-            {block.label}
-          </span>
-          <p className="text-base text-[#1F2430]">{block.description}</p>
+              the problem rather than competing with it. */}
+          <div>
+            <span
+              className={`${PILL} border-[#A6D2CA] bg-[#DFF1ED] text-[#1C574F]`}
+            >
+              Action / Activity
+            </span>
+            <ActionLabel action={block.action} className="mt-1.5" />
+          </div>
+          <div>
+            <span
+              className={`${PILL} border-[#E0CDA1] bg-[#FBF3DE] text-[#6F5615]`}
+            >
+              Problem / Pain / Gain
+            </span>
+            <p className="mt-1.5 text-base text-[#1F2430]">
+              {block.description}
+            </p>
+          </div>
           {block.tags.length > 0 && (
             <ul className="flex flex-wrap items-center gap-2">
               {block.tags.map((tag) => (

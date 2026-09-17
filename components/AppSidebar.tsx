@@ -161,6 +161,10 @@ const data = {
           title: "Common Vocabulary",
           url: "/common-vocabulary",
         },
+        {
+          title: "Do's and Don'ts of JTBD / Activities",
+          url: "/do-and-dont-of-jtbd-activity",
+        },
       ],
     },
     {

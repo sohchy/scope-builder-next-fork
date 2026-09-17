@@ -44,6 +44,8 @@ export default function AppHeader() {
       title = "Value Proposition Canvas";
     if (pathname.includes("/customer-discovery")) title = "Customer Discovery";
     if (pathname.includes("/common-vocabulary")) title = "Common Vocabulary";
+    if (pathname.includes("/do-and-dont-of-jtbd-activity"))
+      title = "Do's and Don'ts of JTBD / Activities";
     if (pathname.includes("/examples/laptop"))
       title = "Laptop Value Prop Example";
     if (pathname.includes("/examples/pickup-truck"))
