@@ -16,7 +16,10 @@ import {
 } from "@/services/milestoneAccess";
 import { getInterviewMilestonesWithProgress } from "@/services/participants";
 import { getSubStepProgress } from "@/services/getStarted";
-import { MIN_PAYER_INTERVIEWS } from "@/lib/milestones";
+import {
+  ALWAYS_AVAILABLE_MILESTONE,
+  MIN_PAYER_INTERVIEWS,
+} from "@/lib/milestones";
 
 export default async function ProblemJourneyMapPage() {
   const { orgId } = await auth();
@@ -45,8 +48,17 @@ export default async function ProblemJourneyMapPage() {
     generateAdLibValuePropRoom(adLibRoom),
   ]);
 
+  // Open on the furthest milestone the startup has unlocked rather than always
+  // on #0 — that's where their current work is, and the header scrolls it to the
+  // left edge on mount. Availability isn't guaranteed contiguous (it's toggled
+  // per milestone from /startups), so this is the max rather than a count;
+  // `getAvailableMilestones` returns ascending and always includes milestone 0,
+  // so the last entry is it.
+  const highestUnlockedMilestone =
+    availableMilestones.at(-1) ?? ALWAYS_AVAILABLE_MILESTONE;
+
   return (
-    <MilestoneSelectionProvider>
+    <MilestoneSelectionProvider defaultSelected={highestUnlockedMilestone}>
       <SubStepProgressProvider initialProgress={subStepProgress}>
         <div className="flex flex-col h-full">
           <MilestoneHeader
