@@ -15,6 +15,7 @@ import {
 
 import { INTERVIEW_PREP_SUB_STEP } from "@/lib/milestones";
 import { LockedRegion, SubStepLockBadge } from "../LockedRegion";
+import { ExportQuestionsButton } from "./ExportQuestionsButton";
 import { ProblemCard } from "./ProblemCard";
 import type {
   InterviewQuestion,
@@ -190,16 +191,23 @@ export function InterviewPrep({
         {/* Outside the dimmed region below, so it stays legible. */}
         {locked && <SubStepLockBadge subStep={INTERVIEW_PREP_SUB_STEP} />}
         <LockedRegion locked={locked} className="flex flex-col gap-6">
-          <header className="flex flex-col gap-2">
-            <h2 className="text-xl font-semibold text-[#1F2430]">
-              What you will ask
-            </h2>
-            <p className="max-w-3xl text-sm text-[#4E5566]">
-              You have your answers to the problem statement questions that
-              should be validated through user testing. Transform them into
-              actual interview questions that will help determine whether your
-              assumptions are valid.
-            </p>
+          <header className="flex items-start justify-between gap-8">
+            <div className="flex flex-col gap-2">
+              <h2 className="text-xl font-semibold text-[#1F2430]">
+                What you will ask
+              </h2>
+              <p className="max-w-3xl text-sm text-[#4E5566]">
+                You have your answers to the problem statement questions that
+                should be validated through user testing. Transform them into
+                actual interview questions that will help determine whether your
+                assumptions are valid.
+              </p>
+            </div>
+            {/* Org data only, so the Examples mirrors get no button. A locked or
+                empty tab has nothing to export yet. */}
+            {exampleNumber == null && !locked && blocks.length > 0 && (
+              <ExportQuestionsButton />
+            )}
           </header>
 
           {blocks.length === 0 ? (

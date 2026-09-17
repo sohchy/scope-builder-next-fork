@@ -11,6 +11,15 @@ import {
   XIcon,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
@@ -675,6 +684,57 @@ function SheetHeaderBar({
   );
 }
 
+// ─── Unsaved work ─────────────────────────────────────────────────────────────
+
+/**
+ * A comparable string of everything Save commits. Both editors keep their drafts
+ * in local state until Save, so the only way to tell an untouched sheet from one
+ * with work in it is to compare it against a snapshot taken when it hydrated.
+ *
+ * The snapshot is taken from the hydrated values rather than read off the props
+ * later, for the same reason the hydration effects aren't keyed on `problem`: a
+ * collaborator editing the same card moves the props under the open sheet, and
+ * that mustn't read as the user's own unsaved work.
+ */
+function problemSnapshot(
+  description: string,
+  type: string,
+  painOrGain: PainOrGain,
+  questions: ProblemQuestionAnswer[],
+): string {
+  return JSON.stringify([
+    description.trim(),
+    type,
+    painOrGain,
+    questions.map((q) => [
+      q.bankQuestionId,
+      q.answer,
+      q.source,
+      q.confidence,
+      q.isHypothesis,
+    ]),
+  ]);
+}
+
+function solutionSnapshot(
+  description: string,
+  type: string,
+  relieverOrCreator: RelieverOrCreator,
+  questions: SolutionQuestionAnswer[],
+): string {
+  return JSON.stringify([
+    description.trim(),
+    type,
+    relieverOrCreator,
+    questions.map((q) => [
+      q.bankQuestionId,
+      q.answer,
+      q.source,
+      q.confidence,
+    ]),
+  ]);
+}
+
 // ─── Main sheet ───────────────────────────────────────────────────────────────
 
 export function ActionNodeSheet({
@@ -744,6 +804,14 @@ export function ActionNodeSheet({
     Record<string, number>
   >({});
 
+  // ── What each editor held when it was last hydrated or saved ──
+  // Compared against the live draft to know whether closing would lose work.
+  const [problemBaseline, setProblemBaseline] = useState("");
+  const [solutionBaseline, setSolutionBaseline] = useState("");
+
+  /** Open while the user is being asked what to do with unsaved work. */
+  const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
+
   // Hydrate the problem editor whenever the sheet opens or the selected node
   // changes. Not keyed on `problem` so remote/round-trip updates don't clobber
   // in-progress edits — this editor is the writer.
@@ -768,6 +836,20 @@ export function ActionNodeSheet({
     setQuestionSources(sources);
     setQuestionConfidence(conf);
     setQuestionHypothesis(hyp);
+    setProblemBaseline(
+      problemSnapshot(
+        problem?.description ?? "",
+        problem?.type ?? "",
+        problem?.painOrGain ?? "pain",
+        ids.map((id) => ({
+          bankQuestionId: id,
+          answer: answers[id] ?? "",
+          source: sources[id] ?? "",
+          confidence: conf[id] ?? 0,
+          isHypothesis: hyp[id] ?? false,
+        })),
+      ),
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, nodeId, problemId]);
 
@@ -790,8 +872,27 @@ export function ActionNodeSheet({
     setSolutionQuestionAnswers(answers);
     setSolutionQuestionSources(sources);
     setSolutionQuestionConfidence(conf);
+    setSolutionBaseline(
+      solutionSnapshot(
+        solution?.description ?? "",
+        solution?.type ?? "",
+        solution?.relieverOrCreator ?? "reliever",
+        ids.map((id) => ({
+          bankQuestionId: id,
+          answer: answers[id] ?? "",
+          source: sources[id] ?? "",
+          confidence: conf[id] ?? 0,
+        })),
+      ),
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, nodeId, problemId]);
+
+  // A sheet that closed takes its unanswered question with it, so the next open
+  // starts clean rather than re-showing the dialog over a freshly loaded card.
+  useEffect(() => {
+    if (!open) setConfirmCloseOpen(false);
+  }, [open]);
 
   // The bank is dimmed and `inert` before Milestone 2, so these can't normally be
   // reached — but adding a question is the one gated action that *writes*, so it
@@ -843,6 +944,36 @@ export function ActionNodeSheet({
     }));
   }
 
+  // ── Unsaved work ──
+  // A read-only editor can't be edited, so it can't be dirty either — that also
+  // keeps the Examples pages, which are read-only throughout, free of the dialog.
+  const problemDirty =
+    !readOnly &&
+    problemSnapshot(
+      problemDraft,
+      problemType,
+      problemPainGain,
+      collectProblemAnswers(),
+    ) !== problemBaseline;
+
+  const solutionDirty =
+    !solutionReadOnly &&
+    solutionSnapshot(
+      solutionDraft,
+      solutionType,
+      solutionRelieverCreator,
+      collectSolutionAnswers(),
+    ) !== solutionBaseline;
+
+  const hasUnsavedChanges = problemDirty || solutionDirty;
+
+  // Saving from the dialog runs the same rule the Save button does: no
+  // description, no save. A draft that can't be saved can only be discarded, so
+  // the dialog drops its Save option rather than offering one that would fail.
+  const canSaveUnsaved =
+    (!problemDirty || problemDraft.trim().length > 0) &&
+    (!solutionDirty || solutionDraft.trim().length > 0);
+
   // Where the open problem sits on its card. Switching problems only moves this
   // index: the hydration effects above are keyed on `problemId`, so both editors
   // refill from the problem you land on and an unsaved draft is dropped — the
@@ -856,11 +987,12 @@ export function ActionNodeSheet({
     if (target) onSelectProblem(target.id);
   }
 
-  function handleSaveProblem() {
+  /** Commits the problem draft. False when there was nothing to commit it from. */
+  function saveProblemDraft(): boolean {
     const trimmed = problemDraft.trim();
     if (!trimmed) {
       toast.error("Add a description before saving the problem.");
-      return;
+      return false;
     }
     onSaveProblem(
       trimmed,
@@ -871,14 +1003,14 @@ export function ActionNodeSheet({
     toast.success(
       problem?.description?.trim() ? "Problem updated" : "Problem saved",
     );
-    onOpenChange(false);
+    return true;
   }
 
-  function handleSaveSolution() {
+  function saveSolutionDraft(): boolean {
     const trimmed = solutionDraft.trim();
     if (!trimmed) {
       toast.error("Add a description before saving the solution.");
-      return;
+      return false;
     }
     onSaveSolution(
       trimmed,
@@ -889,246 +1021,148 @@ export function ActionNodeSheet({
     toast.success(
       solution?.description?.trim() ? "Solution updated" : "Solution saved",
     );
+    return true;
+  }
+
+  function handleSaveProblem() {
+    if (saveProblemDraft()) onOpenChange(false);
+  }
+
+  function handleSaveSolution() {
+    if (saveSolutionDraft()) onOpenChange(false);
+  }
+
+  /**
+   * The one way out of the sheet. Every close — the header's X, Escape, a click
+   * on the overlay — arrives here, and work that Save hasn't taken yet stops it
+   * and asks first.
+   */
+  function requestClose() {
+    if (hasUnsavedChanges) {
+      setConfirmCloseOpen(true);
+      return;
+    }
     onOpenChange(false);
   }
 
+  // Radix asks to close; whether it does is decided above. `open` is controlled
+  // by the canvas, so ignoring the request simply leaves the sheet standing.
+  function handleSheetOpenChange(next: boolean) {
+    if (!next) {
+      requestClose();
+      return;
+    }
+    onOpenChange(true);
+  }
+
+  function handleDiscardAndClose() {
+    setConfirmCloseOpen(false);
+    onOpenChange(false);
+  }
+
+  // Saves whichever editors the user actually touched — the sheet can be dirty
+  // on both tabs at once, and closing loses both.
+  function handleSaveAndClose() {
+    if (problemDirty && !saveProblemDraft()) return;
+    if (solutionDirty && !saveSolutionDraft()) return;
+    setConfirmCloseOpen(false);
+    onOpenChange(false);
+  }
+
+  const unsavedLabel =
+    problemDirty && solutionDirty
+      ? "this problem and its solution"
+      : solutionDirty
+        ? "this solution"
+        : "this problem";
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        className="w-[820px] sm:max-w-[820px] flex flex-col p-0 gap-0 [&>button:last-of-type]:hidden"
-      >
-        {/* The visible title is the editable Action field below, which can't
-            double as the dialog's accessible name. */}
-        <SheetTitle className="sr-only">
-          {actionTitle?.trim() || "Action"}
-        </SheetTitle>
-
-        <SheetHeaderBar
-          actionTitle={actionTitle}
-          onActionTitleChange={onActionTitleChange}
-          index={problemIndex}
-          total={problems.length}
-          onPrev={() => goToProblem(-1)}
-          onNext={() => goToProblem(1)}
-          onClose={() => onOpenChange(false)}
-          readOnly={readOnly}
-        />
-
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => onActiveTabChange(v as ActionSheetTab)}
-          className="w-full flex flex-col flex-1 min-h-0"
+    <>
+      <Sheet open={open} onOpenChange={handleSheetOpenChange}>
+        <SheetContent
+          side="right"
+          className="w-[820px] sm:max-w-[820px] flex flex-col p-0 gap-0 [&>button:last-of-type]:hidden"
         >
-          <TabsList className="w-80 bg-white border-1 rounded-lg m-2 shrink-0">
-            {TABS.map(({ value, label }) => (
-              <TabsTrigger
-                key={value}
-                value={value}
-                className="group text-sm rounded-sm"
-              >
-                <span className="flex items-center gap-1.5">
-                  {value === "solution" && solutionsLocked && (
-                    // Purple on the light inactive tab, white on the purple active one.
-                    <LockIcon className="w-3 h-3 text-[#6A35FF] group-data-[state=active]:text-white" />
-                  )}
-                  {label}
-                </span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          {/* The visible title is the editable Action field below, which can't
+              double as the dialog's accessible name. */}
+          <SheetTitle className="sr-only">
+            {actionTitle?.trim() || "Action"}
+          </SheetTitle>
 
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            {/* ── Problem tab ── */}
-            <TabsContent value="problem" className="p-0">
-              <div>
-                {/* What the problem? */}
-                <SectionHeader
-                  title="What is the pain/gain you intend to address?"
-                  helpKey="problem.painGain"
-                />
-                <div className={`${SECTION_PADDING} py-4`}>
-                  <span className="inline-block mb-2 text-sm font-semibold bg-[#F5E7D0] text-[#7A5C33] rounded-full px-2.5 py-0.5">
-                    Problem
+          <SheetHeaderBar
+            actionTitle={actionTitle}
+            onActionTitleChange={onActionTitleChange}
+            index={problemIndex}
+            total={problems.length}
+            onPrev={() => goToProblem(-1)}
+            onNext={() => goToProblem(1)}
+            onClose={requestClose}
+            readOnly={readOnly}
+          />
+
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => onActiveTabChange(v as ActionSheetTab)}
+            className="w-full flex flex-col flex-1 min-h-0"
+          >
+            <TabsList className="w-80 bg-white border-1 rounded-lg m-2 shrink-0">
+              {TABS.map(({ value, label }) => (
+                <TabsTrigger
+                  key={value}
+                  value={value}
+                  className="group text-sm rounded-sm"
+                >
+                  <span className="flex items-center gap-1.5">
+                    {value === "solution" && solutionsLocked && (
+                      // Purple on the light inactive tab, white on the purple active one.
+                      <LockIcon className="w-3 h-3 text-[#6A35FF] group-data-[state=active]:text-white" />
+                    )}
+                    {label}
                   </span>
-                  <div className="flex gap-4 items-start">
-                    <textarea
-                      className="flex-1 self-stretch bg-white border border-gray-300 rounded-lg p-3 text-base text-gray-800 placeholder-gray-500 resize-none focus:outline-none focus:ring-1 focus:ring-[#6A35FF] leading-snug"
-                      rows={3}
-                      placeholder="Don't focus on the solution. Focus on what is it they are not able to do well or at all currently."
-                      value={problemDraft}
-                      readOnly={readOnly}
-                      onChange={(e) => setProblemDraft(e.target.value)}
-                    />
-                    {/* One column beside the description: each classification is
-                        its label with its dropdown underneath. Opens with the
-                        description itself — see `PROBLEMS_SUB_STEP`. */}
-                    <div className="flex flex-col gap-3 w-[200px] shrink-0">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm font-medium text-gray-700">
-                          Type of problem
-                        </span>
-                        <Select
-                          value={problemType}
-                          onValueChange={setProblemType}
-                          disabled={readOnly}
-                        >
-                          <SelectTrigger className="h-9 w-full text-base bg-white">
-                            <SelectValue placeholder="Select" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white">
-                            {PROBLEM_TYPES.map((t) => (
-                              <SelectItem key={t} value={t}>
-                                {t}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm font-medium text-gray-700">
-                          Is it a Pain or a Gain?
-                        </span>
-                        <Select
-                          value={problemPainGain}
-                          onValueChange={(v) =>
-                            setProblemPainGain(v as PainOrGain)
-                          }
-                          disabled={readOnly}
-                        >
-                          <SelectTrigger className="h-9 w-full text-base bg-white">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {PAIN_OR_GAIN_OPTIONS.map((o) => (
-                              <SelectItem key={o.value} value={o.value}>
-                                {o.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-                {/* Market Questions */}
-                <SectionHeader
-                  title="Market Questions"
-                  badge={
-                    !questionsUnlocked && (
-                      <LockBadge milestone={MARKET_QUESTIONS_MILESTONE} />
-                    )
-                  }
-                />
-
-                <LockedRegion locked={!questionsUnlocked}>
-                  <div className={SECTION_PADDING}>
-                    {activeQuestionIds.map((qId, i) => {
-                      const bq = BANK_QUESTIONS.find((q) => q.id === qId);
-                      if (!bq) return null;
-                      return (
-                        <QuestionRow
-                          key={qId}
-                          index={i + 1}
-                          question={bq}
-                          value={
-                            questionAnswers[qId] ??
-                            (bq.answerType === "multiple_choice" ? [] : "")
-                          }
-                          onChange={(val) =>
-                            setQuestionAnswers((prev) => ({
-                              ...prev,
-                              [qId]: val,
-                            }))
-                          }
-                          source={questionSources[qId] ?? ""}
-                          confidence={questionConfidence[qId] ?? 0}
-                          isHypothesis={questionHypothesis[qId] ?? false}
-                          onSourceChange={(val) =>
-                            setQuestionSources((prev) => ({
-                              ...prev,
-                              [qId]: val,
-                            }))
-                          }
-                          onConfidenceChange={(val) =>
-                            setQuestionConfidence((prev) => ({
-                              ...prev,
-                              [qId]: val,
-                            }))
-                          }
-                          onToggleHypothesis={(val) =>
-                            setQuestionHypothesis((prev) => ({
-                              ...prev,
-                              [qId]: val,
-                            }))
-                          }
-                          readOnly={questionsReadOnly}
-                          sourceConfidenceUnlocked={sourceConfidenceUnlocked}
-                          hypothesisUnlocked={hypothesisUnlocked}
-                        />
-                      );
-                    })}
-                  </div>
-
-                  {!readOnly && (
-                    <BankOfQuestions
-                      questions={BANK_QUESTIONS}
-                      activeQuestionIds={activeQuestionIds}
-                      onAdd={handleAddBankQuestion}
-                      title="Bank of market questions"
-                    />
-                  )}
-                </LockedRegion>
-              </div>
-            </TabsContent>
-
-            {/* ── Solution tab ── The gate here covers the tab rather than one
-                section of it, so it reads the way a locked section of the Problem
-                tab does: one badge on the first header bar, everything below it
-                greyed and inert. */}
-            <TabsContent value="solution" className="p-0">
-              <div>
-                {/* What the solution? */}
-                <SectionHeader
-                  title="What the solution?"
-                  helpKey="solution.description"
-                  badge={
-                    solutionsLocked && (
-                      <LockBadge milestone={SOLUTIONS_MILESTONE} />
-                    )
-                  }
-                />
-                <LockedRegion locked={solutionsLocked}>
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              {/* ── Problem tab ── */}
+              <TabsContent value="problem" className="p-0">
+                <div>
+                  {/* What the problem? */}
+                  <SectionHeader
+                    title="What is the pain/gain you intend to address?"
+                    helpKey="problem.painGain"
+                  />
                   <div className={`${SECTION_PADDING} py-4`}>
-                    <span className="inline-block mb-2 text-sm font-semibold bg-[#2F9E63] text-white rounded-full px-2.5 py-0.5">
-                      Solution
+                    <span className="inline-block mb-2 text-sm font-semibold bg-[#F5E7D0] text-[#7A5C33] rounded-full px-2.5 py-0.5">
+                      Problem
                     </span>
                     <div className="flex gap-4 items-start">
                       <textarea
                         className="flex-1 self-stretch bg-white border border-gray-300 rounded-lg p-3 text-base text-gray-800 placeholder-gray-500 resize-none focus:outline-none focus:ring-1 focus:ring-[#6A35FF] leading-snug"
                         rows={3}
-                        placeholder="Describe your solution..."
-                        value={solutionDraft}
-                        readOnly={solutionReadOnly}
-                        onChange={(e) => setSolutionDraft(e.target.value)}
+                        placeholder="Don't focus on the solution. Focus on what is it they are not able to do well or at all currently."
+                        value={problemDraft}
+                        readOnly={readOnly}
+                        onChange={(e) => setProblemDraft(e.target.value)}
                       />
-                      {/* Same stacked column as the Problem tab above. */}
+                      {/* One column beside the description: each classification is
+                          its label with its dropdown underneath. Opens with the
+                          description itself — see `PROBLEMS_SUB_STEP`. */}
                       <div className="flex flex-col gap-3 w-[200px] shrink-0">
                         <div className="flex flex-col gap-1">
                           <span className="text-sm font-medium text-gray-700">
-                            Type of solution
+                            Type of problem
                           </span>
                           <Select
-                            value={solutionType}
-                            onValueChange={setSolutionType}
-                            disabled={solutionReadOnly}
+                            value={problemType}
+                            onValueChange={setProblemType}
+                            disabled={readOnly}
                           >
                             <SelectTrigger className="h-9 w-full text-base bg-white">
                               <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent className="bg-white">
-                              {SOLUTION_TYPES.map((t) => (
+                              {PROBLEM_TYPES.map((t) => (
                                 <SelectItem key={t} value={t}>
                                   {t}
                                 </SelectItem>
@@ -1138,20 +1172,20 @@ export function ActionNodeSheet({
                         </div>
                         <div className="flex flex-col gap-1">
                           <span className="text-sm font-medium text-gray-700">
-                            Is it reliever or creator?
+                            Is it a Pain or a Gain?
                           </span>
                           <Select
-                            value={solutionRelieverCreator}
+                            value={problemPainGain}
                             onValueChange={(v) =>
-                              setSolutionRelieverCreator(v as RelieverOrCreator)
+                              setProblemPainGain(v as PainOrGain)
                             }
-                            disabled={solutionReadOnly}
+                            disabled={readOnly}
                           >
                             <SelectTrigger className="h-9 w-full text-base bg-white">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {RELIEVER_OR_CREATOR_OPTIONS.map((o) => (
+                              {PAIN_OR_GAIN_OPTIONS.map((o) => (
                                 <SelectItem key={o.value} value={o.value}>
                                   {o.label}
                                 </SelectItem>
@@ -1162,88 +1196,273 @@ export function ActionNodeSheet({
                       </div>
                     </div>
                   </div>
-                </LockedRegion>
 
-                {/* Market Questions */}
-                <SectionHeader title="Market Questions" />
+                  {/* Market Questions */}
+                  <SectionHeader
+                    title="Market Questions"
+                    badge={
+                      !questionsUnlocked && (
+                        <LockBadge milestone={MARKET_QUESTIONS_MILESTONE} />
+                      )
+                    }
+                  />
 
-                <LockedRegion locked={solutionsLocked || !questionsUnlocked}>
-                  <div className={SECTION_PADDING}>
-                    {activeSolutionQuestionIds.map((qId, i) => {
-                      const bq = SOLUTION_BANK_QUESTIONS.find(
-                        (q) => q.id === qId,
-                      );
-                      if (!bq) return null;
-                      return (
-                        <QuestionRow
-                          key={qId}
-                          index={i + 1}
-                          question={bq}
-                          value={
-                            solutionQuestionAnswers[qId] ??
-                            (bq.answerType === "multiple_choice" ? [] : "")
-                          }
-                          onChange={(val) =>
-                            setSolutionQuestionAnswers((prev) => ({
-                              ...prev,
-                              [qId]: val,
-                            }))
-                          }
-                          source={solutionQuestionSources[qId] ?? ""}
-                          confidence={solutionQuestionConfidence[qId] ?? 0}
-                          onSourceChange={(val) =>
-                            setSolutionQuestionSources((prev) => ({
-                              ...prev,
-                              [qId]: val,
-                            }))
-                          }
-                          onConfidenceChange={(val) =>
-                            setSolutionQuestionConfidence((prev) => ({
-                              ...prev,
-                              [qId]: val,
-                            }))
-                          }
-                          readOnly={solutionQuestionsReadOnly}
-                          sourceConfidenceUnlocked={sourceConfidenceUnlocked}
+                  <LockedRegion locked={!questionsUnlocked}>
+                    <div className={SECTION_PADDING}>
+                      {activeQuestionIds.map((qId, i) => {
+                        const bq = BANK_QUESTIONS.find((q) => q.id === qId);
+                        if (!bq) return null;
+                        return (
+                          <QuestionRow
+                            key={qId}
+                            index={i + 1}
+                            question={bq}
+                            value={
+                              questionAnswers[qId] ??
+                              (bq.answerType === "multiple_choice" ? [] : "")
+                            }
+                            onChange={(val) =>
+                              setQuestionAnswers((prev) => ({
+                                ...prev,
+                                [qId]: val,
+                              }))
+                            }
+                            source={questionSources[qId] ?? ""}
+                            confidence={questionConfidence[qId] ?? 0}
+                            isHypothesis={questionHypothesis[qId] ?? false}
+                            onSourceChange={(val) =>
+                              setQuestionSources((prev) => ({
+                                ...prev,
+                                [qId]: val,
+                              }))
+                            }
+                            onConfidenceChange={(val) =>
+                              setQuestionConfidence((prev) => ({
+                                ...prev,
+                                [qId]: val,
+                              }))
+                            }
+                            onToggleHypothesis={(val) =>
+                              setQuestionHypothesis((prev) => ({
+                                ...prev,
+                                [qId]: val,
+                              }))
+                            }
+                            readOnly={questionsReadOnly}
+                            sourceConfidenceUnlocked={sourceConfidenceUnlocked}
+                            hypothesisUnlocked={hypothesisUnlocked}
+                          />
+                        );
+                      })}
+                    </div>
+
+                    {!readOnly && (
+                      <BankOfQuestions
+                        questions={BANK_QUESTIONS}
+                        activeQuestionIds={activeQuestionIds}
+                        onAdd={handleAddBankQuestion}
+                        title="Bank of market questions"
+                      />
+                    )}
+                  </LockedRegion>
+                </div>
+              </TabsContent>
+
+              {/* ── Solution tab ── The gate here covers the tab rather than one
+                  section of it, so it reads the way a locked section of the Problem
+                  tab does: one badge on the first header bar, everything below it
+                  greyed and inert. */}
+              <TabsContent value="solution" className="p-0">
+                <div>
+                  {/* What the solution? */}
+                  <SectionHeader
+                    title="What the solution?"
+                    helpKey="solution.description"
+                    badge={
+                      solutionsLocked && (
+                        <LockBadge milestone={SOLUTIONS_MILESTONE} />
+                      )
+                    }
+                  />
+                  <LockedRegion locked={solutionsLocked}>
+                    <div className={`${SECTION_PADDING} py-4`}>
+                      <span className="inline-block mb-2 text-sm font-semibold bg-[#2F9E63] text-white rounded-full px-2.5 py-0.5">
+                        Solution
+                      </span>
+                      <div className="flex gap-4 items-start">
+                        <textarea
+                          className="flex-1 self-stretch bg-white border border-gray-300 rounded-lg p-3 text-base text-gray-800 placeholder-gray-500 resize-none focus:outline-none focus:ring-1 focus:ring-[#6A35FF] leading-snug"
+                          rows={3}
+                          placeholder="Describe your solution..."
+                          value={solutionDraft}
+                          readOnly={solutionReadOnly}
+                          onChange={(e) => setSolutionDraft(e.target.value)}
                         />
-                      );
-                    })}
-                  </div>
+                        {/* Same stacked column as the Problem tab above. */}
+                        <div className="flex flex-col gap-3 w-[200px] shrink-0">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-medium text-gray-700">
+                              Type of solution
+                            </span>
+                            <Select
+                              value={solutionType}
+                              onValueChange={setSolutionType}
+                              disabled={solutionReadOnly}
+                            >
+                              <SelectTrigger className="h-9 w-full text-base bg-white">
+                                <SelectValue placeholder="Select" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-white">
+                                {SOLUTION_TYPES.map((t) => (
+                                  <SelectItem key={t} value={t}>
+                                    {t}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-medium text-gray-700">
+                              Is it reliever or creator?
+                            </span>
+                            <Select
+                              value={solutionRelieverCreator}
+                              onValueChange={(v) =>
+                                setSolutionRelieverCreator(v as RelieverOrCreator)
+                              }
+                              disabled={solutionReadOnly}
+                            >
+                              <SelectTrigger className="h-9 w-full text-base bg-white">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {RELIEVER_OR_CREATOR_OPTIONS.map((o) => (
+                                  <SelectItem key={o.value} value={o.value}>
+                                    {o.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </LockedRegion>
 
-                  {!readOnly && (
-                    <BankOfQuestions
-                      questions={SOLUTION_BANK_QUESTIONS}
-                      activeQuestionIds={activeSolutionQuestionIds}
-                      onAdd={handleAddSolutionBankQuestion}
-                      title="Bank of market questions"
-                    />
-                  )}
-                </LockedRegion>
-              </div>
-            </TabsContent>
-          </div>
+                  {/* Market Questions */}
+                  <SectionHeader title="Market Questions" />
 
-          {!readOnly && !(activeTab === "solution" && solutionsLocked) && (
-            <div className="shrink-0 border-t p-2 flex items-center justify-center">
-              {activeTab === "problem" ? (
-                <Button
-                  onClick={handleSaveProblem}
-                  className="text-base font-medium text-white bg-gray-900 hover:bg-gray-700 transition-colors rounded-full"
-                >
-                  Save problem
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleSaveSolution}
-                  className=" text-base font-medium text-white bg-gray-900 hover:bg-gray-700 transition-colors rounded-full"
-                >
-                  Save solution
-                </Button>
-              )}
+                  <LockedRegion locked={solutionsLocked || !questionsUnlocked}>
+                    <div className={SECTION_PADDING}>
+                      {activeSolutionQuestionIds.map((qId, i) => {
+                        const bq = SOLUTION_BANK_QUESTIONS.find(
+                          (q) => q.id === qId,
+                        );
+                        if (!bq) return null;
+                        return (
+                          <QuestionRow
+                            key={qId}
+                            index={i + 1}
+                            question={bq}
+                            value={
+                              solutionQuestionAnswers[qId] ??
+                              (bq.answerType === "multiple_choice" ? [] : "")
+                            }
+                            onChange={(val) =>
+                              setSolutionQuestionAnswers((prev) => ({
+                                ...prev,
+                                [qId]: val,
+                              }))
+                            }
+                            source={solutionQuestionSources[qId] ?? ""}
+                            confidence={solutionQuestionConfidence[qId] ?? 0}
+                            onSourceChange={(val) =>
+                              setSolutionQuestionSources((prev) => ({
+                                ...prev,
+                                [qId]: val,
+                              }))
+                            }
+                            onConfidenceChange={(val) =>
+                              setSolutionQuestionConfidence((prev) => ({
+                                ...prev,
+                                [qId]: val,
+                              }))
+                            }
+                            readOnly={solutionQuestionsReadOnly}
+                            sourceConfidenceUnlocked={sourceConfidenceUnlocked}
+                          />
+                        );
+                      })}
+                    </div>
+
+                    {!readOnly && (
+                      <BankOfQuestions
+                        questions={SOLUTION_BANK_QUESTIONS}
+                        activeQuestionIds={activeSolutionQuestionIds}
+                        onAdd={handleAddSolutionBankQuestion}
+                        title="Bank of market questions"
+                      />
+                    )}
+                  </LockedRegion>
+                </div>
+              </TabsContent>
             </div>
-          )}
-        </Tabs>
-      </SheetContent>
-    </Sheet>
+
+            {!readOnly && !(activeTab === "solution" && solutionsLocked) && (
+              <div className="shrink-0 border-t p-2 flex items-center justify-center">
+                {activeTab === "problem" ? (
+                  <Button
+                    onClick={handleSaveProblem}
+                    className="text-base font-medium text-white bg-gray-900 hover:bg-gray-700 transition-colors rounded-full"
+                  >
+                    Save problem
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSaveSolution}
+                    className=" text-base font-medium text-white bg-gray-900 hover:bg-gray-700 transition-colors rounded-full"
+                  >
+                    Save solution
+                  </Button>
+                )}
+              </div>
+            )}
+          </Tabs>
+        </SheetContent>
+      </Sheet>
+
+      {/* Sits over the open sheet: the close it interrupted only goes through if
+          the user says so here. */}
+      <AlertDialog open={confirmCloseOpen} onOpenChange={setConfirmCloseOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>You have unsaved changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your changes to {unsavedLabel} haven&apos;t been saved yet. If you
+              close now, they&apos;ll be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={handleDiscardAndClose}
+              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+            >
+              Discard changes
+            </Button>
+            {canSaveUnsaved && (
+              <Button
+                onClick={handleSaveAndClose}
+                className="text-white bg-gray-900 hover:bg-gray-700"
+              >
+                Save &amp; close
+              </Button>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

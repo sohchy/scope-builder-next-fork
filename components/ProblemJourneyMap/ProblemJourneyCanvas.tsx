@@ -306,27 +306,21 @@ function CanvasInner({
                     painOrGain,
                     questions,
                   );
-                  // Questions marked as hypotheses by *this* save get their bank
-                  // question's default interview questions. Diffed against what was
-                  // stored rather than sent wholesale so an existing hypothesis whose
-                  // questions were all deleted isn't re-seeded on the next save.
+                  // Questions marked as hypotheses get their bank question's default
+                  // interview questions. Sent whole rather than diffed against what was
+                  // stored: the server records which hypotheses it has already seeded, so
+                  // it can tell "never seeded" from "seeded, then emptied" — which a diff
+                  // taken here cannot, and which is what let a hypothesis marked before
+                  // its bank question grew defaults never receive them.
                   if (readOnly) return;
-                  const wasHypothesis = new Set(
-                    (selectedProblemData?.questions ?? [])
-                      .filter((q) => q.isHypothesis)
-                      .map((q) => q.bankQuestionId),
-                  );
-                  const newlyMarked = questions
-                    .filter(
-                      (q) =>
-                        q.isHypothesis && !wasHypothesis.has(q.bankQuestionId),
-                    )
+                  const marked = questions
+                    .filter((q) => q.isHypothesis)
                     .map((q) => q.bankQuestionId);
-                  if (newlyMarked.length === 0) return;
+                  if (marked.length === 0) return;
                   void seedDefaultInterviewQuestions({
                     nodeId: selectedProblem.nodeId,
                     problemId,
-                    bankQuestionIds: newlyMarked,
+                    bankQuestionIds: marked,
                   });
                 }}
                 solution={selectedSolutionData}

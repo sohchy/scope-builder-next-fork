@@ -737,3 +737,27 @@ model ProblemHypothesisSummary {
   @@index([example_number])
   @@map("problem_hypothesis_summaries")
 }
+
+// A hypothesis that has already been given its bank question's default interview
+// questions. Existence of the row is the whole record — there is nothing else to store.
+//
+// Needed because "this hypothesis holds no questions" is not the same as "this
+// hypothesis was never seeded": a team that deletes every default must not get them
+// back on the next save. With the marker, seeding can be attempted on every save and
+// still happen exactly once per hypothesis, which is also what lets a hypothesis marked
+// before its bank question grew defaults pick them up.
+model ProblemHypothesisSeed {
+  id               String @id @default(cuid())
+  org_id           String
+  node_id          String
+  problem_id       String
+  bank_question_id String
+  example_number   Int? // NULL = real data, N = example set N
+
+  created_at DateTime @default(now())
+
+  @@unique([org_id, node_id, problem_id, bank_question_id])
+  @@index([org_id])
+  @@index([example_number])
+  @@map("problem_hypothesis_seeds")
+}

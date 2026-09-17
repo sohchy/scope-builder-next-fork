@@ -47,5 +47,9 @@ export interface ProblemBlock {
   description: string;
   /** Classification tags, e.g. ["Functional", "Pain"]. */
   tags: string[];
+  /** Raw `problems[].type` — `tags` holds the display copy of the same value. */
+  problemType: string;
+  /** Raw `problems[].painOrGain`; absent in storage reads as "pain", as `tags` renders it. */
+  painOrGain: "pain" | "gain";
   hypotheses: Hypothesis[];
 }

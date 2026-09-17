@@ -62,12 +62,22 @@ export const BANK_QUESTIONS: BankQuestion[] = [
     category: "Market Status Quo",
     text: "How are they solving it today?",
     answerType: "plain_text",
+    defaultInterviewQuestions: [
+        { title: "How are you solving this today?", responseType: "text" },
+        { title: "How did you find about this solution?", responseType: "text" },
+
+    ]
   },
   {
     id: "bq-2",
     category: "Market Status Quo",
     text: "How do they acquire the current solution? How much do they pay for it?",
     answerType: "plain_text",
+    defaultInterviewQuestions: [
+        { title: "How do you go about buying this?", responseType: "text" },
+        { title: "How much are you paying for it?", responseType: "text" },
+        { title: "What do you think of the price? Is it reasonable or too expensive?", responseType: "text" },
+    ]
   },
   {
     id: "bq-3",
