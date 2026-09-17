@@ -10,6 +10,12 @@ import {
 
 import { Progress } from "@/components/ui/progress";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import type { AttendedSession } from "@/services/officeHours";
+import {
   Table,
   TableBody,
   TableCell,
@@ -39,8 +45,8 @@ export interface MilestoneProgressRow {
   orgId: string;
   orgName: string;
   interviews: InterviewCounts;
-  /** Office-hour bookings an instructor marked as attended. */
-  officeHoursAttended: number;
+  /** Office-hour bookings an instructor marked as attended, newest first. */
+  officeHours: AttendedSession[];
   /** Sub-step key ("1.1", "2.3"…) → reviewed. Absent key means not reviewed. */
   subSteps: Record<string, boolean>;
   /** All 6 slots, indexed by milestone number (milestone 0 is first). */
@@ -162,6 +168,57 @@ function InterviewProgress({
   );
 }
 
+/**
+ * The OH tally, with the sessions behind it a click away. The number carries a
+ * dotted underline so it reads as openable without looking like a link, and a
+ * startup with nothing attended stays plain text — there'd be no history to show.
+ */
+function OfficeHoursCell({ sessions }: { sessions: AttendedSession[] }) {
+  if (sessions.length === 0) {
+    return (
+      <span
+        className="text-label-muted flex justify-center font-semibold"
+        title="No office hours attended"
+      >
+        0
+      </span>
+    );
+  }
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          title={`${sessions.length} office hours attended — click for history`}
+          className="flex w-full cursor-pointer justify-center font-semibold underline decoration-dotted underline-offset-4 hover:text-[#6A35FF]"
+        >
+          {sessions.length}
+        </button>
+      </PopoverTrigger>
+      {/* Newest first, as the service ordered them. Taller than a handful of
+          sessions and the list scrolls rather than running off the viewport. */}
+      <PopoverContent align="center" className="w-64 p-0">
+        <p className="border-b border-gray-100 px-3 py-2 text-xs font-semibold text-gray-700">
+          Office hours attended ({sessions.length})
+        </p>
+        <ul className="max-h-64 divide-y divide-gray-100 overflow-y-auto">
+          {sessions.map((session) => (
+            <li key={session.id} className="px-3 py-2">
+              <p className="text-xs font-semibold text-gray-900">
+                {session.mentorName}
+              </p>
+              <p className="text-xs text-gray-500">
+                {session.dateLabel} · {session.timeLabel}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 // Nothing here closes over a callback, so the columns are a module-level constant
 // rather than a `getColumns(...)` factory.
 const columns: ColumnDef<MilestoneProgressRow>[] = [
@@ -200,14 +257,7 @@ const columns: ColumnDef<MilestoneProgressRow>[] = [
     header: () => <span title="Office hours attended">OH</span>,
     size: OFFICE_HOURS_WIDTH,
     minSize: OFFICE_HOURS_WIDTH,
-    cell: ({ row }) => (
-      <span
-        className="flex justify-center font-semibold"
-        title={`${row.original.officeHoursAttended} office hours attended`}
-      >
-        {row.original.officeHoursAttended}
-      </span>
-    ),
+    cell: ({ row }) => <OfficeHoursCell sessions={row.original.officeHours} />,
   },
   // One group per milestone: its sub-steps, then the milestone sign-off itself.
   // The grouped header is what keeps 31 columns readable — `getHeaderGroups()`

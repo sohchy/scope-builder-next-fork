@@ -1,5 +1,5 @@
 /**
- * The 6 milestones and their 24 sub-steps — the single source of truth for the
+ * The 6 milestones and their 25 sub-steps — the single source of truth for the
  * curriculum. `MilestoneHeader.tsx` renders from here, and the seeded "steps"
  * Get Started card mirrors it (one item per sub-step, linked by position).
  *
@@ -96,18 +96,22 @@ export const HYPOTHESIS_SUB_STEP = subStepKey(2, 1);
  * the answers a team has flagged as beliefs into interview questions, which is
  * 2.3's work, so there's nothing to prepare until those flags exist.
  *
- * This is the last gate in the unlock map. Locked means visible but greyed and
- * read-only, so a team can see what's coming; see `JourneyMapTabs`.
+ * Locked means visible but greyed and read-only, so a team can see what's
+ * coming; see `JourneyMapTabs`.
  */
 export const INTERVIEW_PREP_SUB_STEP = subStepKey(2, 2);
 
 /**
- * Milestone that opens the Ad-Lib Value Prop tab. Instructor-granted, like
- * `MARKET_QUESTIONS_MILESTONE`, rather than a sub-step the team ticks. Locked
- * means the tab still opens, with its canvas greyed and read-only behind the
- * badge; see `JourneyMapTabs` and `AdLibValuePropCanvas`.
+ * Sub-step that opens the Ad-Lib Value Prop tab. 3.1 is "Hypotheses": the ad-lib
+ * sentence is how a team states who the product is for once it knows what it
+ * believes about them, and it's 3.2's own work — so this keeps the off-by-one
+ * that runs through the rest of the unlock map.
+ *
+ * This is the last gate in the map. Locked means the tab still opens, with its
+ * canvas greyed and read-only behind the badge; see `JourneyMapTabs` and
+ * `AdLibValuePropCanvas`.
  */
-export const ADLIB_VALUE_PROP_MILESTONE = 3;
+export const ADLIB_VALUE_PROP_SUB_STEP = subStepKey(3, 1);
 
 /** Payer interviews a startup has to document — the denominator the MilestoneHeader
  * counts toward. Read here rather than at each call site so the interviews board and
@@ -270,6 +274,11 @@ const SUB_STEP_CONTENT: { label: string; description: string }[][] = [
         "Write the beliefs your business depends on as testable statements, so an interview can actually prove one wrong.",
     },
     {
+      label: "Ad-Lib Value Prop",
+      description:
+        "Fill in the ad-lib sentence for your beachhead segment — who it's for, what they can't do today, and what your solution lets them do instead. Write one version per segment you're still weighing.",
+    },
+    {
       label: "Interview Questions",
       description:
         "Draft open questions about what people have already done, not what they would hypothetically do. Tie each question back to a hypothesis.",
@@ -326,7 +335,7 @@ const SUB_STEP_CONTENT: { label: string; description: string }[][] = [
   ],
 ];
 
-/** All 24 sub-steps, milestone 0 first. */
+/** All 25 sub-steps, milestone 0 first. */
 export const SUB_STEPS: SubStepDef[] = SUB_STEP_CONTENT.flatMap(
   (subSteps, milestoneIndex) =>
     subSteps.map((subStep, subStepIndex) => {

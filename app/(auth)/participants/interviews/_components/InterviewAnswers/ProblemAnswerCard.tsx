@@ -53,7 +53,7 @@ export function ProblemAnswerCard({
               <span className="text-sm font-medium text-[#6A35FF]">
                 {question.index}
               </span>
-              <p className="min-w-0 flex-1 text-sm font-medium text-[#1F2430]">
+              <p className="min-w-0 flex-1 whitespace-pre-wrap text-sm font-medium text-[#1F2430]">
                 {question.title}
               </p>
             </div>

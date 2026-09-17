@@ -100,7 +100,7 @@ export default function QuestionResponse({
       </div>
       <span className="flex flex-row  gap-2.5 text-[14px] text-[#111827] font-semibold">
         <span className="text-[#6A35FF]">{`${idx + 1}.`}</span>
-        {question.title}
+        <span className="whitespace-pre-wrap">{question.title}</span>
       </span>
       <Textarea
         value={response}

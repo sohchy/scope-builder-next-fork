@@ -5,7 +5,7 @@ import MilestoneProgressTable, {
 } from "./_components/MilestoneProgressTable";
 import { getAllSubStepProgress } from "@/services/getStarted";
 import { getAllInterviewCounts } from "@/services/participants";
-import { getAllAttendedCounts } from "@/services/officeHours";
+import { getAllAttendedSessions } from "@/services/officeHours";
 import { getAllMilestoneAccess } from "@/services/milestoneAccess";
 import { defaultMilestoneAccess } from "@/lib/milestones";
 import { isInCurrentCohort } from "@/lib/cohort";
@@ -31,13 +31,13 @@ export default async function TeamsDashboardPage() {
     subStepProgress,
     milestoneAccess,
     interviewCounts,
-    attendedCounts,
+    attendedSessions,
   ] = await Promise.all([
     client.organizations.getOrganizationList({ limit: 200 }),
     getAllSubStepProgress(),
     getAllMilestoneAccess(),
     getAllInterviewCounts(),
-    getAllAttendedCounts(),
+    getAllAttendedSessions(),
   ]);
 
   const rows: MilestoneProgressRow[] = organizations.data
@@ -50,7 +50,7 @@ export default async function TeamsDashboardPage() {
         conducted: 0,
         documented: 0,
       },
-      officeHoursAttended: attendedCounts[org.id] ?? 0,
+      officeHours: attendedSessions[org.id] ?? [],
       subSteps: subStepProgress[org.id] ?? {},
       milestones: milestoneAccess[org.id] ?? defaultMilestoneAccess(),
     }))

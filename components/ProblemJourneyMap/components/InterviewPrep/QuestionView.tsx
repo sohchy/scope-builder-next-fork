@@ -36,7 +36,9 @@ export function QuestionView({
           {/* Pulled into the column's left padding so the title stays flush with the
               rest of the column whether or not the handle is there. */}
           {dragHandle && <div className="-ml-10 -mt-1 shrink-0">{dragHandle}</div>}
-          <p className="min-w-0 text-base font-semibold text-[#1F2430]">
+          {/* `whitespace-pre-wrap` — the question is written in a multiline field,
+              so line breaks the user typed are part of it. */}
+          <p className="min-w-0 whitespace-pre-wrap text-base font-semibold text-[#1F2430]">
             {question.title}
           </p>
         </div>

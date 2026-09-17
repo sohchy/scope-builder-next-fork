@@ -6,7 +6,9 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
-import { split30MinIntervals } from "@/lib/officeHoursUtils";
+import { format } from "date-fns";
+import { formatTimeDisplay, split30MinIntervals } from "@/lib/officeHoursUtils";
+import { storedSlotDay } from "@/lib/officeHoursCalendar";
 import { bookingLinkFormSchema } from "@/schemas/officeHours";
 import {
   BookingOutcome,
@@ -328,25 +330,67 @@ export async function getBookingStartupNames(): Promise<
 }
 
 /**
- * Attended office-hour sessions per startup, for the instructor-facing leaderboard.
- * Keyed org id → count. Only bookings an instructor actually marked `attended` are
- * counted, and like `getBookingStartupNames` this spans every cohort — the caller
- * filters the orgs it renders. Orgs with none are absent; callers fall back to 0.
+ * One attended session as the leaderboard's OH history lists it. The labels are
+ * built here rather than on the client: the slot day has to be read back with
+ * `storedSlotDay`, which a raw `Date` crossing to the browser would defeat.
  */
-export async function getAllAttendedCounts(): Promise<Record<string, number>> {
+export type AttendedSession = {
+  id: string;
+  /** The instructor whose slot it was. */
+  mentorName: string;
+  /** "Mar 4, 2026" */
+  dateLabel: string;
+  /** "9:30 AM – 10:00 AM" */
+  timeLabel: string;
+};
+
+/**
+ * Attended office-hour sessions per startup, for the instructor-facing leaderboard.
+ * Keyed org id → sessions, newest first; the OH column shows the count and the
+ * popover the list, so both come from this one query. Only bookings an instructor
+ * actually marked `attended` are included, and like `getBookingStartupNames` this
+ * spans every cohort — the caller filters the orgs it renders. Orgs with none are
+ * absent; callers fall back to an empty list.
+ */
+export async function getAllAttendedSessions(): Promise<
+  Record<string, AttendedSession[]>
+> {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const rows = await prisma.officeHourBooking.groupBy({
-    by: ["org_id"],
+  const bookings = await prisma.officeHourBooking.findMany({
     where: { outcome: BookingOutcome.attended, org_id: { not: null } },
-    _count: { _all: true },
+    select: {
+      id: true,
+      org_id: true,
+      subSlot: {
+        select: {
+          start_time: true,
+          end_time: true,
+          slot: { select: { date: true, mentor_name: true } },
+        },
+      },
+    },
+    // Newest first, which is the order the popover renders. `date` alone can't
+    // break ties within a day, so the start time settles those.
+    orderBy: [
+      { subSlot: { slot: { date: "desc" } } },
+      { subSlot: { start_time: "desc" } },
+    ],
   });
 
-  const byOrg: Record<string, number> = {};
-  for (const row of rows) {
-    if (!row.org_id) continue;
-    byOrg[row.org_id] = row._count._all;
+  const byOrg: Record<string, AttendedSession[]> = {};
+  for (const booking of bookings) {
+    if (!booking.org_id) continue;
+    const { start_time, end_time, slot } = booking.subSlot;
+    const { year, month, day } = storedSlotDay(slot.date);
+
+    (byOrg[booking.org_id] ??= []).push({
+      id: booking.id,
+      mentorName: slot.mentor_name,
+      dateLabel: format(new Date(year, month, day), "MMM d, yyyy"),
+      timeLabel: `${formatTimeDisplay(start_time)} – ${formatTimeDisplay(end_time)}`,
+    });
   }
 
   return byOrg;

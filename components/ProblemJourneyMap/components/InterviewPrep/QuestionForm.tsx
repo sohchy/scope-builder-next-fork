@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -66,12 +66,16 @@ export function QuestionForm({ initial, onSave, onCancel }: QuestionFormProps) {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <span className="text-base text-[#4E5566]">Question:</span>
-        <Input
+        {/* Multiline: interview questions carry their own framing and run past a
+            single line. `field-sizing-content` grows the box with the text, so the
+            whole question stays visible while it is being written. */}
+        <Textarea
           autoFocus
           value={draft.title}
           onChange={(e) => patch({ title: e.target.value })}
           placeholder="Type your question"
-          className="h-9 bg-white text-base"
+          rows={2}
+          className="min-h-[4.5rem] resize-none bg-white text-base leading-snug md:text-base"
         />
       </div>
 

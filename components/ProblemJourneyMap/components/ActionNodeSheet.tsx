@@ -16,7 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { HelpPopover } from "@/components/ui/help-popover";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -208,9 +207,13 @@ function AnswerInput({
   readOnly = false,
 }: AnswerInputProps) {
   if (question.answerType === "plain_text") {
+    // Answers here run long — a single line hid everything past the first
+    // sentence. `field-sizing-content` grows the box with the text, so the whole
+    // answer stays readable without a scrollbar inside the row.
     return (
-      <Input
-        className="text-base bg-white"
+      <Textarea
+        className="min-h-[4.5rem] resize-none border-gray-300 bg-white p-3 text-base leading-snug text-gray-800 placeholder-gray-500 shadow-none focus-visible:border-[#6A35FF] focus-visible:ring-0 md:text-base"
+        rows={2}
         placeholder="Answer..."
         value={(value as string) ?? ""}
         readOnly={readOnly}

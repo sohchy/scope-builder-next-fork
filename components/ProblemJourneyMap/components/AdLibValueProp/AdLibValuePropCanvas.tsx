@@ -14,8 +14,12 @@ import { PlusIcon } from "lucide-react";
 import "@xyflow/react/dist/style.css";
 
 import { ADLIB_CARD_WIDTH } from "@/lib/adLibValueProp";
-import { ADLIB_VALUE_PROP_MILESTONE } from "@/lib/milestones";
-import { LockBadge, LockedRegion } from "../LockedRegion";
+import {
+  ADLIB_VALUE_PROP_SUB_STEP,
+  isSubStepUnlocked,
+} from "@/lib/milestones";
+import { useSubStepProgress } from "../../SubStepProgressContext";
+import { LockedRegion, SubStepLockBadge } from "../LockedRegion";
 import { AdLibContext } from "./AdLibContext";
 import { DeleteAdLibCardDialog } from "./DeleteAdLibCardDialog";
 import { adLibNodeTypes } from "./nodeTypes";
@@ -25,9 +29,11 @@ interface AdLibValuePropCanvasProps {
   /** Render the canvas as a read-only viewer (Examples pages). */
   readOnly?: boolean;
   /**
-   * Milestone numbers the startup has unlocked. Until it includes
-   * `ADLIB_VALUE_PROP_MILESTONE` the canvas renders greyed and read-only behind
-   * its badge. Omit to lock nothing — same convention as `JourneyMapTabs`.
+   * Milestone numbers the startup has unlocked. Half of the
+   * `ADLIB_VALUE_PROP_SUB_STEP` gate — the team's own "Reviewed" toggle is the
+   * other half, read from `SubStepProgressContext`. Until both are in, the
+   * canvas renders greyed and read-only behind its badge. Omit to lock nothing
+   * — same convention as `JourneyMapTabs`.
    */
   availableMilestones?: number[];
 }
@@ -145,7 +151,7 @@ function CanvasInner({ readOnly: viewerOnly, locked }: CanvasInnerProps) {
         {/* Outside the dimmed region so it stays legible. */}
         {locked && (
           <div className="absolute top-4 left-4 z-10">
-            <LockBadge milestone={ADLIB_VALUE_PROP_MILESTONE} />
+            <SubStepLockBadge subStep={ADLIB_VALUE_PROP_SUB_STEP} />
           </div>
         )}
 
@@ -175,9 +181,13 @@ export function AdLibValuePropCanvas({
   readOnly = false,
   availableMilestones,
 }: AdLibValuePropCanvasProps) {
-  const locked =
-    availableMilestones !== undefined &&
-    !availableMilestones.includes(ADLIB_VALUE_PROP_MILESTONE);
+  const { progress } = useSubStepProgress();
+
+  const locked = !isSubStepUnlocked(
+    ADLIB_VALUE_PROP_SUB_STEP,
+    progress,
+    availableMilestones ? new Set(availableMilestones) : null,
+  );
 
   return (
     <ReactFlowProvider>
