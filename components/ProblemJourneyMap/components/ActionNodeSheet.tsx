@@ -529,6 +529,7 @@ interface BankOfQuestionsProps {
   questions: BankQuestion[];
   activeQuestionIds: string[];
   onAdd: (questionId: string) => void;
+  onRemove: (questionId: string) => void;
   title?: string;
 }
 
@@ -536,6 +537,7 @@ function BankOfQuestions({
   questions: bankQuestions,
   activeQuestionIds,
   onAdd,
+  onRemove,
   title = "Bank of questions",
 }: BankOfQuestionsProps) {
   const activeSet = new Set(activeQuestionIds);
@@ -566,12 +568,26 @@ function BankOfQuestions({
                         {q.text}
                       </span>
                       {added ? (
-                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#6A35FF] flex items-center justify-center text-white">
-                          <CheckIcon className="w-3.5 h-3.5" />
-                        </span>
+                        // The tick is the resting state, so the bank still reads
+                        // as "these are on the problem" at a glance; the ✕ only
+                        // comes up under the cursor, which is where the undo of
+                        // the ＋ next to it belongs.
+                        <button
+                          type="button"
+                          onClick={() => onRemove(q.id)}
+                          title="Remove from this problem"
+                          aria-label={`Remove: ${q.text}`}
+                          className="group flex-shrink-0 w-6 h-6 rounded-full bg-[#6A35FF] flex items-center justify-center text-white transition-colors hover:bg-[#D92D20]"
+                        >
+                          <CheckIcon className="w-3.5 h-3.5 group-hover:hidden" />
+                          <XIcon className="hidden w-3.5 h-3.5 group-hover:block" />
+                        </button>
                       ) : (
                         <button
+                          type="button"
                           onClick={() => onAdd(q.id)}
+                          title="Add to this problem"
+                          aria-label={`Add: ${q.text}`}
                           className="flex-shrink-0 w-6 h-6 rounded-full border border-gray-400 flex items-center justify-center text-gray-600 hover:border-[#6A35FF] hover:text-[#6A35FF] transition-colors"
                         >
                           <PlusIcon className="w-3.5 h-3.5" />
@@ -735,6 +751,23 @@ function solutionSnapshot(
   ]);
 }
 
+/**
+ * A copy of `record` without `key`. The per-question maps are keyed by bank
+ * question id, so taking a question off a problem means dropping its entry from
+ * each of them.
+ */
+function omitKey<T>(record: Record<string, T>, key: string): Record<string, T> {
+  const next = { ...record };
+  delete next[key];
+  return next;
+}
+
+/** Whether an answer of either shape (text or multi-select) holds anything. */
+function hasAnswer(value: string | string[] | undefined): boolean {
+  if (Array.isArray(value)) return value.length > 0;
+  return Boolean(value?.trim());
+}
+
 // ─── Main sheet ───────────────────────────────────────────────────────────────
 
 export function ActionNodeSheet({
@@ -811,6 +844,12 @@ export function ActionNodeSheet({
 
   /** Open while the user is being asked what to do with unsaved work. */
   const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
+
+  /** The question the user asked to remove, while it still holds work to lose. */
+  const [questionPendingRemoval, setQuestionPendingRemoval] = useState<{
+    scope: "problem" | "solution";
+    id: string;
+  } | null>(null);
 
   // Hydrate the problem editor whenever the sheet opens or the selected node
   // changes. Not keyed on `problem` so remote/round-trip updates don't clobber
@@ -891,8 +930,17 @@ export function ActionNodeSheet({
   // A sheet that closed takes its unanswered question with it, so the next open
   // starts clean rather than re-showing the dialog over a freshly loaded card.
   useEffect(() => {
-    if (!open) setConfirmCloseOpen(false);
+    if (!open) {
+      setConfirmCloseOpen(false);
+      setQuestionPendingRemoval(null);
+    }
   }, [open]);
+
+  // Switching problems refills both editors from the problem you land on, so a
+  // removal still waiting on an answer belongs to a card that is no longer open.
+  useEffect(() => {
+    setQuestionPendingRemoval(null);
+  }, [nodeId, problemId]);
 
   // The bank is dimmed and `inert` before Milestone 2, so these can't normally be
   // reached — but adding a question is the one gated action that *writes*, so it
@@ -923,6 +971,79 @@ export function ActionNodeSheet({
     }));
     setSolutionQuestionSources((prev) => ({ ...prev, [questionId]: "" }));
     setSolutionQuestionConfidence((prev) => ({ ...prev, [questionId]: 0 }));
+  }
+
+  // ── Taking a question back off ──
+  // Dropping the id is what removes the question — `collectProblemAnswers` walks
+  // the id list, so the saved array simply no longer holds it. The per-question
+  // records are cleared alongside it rather than left behind, so a question added
+  // back later starts empty instead of resurfacing the answer it used to have.
+  function removeProblemQuestion(questionId: string) {
+    setActiveQuestionIds((prev) => prev.filter((id) => id !== questionId));
+    setQuestionAnswers((prev) => omitKey(prev, questionId));
+    setQuestionSources((prev) => omitKey(prev, questionId));
+    setQuestionConfidence((prev) => omitKey(prev, questionId));
+    setQuestionHypothesis((prev) => omitKey(prev, questionId));
+  }
+
+  function removeSolutionQuestion(questionId: string) {
+    setActiveSolutionQuestionIds((prev) =>
+      prev.filter((id) => id !== questionId),
+    );
+    setSolutionQuestionAnswers((prev) => omitKey(prev, questionId));
+    setSolutionQuestionSources((prev) => omitKey(prev, questionId));
+    setSolutionQuestionConfidence((prev) => omitKey(prev, questionId));
+  }
+
+  /** Whether anything would be lost by removing this question. */
+  function problemQuestionHasWork(questionId: string): boolean {
+    return (
+      hasAnswer(questionAnswers[questionId]) ||
+      Boolean(questionSources[questionId]) ||
+      (questionConfidence[questionId] ?? 0) > 0 ||
+      Boolean(questionHypothesis[questionId])
+    );
+  }
+
+  function solutionQuestionHasWork(questionId: string): boolean {
+    return (
+      hasAnswer(solutionQuestionAnswers[questionId]) ||
+      Boolean(solutionQuestionSources[questionId]) ||
+      (solutionQuestionConfidence[questionId] ?? 0) > 0
+    );
+  }
+
+  // Same gate the add handlers check, for the same reason: removing writes too.
+  // An untouched question goes straight away — it's the ＋ being taken back, and
+  // nothing is lost. One with work in it asks first.
+  function handleRemoveBankQuestion(questionId: string) {
+    if (!questionsUnlocked) return;
+    if (!activeQuestionIds.includes(questionId)) return;
+    if (problemQuestionHasWork(questionId)) {
+      setQuestionPendingRemoval({ scope: "problem", id: questionId });
+      return;
+    }
+    removeProblemQuestion(questionId);
+  }
+
+  function handleRemoveSolutionBankQuestion(questionId: string) {
+    if (!questionsUnlocked || solutionsLocked) return;
+    if (!activeSolutionQuestionIds.includes(questionId)) return;
+    if (solutionQuestionHasWork(questionId)) {
+      setQuestionPendingRemoval({ scope: "solution", id: questionId });
+      return;
+    }
+    removeSolutionQuestion(questionId);
+  }
+
+  function handleConfirmRemoval() {
+    if (!questionPendingRemoval) return;
+    if (questionPendingRemoval.scope === "problem") {
+      removeProblemQuestion(questionPendingRemoval.id);
+    } else {
+      removeSolutionQuestion(questionPendingRemoval.id);
+    }
+    setQuestionPendingRemoval(null);
   }
 
   function collectProblemAnswers(): ProblemQuestionAnswer[] {
@@ -1075,6 +1196,20 @@ export function ActionNodeSheet({
       : solutionDirty
         ? "this solution"
         : "this problem";
+
+  // The question the removal dialog is asking about, and whether losing it also
+  // costs a hypothesis — which is the one thing that reaches past this sheet.
+  const pendingRemovalQuestion = questionPendingRemoval
+    ? (questionPendingRemoval.scope === "problem"
+        ? BANK_QUESTIONS
+        : SOLUTION_BANK_QUESTIONS
+      ).find((q) => q.id === questionPendingRemoval.id)
+    : undefined;
+
+  const pendingRemovalIsHypothesis = Boolean(
+    questionPendingRemoval?.scope === "problem" &&
+      questionHypothesis[questionPendingRemoval.id],
+  );
 
   return (
     <>
@@ -1261,6 +1396,7 @@ export function ActionNodeSheet({
                         questions={BANK_QUESTIONS}
                         activeQuestionIds={activeQuestionIds}
                         onAdd={handleAddBankQuestion}
+                        onRemove={handleRemoveBankQuestion}
                         title="Bank of market questions"
                       />
                     )}
@@ -1400,6 +1536,7 @@ export function ActionNodeSheet({
                         questions={SOLUTION_BANK_QUESTIONS}
                         activeQuestionIds={activeSolutionQuestionIds}
                         onAdd={handleAddSolutionBankQuestion}
+                        onRemove={handleRemoveSolutionBankQuestion}
                         title="Bank of market questions"
                       />
                     )}
@@ -1460,6 +1597,42 @@ export function ActionNodeSheet({
                 Save &amp; close
               </Button>
             )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Only reached for a question with work in it — an untouched one is taken
+          off without asking. */}
+      <AlertDialog
+        open={questionPendingRemoval !== null}
+        onOpenChange={(next) => {
+          if (!next) setQuestionPendingRemoval(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove this question?</AlertDialogTitle>
+            <AlertDialogDescription>
+              &ldquo;{pendingRemovalQuestion?.text}&rdquo; will be taken off this{" "}
+              {questionPendingRemoval?.scope === "solution"
+                ? "solution"
+                : "problem"}
+              , and its answer, source and confidence go with it.
+              {pendingRemovalIsHypothesis &&
+                " It is marked as a hypothesis, so it also leaves the Interview Prep tab."}{" "}
+              This takes effect when you save.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep question</AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={handleConfirmRemoval}
+              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+            >
+              Remove question
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
