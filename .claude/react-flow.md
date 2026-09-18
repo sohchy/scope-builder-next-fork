@@ -152,7 +152,9 @@ export default function FlowCanvas() {
 | `minZoom` / `maxZoom` | `number` | Zoom limits |
 | `proOptions` | `{ hideAttribution: boolean }` | Hide the React Flow attribution |
 | `deleteKeyCode` | `string \| string[]` | Key(s) to delete selected elements |
-| `multiSelectionKeyCode` | `string` | Default `'Shift'` |
+| `multiSelectionKeyCode` | `string` | Add to a selection. Default **`'Meta'` on macOS, `'Control'` elsewhere** — *not* Shift |
+| `selectionKeyCode` | `string` | Hold-and-drag to rubber-band select. Default `'Shift'`. Panning is suspended only while it's held, so a Shift+drag marquee costs nothing on a canvas that pans on plain drag |
+| `selectionOnDrag` | `boolean` | Default `false`. `true` makes a *plain* drag rubber-band, which means panning has to move to `panOnDrag={[1,2]}` or `panOnScroll` |
 | `panOnDrag` | `boolean \| number[]` | Allow pan; limit to mouse button numbers |
 | `panOnScroll` | `boolean` | Trackpad pan |
 | `zoomOnScroll` | `boolean` | Scroll to zoom |
@@ -545,11 +547,18 @@ React Flow handles these by default:
 |---|---|
 | `Backspace` / `Delete` | Delete selected nodes and edges |
 | `Escape` | Deselect all |
-| `Shift+click` | Add to selection |
+| `Ctrl/Cmd+click` | Add to selection (`multiSelectionKeyCode`) |
+| `Shift+drag` | Rubber-band select (`selectionKeyCode`) |
 | `Ctrl/Cmd+A` | Select all |
 | `Ctrl/Cmd+Z` | Undo (if implemented) |
 | `Ctrl/Cmd+Shift+Z` | Redo (if implemented) |
 | `Ctrl/Cmd+C` / `V` | Copy/paste (if implemented) |
+
+**In this repo** the journey canvas (`components/ProblemJourneyMap`) runs on native
+selection with `deleteKeyCode={null}`: Shift+drag marqueees, Cmd/Ctrl+click adds one card, and
+Delete routes through a confirmation dialog rather than React Flow's own delete. Cards suppress
+plain-click selection by stopping the click before it reaches the wrapper React Flow selects
+from — see `hooks/useCardSelection.ts`.
 
 ### Custom key bindings with `useKeyPress`
 
@@ -1317,6 +1326,12 @@ const {
 ---
 
 ## 23. Common Pitfalls
+
+### ❌ Importing from `@xyflow/system`
+
+Only `@xyflow/react` is installed here — `node_modules/@xyflow/` has nothing else. Docs and
+blog posts import helpers (`isMacOs`, `isInputDOMNode`, `getNodesInside`) from `@xyflow/system`;
+that resolves in their setup, not in ours. Copy the helper instead.
 
 ### ❌ Defining `nodeTypes` / `edgeTypes` inside render
 

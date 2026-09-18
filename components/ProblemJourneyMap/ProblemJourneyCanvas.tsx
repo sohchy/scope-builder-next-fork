@@ -16,6 +16,7 @@ import { journeyNodeTypes } from "./nodes/nodeTypes";
 import { journeyEdgeTypes } from "./edges/edgeTypes";
 import { useJourneyDataBridge } from "./hooks/useJourneyDataBridge";
 import { useLayout } from "./hooks/useLayout";
+import { useDeleteSelectionShortcut } from "./hooks/useDeleteSelectionShortcut";
 import { JourneyContext, type JourneyNodeData } from "./JourneyContext";
 import {
   SelectedNodeContext,
@@ -55,6 +56,12 @@ interface ProblemJourneyCanvasProps {
 
 const noop = () => {};
 
+// Edges are never part of a selection: the marquee would otherwise pick up every
+// connection touching a selected card, and a journey edge is a branch label, not
+// something to delete on its own. Module scope — an inline object would re-run
+// React Flow's edge updater on every render.
+const EDGE_DEFAULTS = { selectable: false };
+
 function CanvasInner({
   stakeholderRows,
   availableMilestones,
@@ -70,8 +77,10 @@ function CanvasInner({
     addTriggerNode,
     addChildNode,
     canDeleteNode,
-    childCount,
-    deleteNode,
+    canDeleteSelection,
+    childIds,
+    deleteNodes,
+    toggleNodeSelected,
     updateNodeData,
     updateEdgeLabel,
     saveProblem,
@@ -151,31 +160,88 @@ function CanvasInner({
     setSelectedProblem(null);
   }, []);
 
-  // Id of the card whose delete was requested — the confirmation dialog is open
-  // while this is set. Nothing is written until the user confirms.
-  const [nodePendingDelete, setNodePendingDelete] = useState<string | null>(
-    null,
-  );
+  // Cards whose delete was requested — the confirmation dialog is open while this
+  // isn't empty. One id when it came from a card's trash button, the whole
+  // selection when it came from the Delete key. Nothing is written until the user
+  // confirms.
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
 
   const requestDeleteNode = useCallback((nodeId: string) => {
-    setNodePendingDelete(nodeId);
+    setPendingDeleteIds([nodeId]);
   }, []);
 
-  const confirmDeleteNode = useCallback(() => {
-    if (!nodePendingDelete) return;
-    deleteNode(nodePendingDelete);
-    // The sheet outlives the card it was opened from, so close it when its node
-    // is the one going away.
-    setSelectedProblem((current) =>
-      current?.nodeId === nodePendingDelete ? null : current,
-    );
-    setNodePendingDelete(null);
-  }, [nodePendingDelete, deleteNode]);
+  // Delete/Backspace. A selection the rules refuse — a Scenarios card whose
+  // branches aren't also selected, say — is a silent no-op, matching how a card
+  // that can't be deleted simply doesn't render a trash button.
+  const requestDeleteSelection = useCallback(
+    (ids: string[]) => {
+      if (!canDeleteSelection(ids)) return;
+      setPendingDeleteIds(ids);
+    },
+    [canDeleteSelection],
+  );
 
-  const pendingNodeData = nodePendingDelete
-    ? ((nodes.find((n) => n.id === nodePendingDelete)?.data ??
-        null) as JourneyNodeData | null)
-    : null;
+  useDeleteSelectionShortcut(
+    !readOnly && pendingDeleteIds.length === 0,
+    requestDeleteSelection,
+  );
+
+  const confirmDelete = useCallback(() => {
+    if (pendingDeleteIds.length === 0) return;
+    // Re-checked on confirm: a collaborator can hang a card off one of these
+    // between the dialog opening and this click, which would turn a clean delete
+    // into an orphaning one.
+    if (!canDeleteSelection(pendingDeleteIds)) {
+      setPendingDeleteIds([]);
+      return;
+    }
+    const going = new Set(pendingDeleteIds);
+    deleteNodes(pendingDeleteIds);
+    // The sheet outlives the card it was opened from, so close it when its node
+    // is one of those going away.
+    setSelectedProblem((current) =>
+      current && going.has(current.nodeId) ? null : current,
+    );
+    setPendingDeleteIds([]);
+  }, [pendingDeleteIds, canDeleteSelection, deleteNodes]);
+
+  // What the dialog needs to describe the delete: each card going, and — across
+  // all of them — how much work goes with them and how many cards move up rather
+  // than disappear.
+  const pendingSummary = useMemo(() => {
+    if (pendingDeleteIds.length === 0) return null;
+    const going = new Set(pendingDeleteIds);
+    const cards = pendingDeleteIds.flatMap((id) => {
+      const data = nodes.find((n) => n.id === id)?.data as
+        | JourneyNodeData
+        | undefined;
+      if (!data) return [];
+      return [
+        {
+          id,
+          type: data.type,
+          content: data.content ?? "",
+          problems: nodeProblems.get(id) ?? [],
+        },
+      ];
+    });
+    return {
+      cards,
+      problemCount: pendingDeleteIds.reduce(
+        (total, id) => total + (nodeProblems.get(id)?.length ?? 0),
+        0,
+      ),
+      solutionCount: pendingDeleteIds.reduce(
+        (total, id) => total + (nodeSolutions.get(id)?.length ?? 0),
+        0,
+      ),
+      survivingChildCount: pendingDeleteIds.reduce(
+        (total, id) =>
+          total + childIds(id).filter((child) => !going.has(child)).length,
+        0,
+      ),
+    };
+  }, [pendingDeleteIds, nodes, nodeProblems, nodeSolutions, childIds]);
 
   const selectedProblemData = selectedProblem
     ? (nodeProblems
@@ -223,6 +289,7 @@ function CanvasInner({
                 addChildNode: readOnly ? noop : addChildNode,
                 canDeleteNode,
                 requestDeleteNode: readOnly ? noop : requestDeleteNode,
+                toggleNodeSelected: readOnly ? noop : toggleNodeSelected,
                 updateNodeData: readOnly ? noop : updateNodeData,
                 updateEdgeLabel: readOnly ? noop : updateEdgeLabel,
                 stakeholderRows,
@@ -238,15 +305,26 @@ function CanvasInner({
             >
               <div style={{ width: "100%", height: "100%" }}>
                 <ReactFlow
+                  className="journey-canvas"
                   nodes={nodes}
                   edges={edges}
                   onNodesChange={onNodesChange}
                   onEdgesChange={onEdgesChange}
                   nodeTypes={journeyNodeTypes}
                   edgeTypes={journeyEdgeTypes}
+                  defaultEdgeOptions={EDGE_DEFAULTS}
                   nodesDraggable={false}
                   nodesConnectable={false}
-                  elementsSelectable={false}
+                  // Selection is on so cards can be multi-selected and deleted
+                  // together: Shift+drag marquees, Cmd/Ctrl+click adds one. Plain
+                  // drag still pans — React Flow only suspends panning while the
+                  // selection key is held — and a plain click on a card doesn't
+                  // select, because each card stops the click before it reaches
+                  // the wrapper React Flow selects from (see `useCardSelection`).
+                  elementsSelectable={!readOnly}
+                  // Stays null: the Delete key goes through the confirmation
+                  // dialog (`useDeleteSelectionShortcut`), never straight to a
+                  // delete.
                   deleteKeyCode={null}
                   zoomOnDoubleClick={false}
                   minZoom={0.2}
@@ -338,22 +416,16 @@ function CanvasInner({
               />
 
               <DeleteNodeDialog
-                open={nodePendingDelete !== null}
+                open={pendingDeleteIds.length > 0}
                 onOpenChange={(open) => {
-                  if (!open) setNodePendingDelete(null);
+                  if (!open) setPendingDeleteIds([]);
                 }}
-                nodeType={pendingNodeData?.type ?? null}
-                nodeContent={pendingNodeData?.content ?? ""}
-                problems={
-                  nodePendingDelete
-                    ? (nodeProblems.get(nodePendingDelete) ?? [])
-                    : []
-                }
-                childCount={
-                  nodePendingDelete ? childCount(nodePendingDelete) : 0
-                }
+                cards={pendingSummary?.cards ?? []}
+                problemCount={pendingSummary?.problemCount ?? 0}
+                solutionCount={pendingSummary?.solutionCount ?? 0}
+                survivingChildCount={pendingSummary?.survivingChildCount ?? 0}
                 showProblems={problemsUnlocked}
-                onConfirm={confirmDeleteNode}
+                onConfirm={confirmDelete}
               />
             </JourneyContext.Provider>
           </SelectedNodeContext.Provider>

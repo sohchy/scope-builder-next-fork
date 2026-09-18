@@ -14,6 +14,10 @@ import {
 import { useSelectedNode } from "../SelectedNodeContext";
 import { useNodeProblems } from "../NodeProblemsContext";
 import { useNodeContentDraft } from "../hooks/useNodeContentDraft";
+import {
+  useCardSelection,
+  CARD_SELECTION_RING,
+} from "../hooks/useCardSelection";
 import { Textarea } from "@/components/ui/textarea";
 import { HelpPopover } from "@/components/ui/help-popover";
 import { PROBLEMS_SUB_STEP } from "@/lib/milestones";
@@ -113,7 +117,10 @@ function ProblemCard({
   );
 }
 
-function ActionNodeInner({ id, data }: NodeProps) {
+// `selected` is React Flow's own flag — the multi-selection the marquee and
+// Cmd+click write. Renamed on the way in so it can't be confused with
+// `useSelectedNode()` below, which is the card whose problem is open in the sheet.
+function ActionNodeInner({ id, data, selected: isMultiSelected }: NodeProps) {
   const nodeData = data as unknown as JourneyNodeData;
   const {
     readOnly,
@@ -125,6 +132,7 @@ function ActionNodeInner({ id, data }: NodeProps) {
     canDeleteNode: canDelete,
     requestDeleteNode,
   } = useJourneyContext();
+  const cardSelection = useCardSelection(id);
   // Until 1.3 is marked done an Action node is its text alone: both the problem
   // cards and "Add a problem" are absent rather than greyed. This is the one
   // place the unlock map hides instead of dimming — a card this size has no room
@@ -208,7 +216,8 @@ function ActionNodeInner({ id, data }: NodeProps) {
 
   return (
     <div
-      className={`group/card nopan nodrag pointer-events-auto w-[370px] bg-[#C8ECE6] border-2 rounded-xl p-4 relative shadow-[0_1px_3px_0_rgba(16,24,40,0.06),0_6px_14px_-2px_rgba(16,24,40,0.12)] ${isNodeSelected ? "border-purple-500" : "border-[#B9BDC9]"}`}
+      {...cardSelection}
+      className={`group/card nopan nodrag pointer-events-auto w-[370px] bg-[#C8ECE6] border-2 rounded-xl p-4 relative shadow-[0_1px_3px_0_rgba(16,24,40,0.06),0_6px_14px_-2px_rgba(16,24,40,0.12)] ${isNodeSelected ? "border-purple-500" : "border-[#B9BDC9]"} ${isMultiSelected ? CARD_SELECTION_RING : ""}`}
     >
       <Handle
         id="left"

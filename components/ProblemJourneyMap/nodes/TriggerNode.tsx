@@ -14,6 +14,10 @@ import {
   type JourneyNodeData,
 } from "../JourneyContext";
 import { useNodeContentDraft } from "../hooks/useNodeContentDraft";
+import {
+  useCardSelection,
+  CARD_SELECTION_RING,
+} from "../hooks/useCardSelection";
 import type { StakeholderRow } from "@/services/market";
 import { Textarea } from "@/components/ui/textarea";
 import { HelpPopover } from "@/components/ui/help-popover";
@@ -42,7 +46,9 @@ function groupSelected(
   });
 }
 
-function TriggerNodeInner({ id, data }: NodeProps) {
+// `selected` is React Flow's own flag: the multi-selection the marquee and
+// Cmd+click write.
+function TriggerNodeInner({ id, data, selected }: NodeProps) {
   const nodeData = data as unknown as JourneyNodeData;
   const {
     readOnly,
@@ -53,6 +59,7 @@ function TriggerNodeInner({ id, data }: NodeProps) {
     canDeleteNode: canDelete,
     requestDeleteNode,
   } = useJourneyContext();
+  const cardSelection = useCardSelection(id);
   // Stakeholders are entered on the Market tab, which stays locked until 1.1 is
   // marked done — so until then a Trigger card is its text alone and the picker
   // isn't offered. This is the one gate that hides rather than greys: a card is
@@ -112,7 +119,10 @@ function TriggerNodeInner({ id, data }: NodeProps) {
   // and the help icon; `useLayout` spaces children off each node's measured width,
   // so the extra width just pushes this chain's children further right.
   return (
-    <div className="group/card nopan nodrag pointer-events-auto w-[540px] bg-[#E6DEFA] border-2 border-[#B9BDC9] rounded-xl p-4 relative shadow-[0_1px_3px_0_rgba(16,24,40,0.06),0_6px_14px_-2px_rgba(16,24,40,0.12)]">
+    <div
+      {...cardSelection}
+      className={`group/card nopan nodrag pointer-events-auto w-[540px] bg-[#E6DEFA] border-2 border-[#B9BDC9] rounded-xl p-4 relative shadow-[0_1px_3px_0_rgba(16,24,40,0.06),0_6px_14px_-2px_rgba(16,24,40,0.12)] ${selected ? CARD_SELECTION_RING : ""}`}
+    >
       <Handle
         id="left"
         type="target"

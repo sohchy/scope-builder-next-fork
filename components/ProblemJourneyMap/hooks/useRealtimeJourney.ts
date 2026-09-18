@@ -44,24 +44,40 @@ export function useRealtimeJourney() {
     []
   );
 
-  // Logical delete: the node keeps all of its data and stays in storage, it just
-  // stops being read. The edge that pointed at it is left alone — readers drop
-  // any edge whose endpoint is deleted. When the node had children, call
-  // `reparentJourneyEdges` first so they aren't dropped along with it.
-  const softDeleteJourneyNode = useMutation(({ storage }, id: string) => {
-    const nodes = (storage.get('journeyNodes') as any).toArray() as Array<any>;
-    const node = nodes.find((n: any) => n.get('id') === id);
-    if (node) node.update({ deletedAt: new Date().toISOString() });
-  }, []);
-
-  // Hand a deleted node's children over to its parent: every edge leaving
-  // `fromId` is re-pointed to `toId`. The edges keep their ids, so a branch that
-  // was renamed keeps its label under the new parent.
-  const reparentJourneyEdges = useMutation(
-    ({ storage }, fromId: string, toId: string) => {
+  // Logical delete of one or more cards. The nodes keep all of their data and
+  // stay in storage, they just stop being read. The edge that pointed at a
+  // deleted node is left alone — readers drop any edge whose endpoint is gone.
+  //
+  // `reparents` is the list of edges whose source has to move so the deleted
+  // cards' children close the gap instead of disappearing with them. The caller
+  // resolves each new source (see `planDeletion`) rather than passing a from/to
+  // pair, because with several cards going at once a child's new parent may be
+  // several steps up — and re-pointing it at a node that is itself being deleted
+  // would leave the tree unlayoutable. Edges keep their ids, so a branch that was
+  // renamed keeps its label under the new parent.
+  //
+  // One mutation, so collaborators receive the reparenting and the delete markers
+  // together and never observe a half-applied graph.
+  const deleteJourneyNodes = useMutation(
+    (
+      { storage },
+      ids: string[],
+      reparents: Array<{ id: string; source: string }>
+    ) => {
       const edges = (storage.get('journeyEdges') as any).toArray() as Array<any>;
-      for (const edge of edges) {
-        if (edge.get('source') === fromId) edge.update({ source: toId });
+      for (const { id, source } of reparents) {
+        const edge = edges.find((e: any) => e.get('id') === id);
+        if (edge) edge.update({ source });
+      }
+
+      const deletedAt = new Date().toISOString();
+      const targets = new Set(ids);
+      const nodes = (storage.get('journeyNodes') as any).toArray() as Array<any>;
+      // Marks *every* node carrying a deleted id rather than the first match: a
+      // racing server seed can leave two cards sharing one id, and a survivor
+      // would reappear on the next sync.
+      for (const node of nodes) {
+        if (targets.has(node.get('id'))) node.update({ deletedAt });
       }
     },
     []
@@ -191,8 +207,7 @@ export function useRealtimeJourney() {
     addJourneyEdge,
     updateJourneyEdge,
     updateJourneyNode,
-    softDeleteJourneyNode,
-    reparentJourneyEdges,
+    deleteJourneyNodes,
     addProblem,
     updateProblem,
     removeProblem,

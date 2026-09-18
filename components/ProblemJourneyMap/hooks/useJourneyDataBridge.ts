@@ -4,6 +4,11 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNodesState, useEdgesState, type Node, type Edge } from '@xyflow/react';
 
 import type { JourneyNodeType, JourneyNodeData, JourneyEdgeData } from '../JourneyContext';
+import {
+  canDeleteSelection as canDeleteSelectionRule,
+  planDeletion,
+  type GraphView,
+} from '../lib/deletionPlan';
 import type { Problem, Solution, ProblemQuestionAnswer, SolutionQuestionAnswer, NodeConclusion, ConclusionStatus, PainOrGain, RelieverOrCreator } from '../components/ActionNodeSheet';
 import { useRealtimeJourney, type JourneyNodeStorage, type JourneyEdgeStorage } from './useRealtimeJourney';
 
@@ -53,6 +58,11 @@ function lbNodeToRFNode(lb: JourneyNodeStorage): Node {
     id: lb.id,
     type: lb.type,
     position: { x: 0, y: 0 },
+    // The Startup Idea card opts out of selection for good — it isn't part of the
+    // journey tree and has no delete path. Every other card leaves the flag unset
+    // so the canvas-wide `elementsSelectable` governs it, which is what keeps the
+    // read-only Examples canvas unselectable.
+    ...(lb.type === 'startup_idea' ? { selectable: false } : null),
     data: {
       id: lb.id,
       type: lb.type,
@@ -83,8 +93,7 @@ export function useJourneyDataBridge() {
     addJourneyEdge,
     updateJourneyEdge,
     updateJourneyNode,
-    softDeleteJourneyNode,
-    reparentJourneyEdges,
+    deleteJourneyNodes,
     addProblem: lbAddProblem,
     updateProblem: lbUpdateProblem,
     removeProblem: lbRemoveProblem,
@@ -309,63 +318,77 @@ export function useJourneyDataBridge() {
 
   // Who hangs off whom, and who each node hangs off. The graph is a tree, so a
   // node has at most one parent.
-  const childCounts = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const e of visibleEdges) map.set(e.source, (map.get(e.source) ?? 0) + 1);
-    return map;
-  }, [visibleEdges]);
+  const graphView = useMemo((): GraphView => {
+    const parentOf = new Map<string, string>();
+    const childrenOf = new Map<string, string[]>();
+    for (const e of visibleEdges) {
+      parentOf.set(e.target, e.source);
+      const siblings = childrenOf.get(e.source);
+      if (siblings) siblings.push(e.target);
+      else childrenOf.set(e.source, [e.target]);
+    }
+    const types = new Map<string, JourneyNodeType>(
+      visibleNodes.map((n) => [n.id, n.type])
+    );
+    return { parentOf, childrenOf, typeOf: (id) => types.get(id) };
+  }, [visibleEdges, visibleNodes]);
 
-  const parentOf = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const e of visibleEdges) map.set(e.target, e.source);
-    return map;
-  }, [visibleEdges]);
-
-  const childCount = useCallback(
-    (nodeId: string) => childCounts.get(nodeId) ?? 0,
-    [childCounts]
+  const childIds = useCallback(
+    (nodeId: string): readonly string[] => graphView.childrenOf.get(nodeId) ?? [],
+    [graphView]
   );
 
-  // What the delete affordance on each card is gated on. A childless card can
-  // always go. A card with children can go too — its children move up to its
-  // parent — except in two cases that would leave the map worse off:
-  //
-  //   • no parent to move them to: the head of a chain keeps everything below it
-  //   • a Scenarios card: its children *are* its branches, and reparenting them
-  //     would spread the fork onto a card that isn't a fork
+  // Whether a set of cards can be deleted together. The rules live in
+  // `lib/deletionPlan` — they're evaluated against what survives the delete, so
+  // selecting a Scenarios card together with its branches lifts the block that
+  // stops it going on its own.
+  const canDeleteSelection = useCallback(
+    (ids: readonly string[]) => canDeleteSelectionRule(ids, graphView),
+    [graphView]
+  );
+
+  // What the delete affordance on each card is gated on. One card is just a
+  // selection of one, so both paths share a rule engine and can't drift apart.
   const canDeleteNode = useCallback(
-    (nodeId: string) => {
-      if (childCount(nodeId) === 0) return true;
-      if (!parentOf.has(nodeId)) return false;
-      const type = visibleNodes.find((n) => n.id === nodeId)?.type;
-      return type !== 'split_route';
-    },
-    [childCount, parentOf, visibleNodes]
+    (nodeId: string) => canDeleteSelection([nodeId]),
+    [canDeleteSelection]
   );
 
-  // Logical delete. Locally the node goes right away: the edge that hung it off
-  // its parent is dropped, and every edge leaving it is re-pointed at that parent
-  // so its children close the gap rather than disappearing with it. Storage gets
-  // the same two writes — reparent first, then the delete marker — and
-  // collaborators pick both up through the usual diff sync.
-  const deleteNode = useCallback(
-    (nodeId: string) => {
-      const parentId = parentOf.get(nodeId) ?? null;
+  // Logical delete of one or more cards. Locally they go right away: the edges
+  // that hung them off their parents are dropped, and every edge leaving one of
+  // them is re-pointed at the nearest card that *stays*, so the children close
+  // the gap rather than disappearing along with them.
+  //
+  // The whole delete is planned before anything is written (see `planDeletion`),
+  // which is what makes deleting adjacent cards safe — resolving each child's new
+  // parent one card at a time would re-point it at a node that is itself going
+  // away. Local state gets one write each, storage gets one mutation, and
+  // collaborators pick it all up through the usual diff sync.
+  const deleteNodes = useCallback(
+    (ids: readonly string[]) => {
+      const plan = planDeletion(ids, graphView, edges);
+      if (!plan) return;
 
-      setNodes((current) => current.filter((n) => n.id !== nodeId));
-      setEdges((current) => {
-        if (!parentId) {
-          return current.filter((e) => e.source !== nodeId && e.target !== nodeId);
-        }
-        return current
-          .filter((e) => e.target !== nodeId)
-          .map((e) => (e.source === nodeId ? { ...e, source: parentId } : e));
-      });
+      setNodes((current) => current.filter((n) => !plan.deleted.has(n.id)));
+      setEdges(() => plan.keptEdges);
 
-      if (parentId) reparentJourneyEdges(nodeId, parentId);
-      softDeleteJourneyNode(nodeId);
+      deleteJourneyNodes([...plan.deleted], plan.reparents);
     },
-    [setNodes, setEdges, parentOf, reparentJourneyEdges, softDeleteJourneyNode]
+    [graphView, edges, setNodes, setEdges, deleteJourneyNodes]
+  );
+
+  // Add or remove one card from the multi-selection. React Flow owns the flag —
+  // it's what the marquee writes and what each card reads — so a Cmd-click just
+  // flips it on the controlled node list.
+  const toggleNodeSelected = useCallback(
+    (nodeId: string) => {
+      setNodes((current) =>
+        current.map((n) =>
+          n.id === nodeId ? { ...n, selected: !n.selected } : n
+        )
+      );
+    },
+    [setNodes]
   );
 
   const updateNodeData = useCallback(
@@ -566,8 +589,10 @@ export function useJourneyDataBridge() {
     addTriggerNode,
     addChildNode,
     canDeleteNode,
-    childCount,
-    deleteNode,
+    canDeleteSelection,
+    childIds,
+    deleteNodes,
+    toggleNodeSelected,
     updateNodeData,
     updateEdgeLabel,
     saveProblem,

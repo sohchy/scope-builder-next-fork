@@ -6,10 +6,14 @@ import { GitForkIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 
 import { NodeTypeMenu } from '../components/NodeTypeMenu';
 import { useJourneyContext, type JourneyNodeType } from '../JourneyContext';
+import { useCardSelection, CARD_SELECTION_RING } from '../hooks/useCardSelection';
 
-function SplitRouteNodeInner({ id }: NodeProps) {
+// `selected` is React Flow's own flag: the multi-selection the marquee and
+// Cmd+click write.
+function SplitRouteNodeInner({ id, selected }: NodeProps) {
   const { readOnly, addChildNode, canDeleteNode: canDelete, requestDeleteNode } =
     useJourneyContext();
+  const cardSelection = useCardSelection(id);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -45,7 +49,10 @@ function SplitRouteNodeInner({ id }: NodeProps) {
   const canDeleteNode = !readOnly && canDelete(id);
 
   return (
-    <div className="group/card nopan nodrag pointer-events-auto w-[180px] bg-[#F5DFC6] border-2 border-[#B9BDC9] rounded-xl p-4 relative shadow-[0_1px_3px_0_rgba(16,24,40,0.06),0_6px_14px_-2px_rgba(16,24,40,0.12)] flex items-center gap-3">
+    <div
+      {...cardSelection}
+      className={`group/card nopan nodrag pointer-events-auto w-[180px] bg-[#F5DFC6] border-2 border-[#B9BDC9] rounded-xl p-4 relative shadow-[0_1px_3px_0_rgba(16,24,40,0.06),0_6px_14px_-2px_rgba(16,24,40,0.12)] flex items-center gap-3 ${selected ? CARD_SELECTION_RING : ''}`}
+    >
       <Handle
         id="left"
         type="target"

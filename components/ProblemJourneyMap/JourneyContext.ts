@@ -56,6 +56,11 @@ interface JourneyContextValue {
   /** Ask to delete a card: opens the confirmation dialog, which lists what would
    * be lost. It does not delete anything on its own. */
   requestDeleteNode: (nodeId: string) => void;
+  /** Add or remove one card from the multi-selection (Cmd/Ctrl+click). The
+   * selection itself lives on React Flow's own `node.selected` — the marquee
+   * writes the same flag — so this only exists for the modifier-click path,
+   * which has to beat the card's inner click handlers. See `useCardSelection`. */
+  toggleNodeSelected: (nodeId: string) => void;
   updateNodeData: (id: string, patch: Partial<Omit<JourneyNodeData, 'id' | 'type'>>) => void;
   /** Rename a branch connection. An empty string clears it back to "Option n". */
   updateEdgeLabel: (edgeId: string, label: string) => void;

@@ -202,6 +202,17 @@
     border-width: 0 0 1px 0 !important;
     border-radius: 0 !important;
   }
+
+  /* Journey canvas only: after a Shift+drag marquee, React Flow mounts a dotted
+     rectangle over the selected cards and focuses it. The cards carry their own
+     selection ring, so the rectangle is redundant chrome — and because it grabs
+     focus, it would also intercept the Delete key that deletes the selection.
+     Scoped to .journey-canvas so the other canvases keep the default behaviour.
+     `!important` is load-bearing here for the same reason as the rules above:
+     @xyflow/react's stylesheet is unlayered and outranks @layer base. */
+  .journey-canvas .react-flow__nodesselection {
+    display: none !important;
+  }
 }
 
 /* Scrollable without a visible scrollbar — for strips where the bar would sit
