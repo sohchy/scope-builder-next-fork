@@ -528,13 +528,18 @@ export default function BookingView({
                                       key={entry.subSlotId}
                                       subSlotId={entry.subSlotId}
                                       mentorName={entry.mentorName}
-                                      mode={isBookedByMe ? "manage" : "book"}
+                                      mode={
+                                        isBookedByMe || isBookedByTeammate
+                                          ? "manage"
+                                          : "book"
+                                      }
                                       currentLink={entry.booking?.meeting_link}
                                       currentNote={entry.booking?.note}
                                       lastMeetingLink={lastMeetingLink}
                                       disabled={isBookedByOther}
                                       bookedByTeammate={isBookedByTeammate}
                                       bookerName={entry.booking?.user_name}
+                                      outcome={entry.booking?.outcome}
                                       onBook={handleBook}
                                       onUpdate={handleUpdate}
                                       onCancel={handleCancel}

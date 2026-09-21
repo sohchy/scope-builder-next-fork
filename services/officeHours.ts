@@ -444,19 +444,31 @@ export async function bookSlot(
   }
 }
 
+/**
+ * Who may update or cancel a booking: whoever made it, or any member of the
+ * startup it was made for (`org_id` is pinned at booking time), so a team can
+ * manage its sessions regardless of who signed up.
+ */
+function bookingManagerFilter(userId: string, orgId: string | null | undefined) {
+  return {
+    OR: [{ user_id: userId }, ...(orgId ? [{ org_id: orgId }] : [])],
+  };
+}
+
 export async function updateBooking(
   subSlotId: string,
   meetingLink: string,
   note = "",
 ) {
-  const { userId } = await auth();
+  const { userId, orgId } = await auth();
   if (!userId) redirect("/sign-in");
 
   const { meetingLink: validatedLink, note: validatedNote } =
     bookingLinkFormSchema.parse({ meetingLink, note });
+  const managerFilter = bookingManagerFilter(userId, orgId);
 
   const existing = await prisma.officeHourBooking.findUnique({
-    where: { sub_slot_id: subSlotId, user_id: userId },
+    where: { sub_slot_id: subSlotId, ...managerFilter },
     select: { meeting_link: true },
   });
   // Only a changed link bumps the sequence and re-sends. The note now rides
@@ -465,7 +477,7 @@ export async function updateBooking(
   const linkChanged = existing?.meeting_link !== validatedLink;
 
   const booking = await prisma.officeHourBooking.update({
-    where: { sub_slot_id: subSlotId, user_id: userId },
+    where: { sub_slot_id: subSlotId, ...managerFilter },
     data: {
       meeting_link: validatedLink,
       note: validatedNote || null,
@@ -482,11 +494,12 @@ export async function updateBooking(
 }
 
 export async function cancelBooking(subSlotId: string) {
-  const { userId } = await auth();
+  const { userId, orgId } = await auth();
   if (!userId) redirect("/sign-in");
+  const managerFilter = bookingManagerFilter(userId, orgId);
 
   const existing = await prisma.officeHourBooking.findUnique({
-    where: { sub_slot_id: subSlotId, user_id: userId },
+    where: { sub_slot_id: subSlotId, ...managerFilter },
     select: { id: true },
   });
 
@@ -494,7 +507,7 @@ export async function cancelBooking(subSlotId: string) {
   const snapshot = existing ? await getBookingEmailSnapshot(existing.id) : null;
 
   await prisma.officeHourBooking.delete({
-    where: { sub_slot_id: subSlotId, user_id: userId },
+    where: { sub_slot_id: subSlotId, ...managerFilter },
   });
 
   revalidatePath("/office-hours");

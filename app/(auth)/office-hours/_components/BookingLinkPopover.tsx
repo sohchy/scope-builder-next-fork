@@ -28,6 +28,13 @@ import {
   BOOKING_NOTE_MAX_LENGTH,
 } from "@/schemas/officeHours";
 import { getInitials } from "@/lib/officeHoursUtils";
+import type { BookingOutcome } from "@/lib/generated/prisma";
+
+const OUTCOME_LABELS: Record<BookingOutcome, string> = {
+  attended: "Attended",
+  rescheduled: "Rescheduled",
+  missed: "Missed",
+};
 
 interface BookingLinkPopoverProps {
   subSlotId: string;
@@ -38,12 +45,14 @@ interface BookingLinkPopoverProps {
   lastMeetingLink?: string | null;
   disabled?: boolean;
   /**
-   * Booked by another member of the signed-in user's team. Shown highlighted
-   * like their own bookings but inert: only the booker can update or cancel.
+   * Booked by another member of the signed-in user's team. Managed exactly like
+   * the user's own booking; only the header names the teammate who booked.
    */
   bookedByTeammate?: boolean;
-  /** Name of the teammate who booked, for the tooltip. */
+  /** Name of the teammate who booked, for the tooltip and header. */
   bookerName?: string | null;
+  /** How the instructor marked the session. Read-only here; only they set it. */
+  outcome?: BookingOutcome | null;
   onBook: (
     subSlotId: string,
     meetingLink: string,
@@ -67,6 +76,7 @@ export default function BookingLinkPopover({
   disabled,
   bookedByTeammate,
   bookerName,
+  outcome,
   onBook,
   onUpdate,
   onCancel,
@@ -104,27 +114,23 @@ export default function BookingLinkPopover({
     });
   }
 
+  // Only slots this user can manage carry an outcome (someone else's booking is
+  // rendered disabled), and an attended one reads green over the booked purple.
+  // Missed and rescheduled keep the purple for now.
   const avatarClassName = `w-9 h-9 rounded-full border-2 text-xs font-bold flex items-center justify-center transition-colors ${
-    bookedByTeammate
-      ? "bg-[#6A35FF] text-white border-[#6A35FF] cursor-default"
-      : disabled
+    disabled
       ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-60"
       : mode === "manage"
-        ? "bg-[#6A35FF] text-white border-[#6A35FF] hover:bg-[#5520e0]"
+        ? outcome === "attended"
+          ? "bg-[#28BF58] text-white border-[#28BF58] hover:bg-[#20A249]"
+          : "bg-[#6A35FF] text-white border-[#6A35FF] hover:bg-[#5520e0]"
         : "bg-white text-gray-600 border-gray-300 hover:border-[#6A35FF] hover:text-[#6A35FF]"
   }`;
 
-  if (bookedByTeammate) {
-    return (
-      <button
-        disabled
-        title={`${mentorName} — booked by ${bookerName || "a teammate"}`}
-        className={avatarClassName}
-      >
-        {getInitials(mentorName)}
-      </button>
-    );
-  }
+  const triggerTitle =
+    bookedByTeammate && !disabled
+      ? `${mentorName} — booked by ${bookerName || "a teammate"}`
+      : mentorName;
 
   if (disabled) {
     return (
@@ -168,17 +174,37 @@ export default function BookingLinkPopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button title={mentorName} className={avatarClassName}>
+        <button title={triggerTitle} className={avatarClassName}>
           {getInitials(mentorName)}
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-80 space-y-3" align="center">
         <div>
-          <p className="font-bold text-gray-900">{user?.fullName}</p>
-          <p className="text-sm text-gray-500">
-            {user?.primaryEmailAddress?.emailAddress}
-          </p>
+          {bookedByTeammate ? (
+            <>
+              <p className="font-bold text-gray-900">
+                {bookerName || "A teammate"}
+              </p>
+              <p className="text-sm text-gray-500">Booked by a teammate</p>
+            </>
+          ) : (
+            <>
+              <p className="font-bold text-gray-900">{user?.fullName}</p>
+              <p className="text-sm text-gray-500">
+                {user?.primaryEmailAddress?.emailAddress}
+              </p>
+            </>
+          )}
         </div>
+
+        {outcome && (
+          <p className="text-xs text-gray-500">
+            Session outcome:{" "}
+            <span className="font-semibold text-gray-700">
+              {OUTCOME_LABELS[outcome]}
+            </span>
+          </p>
+        )}
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
