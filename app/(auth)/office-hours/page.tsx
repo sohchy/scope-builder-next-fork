@@ -10,7 +10,7 @@ import OfficeHoursTabs from "./_components/OfficeHoursTabs";
 
 export default async function OfficeHoursPage() {
   const isAdmin = await checkRole("admin");
-  const { userId } = await auth();
+  const { userId, orgId } = await auth();
 
   if (isAdmin) {
     // Instructors see their own availability and, alongside it, the whole
@@ -37,7 +37,11 @@ export default async function OfficeHoursPage() {
   const slots = await getAllSlotsWithBookings();
   return (
     <div className="p-8 h-full flex flex-col">
-      <BookingView initialSlots={slots} currentUserId={userId!} />
+      <BookingView
+        initialSlots={slots}
+        currentUserId={userId!}
+        currentOrgId={orgId ?? null}
+      />
     </div>
   );
 }

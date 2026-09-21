@@ -37,6 +37,13 @@ interface BookingLinkPopoverProps {
   currentNote?: string | null;
   lastMeetingLink?: string | null;
   disabled?: boolean;
+  /**
+   * Booked by another member of the signed-in user's team. Shown highlighted
+   * like their own bookings but inert: only the booker can update or cancel.
+   */
+  bookedByTeammate?: boolean;
+  /** Name of the teammate who booked, for the tooltip. */
+  bookerName?: string | null;
   onBook: (
     subSlotId: string,
     meetingLink: string,
@@ -58,6 +65,8 @@ export default function BookingLinkPopover({
   currentNote,
   lastMeetingLink,
   disabled,
+  bookedByTeammate,
+  bookerName,
   onBook,
   onUpdate,
   onCancel,
@@ -96,12 +105,26 @@ export default function BookingLinkPopover({
   }
 
   const avatarClassName = `w-9 h-9 rounded-full border-2 text-xs font-bold flex items-center justify-center transition-colors ${
-    disabled
+    bookedByTeammate
+      ? "bg-[#6A35FF] text-white border-[#6A35FF] cursor-default"
+      : disabled
       ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-60"
       : mode === "manage"
         ? "bg-[#6A35FF] text-white border-[#6A35FF] hover:bg-[#5520e0]"
         : "bg-white text-gray-600 border-gray-300 hover:border-[#6A35FF] hover:text-[#6A35FF]"
   }`;
+
+  if (bookedByTeammate) {
+    return (
+      <button
+        disabled
+        title={`${mentorName} — booked by ${bookerName || "a teammate"}`}
+        className={avatarClassName}
+      >
+        {getInitials(mentorName)}
+      </button>
+    );
+  }
 
   if (disabled) {
     return (

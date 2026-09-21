@@ -52,6 +52,8 @@ type TimeBlock = {
 interface BookingViewProps {
   initialSlots: SlotWithSubSlots[];
   currentUserId: string;
+  /** The signed-in user's active org (startup), used to spot teammates' bookings. */
+  currentOrgId?: string | null;
   /**
    * Booker org id → startup name, resolved server-side from Clerk. Only the
    * read-only schedule names teams, so the booking view is handed nothing.
@@ -69,6 +71,7 @@ const WEEKS_PER_PAGE = 4;
 export default function BookingView({
   initialSlots,
   currentUserId,
+  currentOrgId = null,
   startupNames = {},
   readOnly = false,
 }: BookingViewProps) {
@@ -511,8 +514,15 @@ export default function BookingView({
 
                                   const isBookedByMe =
                                     entry.booking?.user_id === currentUserId;
+                                  const isBookedByTeammate =
+                                    !!entry.booking &&
+                                    !isBookedByMe &&
+                                    !!currentOrgId &&
+                                    entry.booking.org_id === currentOrgId;
                                   const isBookedByOther =
-                                    !!entry.booking && !isBookedByMe;
+                                    !!entry.booking &&
+                                    !isBookedByMe &&
+                                    !isBookedByTeammate;
                                   return (
                                     <BookingLinkPopover
                                       key={entry.subSlotId}
@@ -523,6 +533,8 @@ export default function BookingView({
                                       currentNote={entry.booking?.note}
                                       lastMeetingLink={lastMeetingLink}
                                       disabled={isBookedByOther}
+                                      bookedByTeammate={isBookedByTeammate}
+                                      bookerName={entry.booking?.user_name}
                                       onBook={handleBook}
                                       onUpdate={handleUpdate}
                                       onCancel={handleCancel}
