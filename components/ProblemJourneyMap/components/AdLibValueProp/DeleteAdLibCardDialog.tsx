@@ -66,7 +66,7 @@ export function DeleteAdLibCardDialog({
         {/* Shown so the user can tell which version this is. */}
         <div className="rounded-lg bg-[#F3F3F6] p-3">
           <p className="text-sm font-semibold text-gray-700">
-            Ad-Lib Value Proposition · Version {card?.version}
+            Value Proposition Ad-Lib · Version {card?.version}
           </p>
           <p className="mt-0.5 text-base text-gray-800">
             {sentence || (

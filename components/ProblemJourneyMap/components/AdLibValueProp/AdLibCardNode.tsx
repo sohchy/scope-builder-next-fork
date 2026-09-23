@@ -51,7 +51,7 @@ function AdLibCardNodeInner({ id, data }: NodeProps<AdLibCardNodeType>) {
       <div className="flex items-center justify-between gap-2 border-b border-[#B9BDC9] pb-4">
         <div className="flex items-center gap-2">
           <span className="text-lg font-semibold tracking-wide text-[#111827]">
-            Ad-Lib Value Proposition
+            Value Proposition Ad-Lib
           </span>
           <span className="text-lg font-semibold text-[#6A35FF]">
             · Version {data.version}
