@@ -3,7 +3,7 @@
 import liveblocks from "@/lib/liveblocks";
 import { LiveObject } from "@liveblocks/node";
 import { redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 import { startupIdeaDefaultFor } from "@/lib/startupIdeaDefaults";
 
@@ -135,4 +135,47 @@ async function removeDuplicateStartupIdeaNodes(roomId: string) {
   } catch {
     // The canvas already ignores the extra copies; the next load tries again.
   }
+}
+
+/**
+ * Each org's Startup Idea card text, for the instructor-facing leaderboard's hover
+ * preview. Keyed by org id; an org with no room yet (never opened its journey map)
+ * or an empty card is simply absent, so the caller falls back to a placeholder.
+ * Like `getAllAttendedSessions`, this returns every org unconditionally — the
+ * leaderboard page is the only caller and it filters to the current cohort itself.
+ */
+export async function getAllStartupIdeaPreviews(): Promise<
+  Record<string, string>
+> {
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+
+  const client = await clerkClient();
+  const organizations = await client.organizations.getOrganizationList({
+    limit: 200,
+  });
+
+  const entries = await Promise.all(
+    organizations.data.map(async (org) => {
+      try {
+        // The "json" overload returns plain objects; the default one returns nested
+        // { liveblocksType, data } wrappers that would need unwrapping at every level.
+        const storage = (await liveblocks.getStorageDocument(
+          `problem-journey-${org.id}`,
+          "json"
+        )) as unknown as {
+          journeyNodes?: { type?: string; content?: string }[];
+        };
+        const content = storage.journeyNodes?.find(
+          (node) => node?.type === "startup_idea"
+        )?.content;
+        return [org.id, content?.trim() ?? ""] as const;
+      } catch {
+        // No room yet — the startup hasn't opened its journey map.
+        return [org.id, ""] as const;
+      }
+    })
+  );
+
+  return Object.fromEntries(entries.filter(([, content]) => content !== ""));
 }

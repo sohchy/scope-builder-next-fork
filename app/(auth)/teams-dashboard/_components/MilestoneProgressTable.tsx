@@ -14,6 +14,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import type { AttendedSession } from "@/services/officeHours";
 import {
   Table,
@@ -51,6 +56,9 @@ export interface MilestoneProgressRow {
   subSteps: Record<string, boolean>;
   /** All 6 slots, indexed by milestone number (milestone 0 is first). */
   milestones: MilestoneAccessState[];
+  /** The Startup Idea card's text from the org's journey map. Empty when the
+   * room doesn't exist yet or the card was never filled in. */
+  startupIdea: string;
 }
 
 /** Sub-step columns are narrow enough to fit 25 of them; the milestone columns get
@@ -219,6 +227,40 @@ function OfficeHoursCell({ sessions }: { sessions: AttendedSession[] }) {
   );
 }
 
+/**
+ * The startup's name, with its Startup Idea card a hover away. Underlined like the
+ * OH count so it reads as revealing more, but hover- rather than click-triggered —
+ * `HoverCard` (unlike `Popover`/`Tooltip`) keeps itself open while the pointer moves
+ * from the name into the card, which a long idea needs room to scroll in. A startup
+ * that hasn't written one yet (or has no room) just renders as plain text.
+ */
+function StartupNameCell({ name, idea }: { name: string; idea: string }) {
+  if (!idea) {
+    return <span>{name}</span>;
+  }
+
+  return (
+    <HoverCard openDelay={150} closeDelay={100}>
+      <HoverCardTrigger asChild>
+        <span
+          tabIndex={0}
+          className="cursor-default underline decoration-dotted underline-offset-4 hover:text-[#6A35FF]"
+        >
+          {name}
+        </span>
+      </HoverCardTrigger>
+      <HoverCardContent align="start" className="w-80 p-0">
+        <p className="border-b border-gray-100 px-3 py-2 text-xs font-semibold text-gray-700">
+          Startup Idea
+        </p>
+        <p className="max-h-64 overflow-y-auto px-3 py-2 text-xs whitespace-pre-wrap text-gray-700">
+          {idea}
+        </p>
+      </HoverCardContent>
+    </HoverCard>
+  );
+}
+
 // Nothing here closes over a callback, so the columns are a module-level constant
 // rather than a `getColumns(...)` factory.
 const columns: ColumnDef<MilestoneProgressRow>[] = [
@@ -227,6 +269,12 @@ const columns: ColumnDef<MilestoneProgressRow>[] = [
     header: "Startup",
     size: NAME_WIDTH,
     minSize: NAME_WIDTH,
+    cell: ({ row }) => (
+      <StartupNameCell
+        name={row.original.orgName}
+        idea={row.original.startupIdea}
+      />
+    ),
   },
   // Sits ahead of the milestone groups so it's readable without scrolling the 26
   // columns to its right. Like `orgName` it's a top-level leaf, so it renders in the

@@ -60,6 +60,22 @@ export function storedSlotDay(date: Date): {
 }
 
 /**
+ * True if a stored slot `date` recovers (via `storedSlotDay`) to the same
+ * calendar day as `calendarDate` — a UI day cell, read in its own local
+ * Y/M/D. Use this instead of `isSameDay(new Date(slot.date), calendarDate)`,
+ * which compares both in the viewer's local timezone and misgroups slots for
+ * anyone whose timezone differs from the admin who created them.
+ */
+export function isSameStoredDay(slotDate: Date, calendarDate: Date): boolean {
+  const slotDay = storedSlotDay(slotDate);
+  return (
+    slotDay.year === calendarDate.getFullYear() &&
+    slotDay.month === calendarDate.getMonth() &&
+    slotDay.day === calendarDate.getDate()
+  );
+}
+
+/**
  * Combines a stored slot `date` with an "HH:mm" wall-clock time into a real UTC
  * instant, treating the time as wall-clock in `timeZone`.
  */

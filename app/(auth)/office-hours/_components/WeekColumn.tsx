@@ -3,7 +3,7 @@
 import { Week, TimeOption } from "@/lib/officeHoursUtils";
 import type { AdminSlot } from "@/services/officeHours";
 import DayRow from "./DayRow";
-import { isSameDay } from "date-fns";
+import { isSameStoredDay } from "@/lib/officeHoursCalendar";
 
 interface WeekColumnProps {
   week: Week;
@@ -33,7 +33,7 @@ export default function WeekColumn({
       <div className="px-4 py-2 flex-1 min-h-0 overflow-y-auto overscroll-contain">
         {week.days.map((day) => {
           const daySlots = slots.filter((s) =>
-            isSameDay(new Date(s.date), day.date),
+            isSameStoredDay(new Date(s.date), day.date),
           );
           return (
             <DayRow

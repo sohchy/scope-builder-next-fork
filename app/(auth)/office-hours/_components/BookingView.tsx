@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { parseISO, isSameDay } from "date-fns";
+import { parseISO } from "date-fns";
 import { toast } from "sonner";
 import {
   BookingOutcome,
@@ -11,6 +11,7 @@ import {
   OfficeHourBooking,
 } from "@/lib/generated/prisma";
 import { generateWeeks, formatTimeDisplay } from "@/lib/officeHoursUtils";
+import { isSameStoredDay } from "@/lib/officeHoursCalendar";
 import {
   bookSlot,
   cancelBooking,
@@ -99,16 +100,12 @@ export default function BookingView({
 
   /** The instructors with slots on a given page — the filter's options there. */
   const mentorsOnPage = (page: number) => {
-    const dates = new Set(
-      weeksForPage(page).flatMap((w) =>
-        w.days.map((d) => d.date.toDateString()),
-      ),
-    );
+    const days = weeksForPage(page).flatMap((w) => w.days.map((d) => d.date));
     return new Set(
       slots
         .filter(
           (s) =>
-            dates.has(new Date(s.date).toDateString()) &&
+            days.some((d) => isSameStoredDay(new Date(s.date), d)) &&
             s.subSlots.some(isVisibleSubSlot),
         )
         .map((s) => s.mentor_name),
@@ -169,7 +166,7 @@ export default function BookingView({
 
   function getDayTimeBlocks(date: Date): TimeBlock[] {
     const daySlots = filteredSlots.filter((s) =>
-      isSameDay(new Date(s.date), date),
+      isSameStoredDay(new Date(s.date), date),
     );
     const blockMap = new Map<string, TimeBlock>();
     for (const slot of daySlots) {
