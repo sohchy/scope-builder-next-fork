@@ -11,6 +11,7 @@ import {
 
 import { ScalePicker } from "../ScalePicker";
 import type { AnswerableQuestion } from "./types";
+import { Textarea } from "@/components/ui/textarea";
 
 interface AnswerInputProps {
   question: AnswerableQuestion;
@@ -72,7 +73,7 @@ export function AnswerInput({
   }
 
   return (
-    <Input
+    <Textarea
       value={value}
       readOnly={readOnly}
       onChange={(e) => onChange(e.target.value)}
