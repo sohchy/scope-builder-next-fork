@@ -78,6 +78,7 @@ model Participant {
   interview_responses    InterviewResponse[]
 
   problem_interview_answers ProblemInterviewAnswer[]
+  imported_interview        ImportedInterview?
 
   @@index([example_number])
   @@map("participants")
@@ -760,4 +761,46 @@ model ProblemHypothesisSeed {
   @@index([org_id])
   @@index([example_number])
   @@map("problem_hypothesis_seeds")
+}
+
+// An interview brought in from a CSV (hypothesis, question, answer) instead of answered
+// against the journey map's problems. Deliberately separate from the Problem* tables:
+// the journey map stays the source of truth for those, and an import never touches it.
+// One per participant — re-importing replaces the row.
+model ImportedInterview {
+  id             String   @id @default(cuid())
+  org_id         String
+  participant_id String   @unique
+  file_name      String   @default("")
+  // { hypotheses: [{ id, text, questions: [{ id, text, answer }] }] } — see
+  // ImportedInterviewData in services/importedInterview.ts.
+  data           Json
+  example_number Int? // NULL = real data, N = example set N
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  participant Participant @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+
+  @@index([org_id])
+  @@index([example_number])
+  @@map("imported_interviews")
+}
+
+// The team's write-up of an imported hypothesis on the Interview Summary tab. Imported
+// hypotheses have no journey-map identity, so they are addressed by their normalized
+// text — which is also what merges the same hypothesis across participants' imports.
+model ImportedHypothesisSummary {
+  id               String   @id @default(cuid())
+  org_id           String
+  hypothesis_key   String
+  summary          String   @default("")
+  // 1..5, 0 = unrated
+  validation_level Int      @default(0)
+  example_number   Int? // NULL = real data, N = example set N
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  @@unique([org_id, hypothesis_key])
+  @@index([example_number])
+  @@map("imported_hypothesis_summaries")
 }

@@ -23,6 +23,8 @@ interface HypothesisSummaryBlockProps {
   /** Print the question above each answer. Page-wide, off by default. */
   showQuestions: boolean;
   orderBy: AnswerOrder;
+  /** Off when the card's own header already names the hypothesis. */
+  showPrompt?: boolean;
 }
 
 /**
@@ -34,6 +36,7 @@ export function HypothesisSummaryBlock({
   hypothesis,
   showQuestions,
   orderBy,
+  showPrompt = true,
 }: HypothesisSummaryBlockProps) {
   const { questions } = hypothesis;
 
@@ -75,17 +78,19 @@ export function HypothesisSummaryBlock({
         {/* Baseline-aligned rather than centred: the pill trails the prompt's first line
             even when a long prompt wraps under it. `flex-1` stays off the prompt so the
             pill hugs the text instead of being pushed to the far edge. */}
-        <div className="flex items-baseline gap-2">
-          <span className="text-sm font-medium text-[#6A35FF]">
-            {hypothesis.index}
-          </span>
-          <p className="min-w-0 text-sm font-medium text-[#1F2430]">
-            {hypothesis.prompt}
-          </p>
-          <span className="inline-flex shrink-0 items-center rounded-full bg-[#F4F0FF] px-2.5 py-0.5 text-xs font-medium text-[#6A35FF]">
-            Hypothesis
-          </span>
-        </div>
+        {showPrompt && (
+          <div className="flex items-baseline gap-2">
+            <span className="text-sm font-medium text-[#6A35FF]">
+              {hypothesis.index}
+            </span>
+            <p className="min-w-0 text-sm font-medium text-[#1F2430]">
+              {hypothesis.prompt}
+            </p>
+            <span className="inline-flex shrink-0 items-center rounded-full bg-[#F4F0FF] px-2.5 py-0.5 text-xs font-medium text-[#6A35FF]">
+              Hypothesis
+            </span>
+          </div>
+        )}
 
         <div className="flex gap-6 text-xs text-[#697288]">
           <span>Answered: {hypothesis.answeredCount}</span>

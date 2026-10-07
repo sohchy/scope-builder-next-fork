@@ -24,13 +24,18 @@ export interface SummaryQuestion {
   answers: SummaryAnswer[];
 }
 
+/**
+ * Where a hypothesis's summary is written. A journey-map hypothesis lives on the canvas,
+ * so it is addressed by the triple that locates it there; an imported (CSV) one has no
+ * canvas identity and is addressed by its normalized text instead.
+ */
+export type SummaryTarget =
+  | { kind: "regular"; nodeId: string; problemId: string; bankQuestionId: string }
+  | { kind: "imported"; hypothesisKey: string };
+
 export interface SummaryHypothesis {
   id: string;
-  /** The triple that addresses the stored summary — the hypothesis itself lives on the
-   *  journey-map canvas, so there is no row id to write against. */
-  nodeId: string;
-  problemId: string;
-  bankQuestionId: string;
+  target: SummaryTarget;
   /** 1-based position shown in the UI ("1.", "2.", ...). */
   index: number;
   /** The problem-statement prompt, taken from the question bank. */

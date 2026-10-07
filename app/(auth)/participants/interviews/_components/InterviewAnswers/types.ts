@@ -25,6 +25,12 @@ export interface AnswerableQuestion {
 
 export interface AnswerableProblem {
   id: string;
+  /**
+   * "problem": a journey-map problem, headed by its action, pill and tags.
+   * "hypothesis": a hypothesis from a CSV import, headed by its text alone — `action`,
+   * `label` and `tags` are empty and `description` holds the hypothesis.
+   */
+  kind: "problem" | "hypothesis";
   /** The action card's text, as typed on the canvas. "" = never filled in. */
   action: string;
   /** Pill label, e.g. "Problem". */

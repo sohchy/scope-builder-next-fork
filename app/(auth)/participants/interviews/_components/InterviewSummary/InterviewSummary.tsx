@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { Accordion } from "@/components/ui/accordion";
 import { Loader } from "@/components/ui/loader";
 import {
   Select,
@@ -15,9 +16,14 @@ import {
   getExampleInterviewSummaryData,
   getInterviewSummaryData,
 } from "@/services/interviewPrep";
+import {
+  getExampleImportedSummaryData,
+  getImportedSummaryData,
+} from "@/services/importedInterview";
 
+import { ImportedSummaryCard } from "./ImportedSummaryCard";
 import { ProblemSummaryCard } from "./ProblemSummaryCard";
-import type { AnswerOrder, SummaryProblem } from "./types";
+import type { AnswerOrder, SummaryHypothesis, SummaryProblem } from "./types";
 
 interface InterviewSummaryProps {
   readOnly?: boolean;
@@ -34,6 +40,8 @@ export function InterviewSummary({
   exampleNumber,
 }: InterviewSummaryProps) {
   const [problems, setProblems] = useState<SummaryProblem[] | null>(null);
+  // Hypotheses from CSV imports, merged across interviewees. Shown ahead of the problems.
+  const [imported, setImported] = useState<SummaryHypothesis[]>([]);
   // How the answers read, page-wide rather than per problem: this is a way of looking at
   // the board, not something one problem should differ on. Deliberately not persisted —
   // showing the questions is a thing you do to check one answer, then turn back off.
@@ -46,10 +54,15 @@ export function InterviewSummary({
     let active = true;
     const load =
       exampleNumber != null
-        ? getExampleInterviewSummaryData(exampleNumber)
-        : getInterviewSummaryData();
-    load.then((result) => {
-      if (active) setProblems(result);
+        ? Promise.all([
+            getExampleInterviewSummaryData(exampleNumber),
+            getExampleImportedSummaryData(exampleNumber),
+          ])
+        : Promise.all([getInterviewSummaryData(), getImportedSummaryData()]);
+    load.then(([problemsResult, importedResult]) => {
+      if (!active) return;
+      setImported(importedResult);
+      setProblems(problemsResult);
     });
     return () => {
       active = false;
@@ -106,7 +119,7 @@ export function InterviewSummary({
           </div>
         </header>
 
-        {problems.length === 0 ? (
+        {problems.length === 0 && imported.length === 0 ? (
           <div className="rounded-2xl bg-white px-8 py-12 text-center shadow-sm">
             <h3 className="text-base font-semibold text-[#1F2430]">
               Nothing to summarize yet
@@ -118,15 +131,28 @@ export function InterviewSummary({
             </p>
           </div>
         ) : (
-          problems.map((problem) => (
-            <ProblemSummaryCard
-              key={problem.id}
-              problem={problem}
-              readOnly={readOnly}
-              showQuestions={showQuestions}
-              orderBy={orderBy}
-            />
-          ))
+          // Every card starts collapsed and any number can be open at once: the tab
+          // runs long, so the user opens just the problems they want to read.
+          <Accordion type="multiple" className="flex flex-col gap-6">
+            {imported.map((hypothesis) => (
+              <ImportedSummaryCard
+                key={hypothesis.id}
+                hypothesis={hypothesis}
+                readOnly={readOnly}
+                showQuestions={showQuestions}
+                orderBy={orderBy}
+              />
+            ))}
+            {problems.map((problem) => (
+              <ProblemSummaryCard
+                key={problem.id}
+                problem={problem}
+                readOnly={readOnly}
+                showQuestions={showQuestions}
+                orderBy={orderBy}
+              />
+            ))}
+          </Accordion>
         )}
       </div>
     </div>

@@ -9,6 +9,7 @@ import { toCsv } from "@/lib/csv";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/lib/generated/prisma";
 import { exampleRoomId } from "@/lib/examples";
+import { importedToAnswerable, readImportedData } from "@/lib/importedInterview";
 import { BANK_QUESTIONS } from "@/components/ProblemJourneyMap/questionBank";
 import type {
   DropdownOption,
@@ -33,6 +34,16 @@ export type InterviewPrepBlock = ProblemBlock;
 export type InterviewPrepQuestion = InterviewQuestion;
 export type InterviewAnswersProblem = AnswerableProblem;
 export type InterviewAnswersQuestion = AnswerableQuestion;
+
+/**
+ * What the answering view shows for one participant. `imported` means the participant has
+ * a CSV import, which replaces the journey-map questions on their interview entirely —
+ * and whose answers are written back to the import, not to ProblemInterviewAnswer.
+ */
+export type InterviewAnswersData = {
+  source: "regular" | "imported";
+  problems: AnswerableProblem[];
+};
 export type InterviewSummaryProblem = SummaryProblem;
 export type InterviewSummaryHypothesis = SummaryHypothesis;
 export type InterviewSummaryQuestion = SummaryQuestion;
@@ -420,21 +431,28 @@ export async function exportInterviewQuestionsCsv(): Promise<string> {
  */
 export async function getInterviewAnswersData(
   participantId: string,
-): Promise<AnswerableProblem[]> {
+): Promise<InterviewAnswersData> {
   const orgId = await requireOrg();
 
   // participantId comes from the client, so it can't be trusted to be ours.
   const participant = await prisma.participant.findFirst({
     where: { id: participantId, org_id: orgId, deleted_at: null },
-    select: { id: true },
+    select: { id: true, imported_interview: { select: { data: true } } },
   });
-  if (!participant) return [];
+  if (!participant) return { source: "regular", problems: [] };
+
+  if (participant.imported_interview) {
+    return importedAnswersData(participant.imported_interview.data);
+  }
 
   const blocks = await loadProblemBlocksFrom(`problem-journey-${orgId}`, {
     org_id: orgId,
   });
 
-  return buildAnswerableProblems(blocks, participantId);
+  return {
+    source: "regular",
+    problems: await buildAnswerableProblems(blocks, participantId),
+  };
 }
 
 // Global read-only variant for the /examples/interviews page: participant and
@@ -442,21 +460,32 @@ export async function getInterviewAnswersData(
 export async function getExampleInterviewAnswersData(
   exampleNumber: number,
   participantId: string,
-): Promise<AnswerableProblem[]> {
+): Promise<InterviewAnswersData> {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
   const participant = await prisma.participant.findFirst({
     where: { id: participantId, example_number: exampleNumber, deleted_at: null },
-    select: { id: true },
+    select: { id: true, imported_interview: { select: { data: true } } },
   });
-  if (!participant) return [];
+  if (!participant) return { source: "regular", problems: [] };
+
+  if (participant.imported_interview) {
+    return importedAnswersData(participant.imported_interview.data);
+  }
 
   const blocks = await loadProblemBlocksFrom(exampleRoomId(exampleNumber), {
     example_number: exampleNumber,
   });
 
-  return buildAnswerableProblems(blocks, participantId);
+  return {
+    source: "regular",
+    problems: await buildAnswerableProblems(blocks, participantId),
+  };
+}
+
+function importedAnswersData(raw: Prisma.JsonValue): InterviewAnswersData {
+  return { source: "imported", problems: importedToAnswerable(readImportedData(raw)) };
 }
 
 /**
@@ -492,6 +521,7 @@ async function buildAnswerableProblems(
 
   return answerable.map(({ block, authored }) => ({
     id: block.id,
+    kind: "problem" as const,
     action: block.action,
     label: block.label,
     description: block.description,
@@ -655,9 +685,12 @@ async function buildSummaryProblems(
 
       return {
         id: hypothesis.id,
-        nodeId: block.nodeId,
-        problemId: block.id,
-        bankQuestionId: hypothesis.bankQuestionId,
+        target: {
+          kind: "regular" as const,
+          nodeId: block.nodeId,
+          problemId: block.id,
+          bankQuestionId: hypothesis.bankQuestionId,
+        },
         // Renumbered rather than reusing the block's index: a hypothesis dropped above
         // for having no authored questions would otherwise leave a hole.
         index: i + 1,

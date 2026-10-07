@@ -11,8 +11,11 @@ import {
   getInterviewAnswersData,
   getExampleInterviewAnswersData,
   upsertProblemInterviewAnswer,
+  type InterviewAnswersData,
 } from "@/services/interviewPrep";
+import { upsertImportedInterviewAnswer } from "@/services/importedInterview";
 
+import { ImportCsvButton } from "./ImportCsvButton";
 import { ProblemAnswerCard } from "./ProblemAnswerCard";
 import type { AnswerableProblem } from "./types";
 
@@ -34,6 +37,8 @@ function InterviewHeader({
   onCompleteReview,
   completingReview = false,
   readOnly = false,
+  hasImport,
+  onImported,
 }: {
   participant: Participant;
   onBack: () => void;
@@ -41,6 +46,9 @@ function InterviewHeader({
   onCompleteReview?: () => void;
   completingReview?: boolean;
   readOnly?: boolean;
+  /** null while the answers are still loading — the import button waits for it. */
+  hasImport: boolean | null;
+  onImported: () => void;
 }) {
   const roles =
     participant.role
@@ -100,12 +108,21 @@ function InterviewHeader({
         </Button>
       ) : (
         !readOnly && (
-          <Button
-            onClick={onSave}
-            className="rounded-lg bg-[#111827] px-8 text-white hover:bg-[#374151]"
-          >
-            Save
-          </Button>
+          <div className="flex items-center gap-3">
+            {hasImport !== null && (
+              <ImportCsvButton
+                participantId={participant.id}
+                hasImport={hasImport}
+                onImported={onImported}
+              />
+            )}
+            <Button
+              onClick={onSave}
+              className="rounded-lg bg-[#111827] px-8 text-white hover:bg-[#374151]"
+            >
+              Save
+            </Button>
+          </div>
         )
       )}
     </div>
@@ -121,7 +138,11 @@ export function InterviewAnswersView({
   exampleNumber,
 }: InterviewAnswersViewProps) {
   const [problems, setProblems] = useState<AnswerableProblem[] | null>(null);
+  // Which store the answers on screen came from, and so which one a commit writes to.
+  const [source, setSource] = useState<InterviewAnswersData["source"] | null>(null);
   const [completingReview, setCompletingReview] = useState(false);
+  // Bumped after an import so the effect below refetches.
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Mirrors `problems` so a commit always persists the latest value rather than
   // whatever the handler closed over before the last keystroke.
@@ -135,12 +156,20 @@ export function InterviewAnswersView({
         ? getExampleInterviewAnswersData(exampleNumber, participant.id)
         : getInterviewAnswersData(participant.id);
     load.then((result) => {
-      if (active) setProblems(result);
+      if (!active) return;
+      setSource(result.source);
+      setProblems(result.problems);
     });
     return () => {
       active = false;
     };
-  }, [participant.id, exampleNumber]);
+  }, [participant.id, exampleNumber, reloadKey]);
+
+  const handleImported = useCallback(() => {
+    setProblems(null);
+    setSource(null);
+    setReloadKey((k) => k + 1);
+  }, []);
 
   const handleAnswerChange = useCallback(
     (problemId: string, questionId: string, value: string) => {
@@ -173,13 +202,16 @@ export function InterviewAnswersView({
 
       // A caller that commits in the same tick as its edit hasn't re-rendered yet, so
       // the argument — not the ref — carries the new value.
-      void upsertProblemInterviewAnswer({
+      const input = {
         questionId,
         participantId: participant.id,
         value: value ?? question.answer,
-      });
+      };
+      void (source === "imported"
+        ? upsertImportedInterviewAnswer(input)
+        : upsertProblemInterviewAnswer(input));
     },
-    [participant.id, readOnly],
+    [participant.id, readOnly, source],
   );
 
   // Answers already persist on blur, and clicking Save blurs the focused input first, so
@@ -211,6 +243,8 @@ export function InterviewAnswersView({
           onCompleteReview={onCompleteReview ? handleCompleteReview : undefined}
           completingReview={completingReview}
           readOnly={readOnly}
+          hasImport={source === null ? null : source === "imported"}
+          onImported={handleImported}
         />
       </div>
 
@@ -227,6 +261,9 @@ export function InterviewAnswersView({
             <p className="mx-auto mt-2 text-xs text-[#697288]">
               Write the interview questions for your problems on the Interview Prep
               tab of the journey map, and they will show up here ready to answer.
+              {!readOnly && !onCompleteReview && (
+                <> Or import a CSV of an interview you ran elsewhere.</>
+              )}
             </p>
           </div>
         </div>

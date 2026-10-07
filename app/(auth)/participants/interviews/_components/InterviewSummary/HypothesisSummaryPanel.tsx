@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 
 import { Textarea } from "@/components/ui/textarea";
+import { upsertImportedHypothesisSummary } from "@/services/importedInterview";
 import { upsertProblemHypothesisSummary } from "@/services/interviewPrep";
 
 import type { SummaryHypothesis } from "./types";
@@ -29,12 +30,23 @@ export function HypothesisSummaryPanel({
   const [validationLevel, setValidationLevel] = useState(hypothesis.validationLevel);
   const [, startTransition] = useTransition();
 
-  const { nodeId, problemId, bankQuestionId } = hypothesis;
+  const { target } = hypothesis;
+
+  // Journey-map and imported hypotheses keep their write-ups in different tables.
+  const write = (fields: { summary?: string; validationLevel?: number }) =>
+    target.kind === "imported"
+      ? upsertImportedHypothesisSummary({ hypothesisKey: target.hypothesisKey, ...fields })
+      : upsertProblemHypothesisSummary({
+          nodeId: target.nodeId,
+          problemId: target.problemId,
+          bankQuestionId: target.bankQuestionId,
+          ...fields,
+        });
 
   const commitSummary = () => {
     if (readOnly || summary === hypothesis.summary) return;
     startTransition(() => {
-      upsertProblemHypothesisSummary({ nodeId, problemId, bankQuestionId, summary });
+      write({ summary });
     });
   };
 
@@ -44,12 +56,7 @@ export function HypothesisSummaryPanel({
     if (readOnly) return;
     setValidationLevel(level);
     startTransition(() => {
-      upsertProblemHypothesisSummary({
-        nodeId,
-        problemId,
-        bankQuestionId,
-        validationLevel: level,
-      });
+      write({ validationLevel: level });
     });
   };
 

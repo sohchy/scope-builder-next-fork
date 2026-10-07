@@ -31,12 +31,21 @@ export function ProblemAnswerCard({
   return (
     <div className="w-full overflow-hidden rounded-xl border border-[#E4E5ED] bg-white">
       {/* Full-bleed so the band reads as the card's header rather than a nested block. */}
-      <ProblemHeaderBand
-        action={problem.action}
-        label={problem.label}
-        description={problem.description}
-        tags={problem.tags}
-      />
+      {problem.kind === "hypothesis" ? (
+        // An imported hypothesis has no action, pill or tags — just its own text.
+        <div className="bg-[#F5F5F8] px-5 py-4">
+          <p className="whitespace-pre-wrap text-sm font-medium text-[#1F2430]">
+            {problem.description}
+          </p>
+        </div>
+      ) : (
+        <ProblemHeaderBand
+          action={problem.action}
+          label={problem.label}
+          description={problem.description}
+          tags={problem.tags}
+        />
+      )}
 
       <div
         className="grid gap-4 p-5"
