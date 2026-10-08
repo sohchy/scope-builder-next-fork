@@ -94,6 +94,16 @@ function InterviewHeader({
               ),
             )}
           </div>
+          {/* Same condition as the Import CSV button, so the hint never shows without it. */}
+          {!readOnly && !onCompleteReview && (
+            <p className="mt-0.5 text-xs text-[#70747D]">
+              If you want to import a CSV, make sure the 3 column headers are{" "}
+              <span className="font-medium text-[#111827]">
+                hypothesis, question, answer
+              </span>{" "}
+              — all lower case and in that order.
+            </p>
+          )}
         </div>
       </div>
 

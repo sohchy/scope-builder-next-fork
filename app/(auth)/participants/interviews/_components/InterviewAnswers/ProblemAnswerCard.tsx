@@ -32,11 +32,15 @@ export function ProblemAnswerCard({
     <div className="w-full overflow-hidden rounded-xl border border-[#E4E5ED] bg-white">
       {/* Full-bleed so the band reads as the card's header rather than a nested block. */}
       {problem.kind === "hypothesis" ? (
-        // An imported hypothesis has no action, pill or tags — just its own text.
+        // An imported hypothesis has no action or tags — its text, then a pill
+        // styled like the summary tab's Hypothesis tag.
         <div className="bg-[#F5F5F8] px-5 py-4">
           <p className="whitespace-pre-wrap text-sm font-medium text-[#1F2430]">
             {problem.description}
           </p>
+          <span className="mt-3 inline-flex w-fit items-center rounded-full bg-[#F4F0FF] px-2.5 py-0.5 text-xs font-medium text-[#6A35FF]">
+            Hypothesis
+          </span>
         </div>
       ) : (
         <ProblemHeaderBand
